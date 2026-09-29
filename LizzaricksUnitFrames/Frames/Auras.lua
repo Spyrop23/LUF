@@ -1,4 +1,4 @@
--- FUF / Frames / Auras
+-- LizzaricksUnitFrames / Frames / Auras
 --
 -- Buffs and debuffs on a unit frame, shown by the client's own aura
 -- container (CustomAuraContainerTemplate).

@@ -1,4 +1,4 @@
--- FUF / Core / Mover
+-- LizzaricksUnitFrames / Core / Mover
 --
 -- Config mode (Luna's "unlock"): every enabled frame is shown, drawn with
 -- the player as a stand-in when its own unit does not exist, and can be
@@ -161,7 +161,7 @@ function ns:SetLocked(locked)
     if locked then
         ns:Print("Frames locked.")
     else
-        ns:Print("Frames unlocked: drag them with the left mouse button. |cffffff00/fuf lock|r when done.")
+        ns:Print("Frames unlocked: drag them with the left mouse button. |cffffff00/lzuf lock|r when done.")
     end
     if ns.Options then ns.Options:Refresh() end
 end

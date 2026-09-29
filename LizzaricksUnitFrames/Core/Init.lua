@@ -1,7 +1,7 @@
--- FUF / Core / Init
+-- LizzaricksUnitFrames / Core / Init
 --
 -- The addon table, a small event dispatcher and the load sequence.
--- Everything lives on `ns`; the only global is the saved variable FUFDB.
+-- Everything lives on `ns`; the only global is the saved variable LizzaricksUFDB.
 local addonName, ns = ...
 
 ns.name = addonName
@@ -15,7 +15,7 @@ do
 end
 
 function ns:Print(msg, ...)
-    print("|cff9fd4ffFUF|r: " .. string.format(msg, ...))
+    print("|cff9fd4ffLizzarick's Unit Frames|r: " .. string.format(msg, ...))
 end
 
 -- ------------------------------------------------------------ events --

@@ -1,12 +1,13 @@
-# FUF – Regeln für den Code
+# Lizzarick's Unit Frames – Regeln für den Code
 
-Addon für **World of Warcraft: Forever**, Client 1.60.1, `## Interface: 16001`. Das Addon liegt im Unterordner `FUF/` (TOC `FUF/FUF.toc`, der Ordner muss im Spiel `FUF` heißen).
+Addon für **World of Warcraft: Forever**, Client 1.60.1, `## Interface: 16001`. Das Addon liegt im Unterordner `LizzaricksUnitFrames/` (TOC `LizzaricksUnitFrames.toc`, der Ordner muss im Spiel
+genau so heißen). Bis 0.7.1 hieß es FUF; der Name ist bei einem anderen Addon vergeben.
 Gearbeitet wird direkt auf `main`, ohne PR.
 Forever ist ein **Mainline-Client** (Spieltyp `camelot`) mit den Retail-12.x-Addon-Sperren.
 
 1. **Keine fremden Libraries.** Weder Ace3 noch oUF noch LibSharedMedia. Alles lebt auf `ns`;
-   die einzigen Globals sind `FUFDB`, `SLASH_FUF1`, `FUF_OnAddonCompartmentClick` und die benannten
-   Frames (`FUF_<unit>`, `FUFOptionsFrame`, `FUFOptionsScroll`, `FUFMinimapButton`).
+   die einzigen Globals sind `LizzaricksUFDB`, `SLASH_LIZUF1/2`, `LizUF_OnAddonCompartmentClick` und die
+   benannten Frames (`LizUF_<unit>`, `LizUFOptionsFrame`, `LizUFOptionsScroll`, `LizUFMinimapButton`).
    Nie `a, _, b = f()` ohne `local` schreiben, sonst wird die globale Variable `_` beschrieben (Taint).
 2. **Nur Retail-API:** `C_UnitAuras`, `C_Spell`, `C_Item`, `C_AddOns`, `MenuUtil`, Settings-API.
    Classic-Globals (`UnitAura`, `GetSpellInfo`, `IsAddOnLoaded`, `EasyMenu`,

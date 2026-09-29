@@ -1,20 +1,20 @@
--- FUF / Core / Slash
+-- LizzaricksUnitFrames / Core / Slash
 --
--- /fuf                    options window
--- /fuf lock | unlock      config mode off / on
--- /fuf profile [name]     show or switch the profile (new names are created)
--- /fuf reset              reset the current profile to defaults
--- /fuf help               this list
+-- /lzuf                    options window
+-- /lzuf lock | unlock      config mode off / on
+-- /lzuf profile [name]     show or switch the profile (new names are created)
+-- /lzuf reset              reset the current profile to defaults
+-- /lzuf help               this list
 local _, ns = ...
 
 local function help()
     ns:Print("v%s commands:", ns.version)
-    print("  /fuf - options window")
-    print("  /fuf unlock - move the frames (config mode)")
-    print("  /fuf lock - end config mode")
-    print("  /fuf profile [name] - show or switch the profile")
-    print("  /fuf reset - reset the current profile")
-    print("  /fuf pet - show what the game reports about your pet's happiness")
+    print("  /lzuf - options window")
+    print("  /lzuf unlock - move the frames (config mode)")
+    print("  /lzuf lock - end config mode")
+    print("  /lzuf profile [name] - show or switch the profile")
+    print("  /lzuf reset - reset the current profile")
+    print("  /lzuf pet - show what the game reports about your pet's happiness")
 end
 
 local commands = {
@@ -57,8 +57,9 @@ local commands = {
     end,
 }
 
-SLASH_FUF1 = "/fuf"
-SlashCmdList.FUF = function(msg)
+SLASH_LIZUF1 = "/lzuf"
+SLASH_LIZUF2 = "/lizuf"
+SlashCmdList.LIZUF = function(msg)
     local cmd, arg = (msg or ""):match("^%s*(%S*)%s*(.-)%s*$")
     local fn = commands[cmd:lower()]
     if fn then fn(arg) else help() end

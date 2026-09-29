@@ -1,9 +1,9 @@
 #!/bin/sh
-# Builds dist/FUF.zip with the addon folder FUF/ at the top, ready to unzip
-# into Interface/AddOns.
+# Builds dist/LizzaricksUnitFrames.zip with the addon folder at the top,
+# ready to unzip into Interface/AddOns.
 set -e
 cd "$(dirname "$0")/.."
 rm -rf dist && mkdir -p dist
-cp -r FUF dist/FUF
-(cd dist && zip -qr FUF.zip FUF)
-echo "dist/FUF.zip"
+cp -r LizzaricksUnitFrames dist/LizzaricksUnitFrames
+(cd dist && zip -qr LizzaricksUnitFrames.zip LizzaricksUnitFrames)
+echo "dist/LizzaricksUnitFrames.zip"

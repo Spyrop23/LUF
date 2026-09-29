@@ -1,4 +1,4 @@
--- FUF / Options / Widgets
+-- LizzaricksUnitFrames / Options / Widgets
 --
 -- The few controls the options window needs, built on Blizzard templates
 -- that exist in the 1.60.1 client (checked in the UI source):

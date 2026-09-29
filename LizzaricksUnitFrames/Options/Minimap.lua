@@ -1,8 +1,8 @@
--- FUF / Options / Minimap
+-- LizzaricksUnitFrames / Options / Minimap
 --
 -- Minimap button: left click opens the options, right click locks or
 -- unlocks the frames, dragging moves it around the minimap. Its angle and
--- visibility are account-wide (FUFDB.minimap), not part of a profile.
+-- visibility are account-wide (LizzaricksUFDB.minimap), not part of a profile.
 local _, ns = ...
 
 local M = {}
@@ -12,7 +12,7 @@ local ICON = "Interface\\Icons\\Spell_Nature_StarFall"
 local button
 
 local function place()
-    local angle = math.rad(FUFDB.minimap.angle or 220)
+    local angle = math.rad(LizzaricksUFDB.minimap.angle or 220)
     local r = (Minimap:GetWidth() / 2) + 10
     button:ClearAllPoints()
     button:SetPoint("CENTER", Minimap, "CENTER", math.cos(angle) * r, math.sin(angle) * r)
@@ -22,12 +22,12 @@ local function onDragUpdate()
     local mx, my = Minimap:GetCenter()
     local px, py = GetCursorPosition()
     local s = Minimap:GetEffectiveScale()
-    FUFDB.minimap.angle = math.deg(math.atan2(py / s - my, px / s - mx))
+    LizzaricksUFDB.minimap.angle = math.deg(math.atan2(py / s - my, px / s - mx))
     place()
 end
 
 local function create()
-    button = CreateFrame("Button", "FUFMinimapButton", Minimap)
+    button = CreateFrame("Button", "LizUFMinimapButton", Minimap)
     button:SetSize(31, 31)
     button:SetFrameStrata("MEDIUM")
     button:SetFrameLevel(8)
@@ -66,7 +66,7 @@ local function create()
     button:SetScript("OnDragStop", function(self) self:SetScript("OnUpdate", nil) end)
     button:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-        GameTooltip:SetText("FUF - Forever Unit Frames")
+        GameTooltip:SetText("Lizzarick's Unit Frames")
         GameTooltip:AddLine("Left click: options", 1, 1, 1)
         GameTooltip:AddLine("Right click: " .. (ns.unlocked and "lock" or "unlock"), 1, 1, 1)
         GameTooltip:AddLine("Drag: move this button", 0.7, 0.7, 0.7)
@@ -76,7 +76,7 @@ local function create()
 end
 
 function M:Update()
-    if FUFDB.minimap.hide then
+    if LizzaricksUFDB.minimap.hide then
         if button then button:Hide() end
         return
     end

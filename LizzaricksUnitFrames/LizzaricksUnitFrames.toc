@@ -1,16 +1,16 @@
 ## Interface: 16001
-## Title: |cff9fd4ffFUF|r - Forever Unit Frames
-## Notes: Luna-style unit frames for World of Warcraft: Forever.
+## Title: |cff9fd4ffLizzarick's|r Unit Frames
+## Notes: Luna-style unit frames for World of Warcraft: Forever, by Lizzarick.
 ## Notes-deDE: Unit Frames im Stil von Luna für World of Warcraft: Forever.
 ## Author: Spyrop23
-## Version: 0.7.1
-## SavedVariables: FUFDB
+## Version: 0.8.0
+## SavedVariables: LizzaricksUFDB
 ## IconTexture: Interface\Icons\Spell_Nature_StarFall
-## AddonCompartmentFunc: FUF_OnAddonCompartmentClick
+## AddonCompartmentFunc: LizUF_OnAddonCompartmentClick
 ## Category: Unit Frames
 ## Category-deDE: Einheitenfenster
 
-# The folder must be named FUF (same as this file) or the client ignores it.
+# The folder must be named LizzaricksUnitFrames (same as this file) or the client ignores it.
 
 Core\Init.lua
 Core\Secret.lua

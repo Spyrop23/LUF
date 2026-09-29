@@ -1,8 +1,8 @@
--- FUF / Core / Profile
+-- LizzaricksUnitFrames / Core / Profile
 --
 -- Saved variables with named profiles, without a library.
 --
--- FUFDB = {
+-- LizzaricksUFDB = {
 --     profiles = { [name] = <settings> },
 --     chars    = { [player GUID] = profileName },
 --     minimap  = { angle = 220, hide = false },   -- account-wide, not per profile
@@ -144,24 +144,24 @@ local function charKey()
 end
 
 function ns:InitDB()
-    FUFDB = FUFDB or {}
-    FUFDB.profiles = FUFDB.profiles or {}
-    FUFDB.chars = FUFDB.chars or {}
-    FUFDB.minimap = FUFDB.minimap or { angle = 220, hide = false }
-    local name = FUFDB.chars[charKey()] or "Default"
-    FUFDB.chars[charKey()] = name
+    LizzaricksUFDB = LizzaricksUFDB or {}
+    LizzaricksUFDB.profiles = LizzaricksUFDB.profiles or {}
+    LizzaricksUFDB.chars = LizzaricksUFDB.chars or {}
+    LizzaricksUFDB.minimap = LizzaricksUFDB.minimap or { angle = 220, hide = false }
+    local name = LizzaricksUFDB.chars[charKey()] or "Default"
+    LizzaricksUFDB.chars[charKey()] = name
     self:SetProfile(name)
 end
 
 function ns:CurrentProfile()
-    return FUFDB.chars[charKey()]
+    return LizzaricksUFDB.chars[charKey()]
 end
 
 -- Switching the profile rebuilds the layout (deferred until out of combat).
 function ns:SetProfile(name)
-    FUFDB.profiles[name] = copyDefaults(FUFDB.profiles[name] or {}, self.defaults)
-    FUFDB.chars[charKey()] = name
-    self.db = FUFDB.profiles[name]
+    LizzaricksUFDB.profiles[name] = copyDefaults(LizzaricksUFDB.profiles[name] or {}, self.defaults)
+    LizzaricksUFDB.chars[charKey()] = name
+    self.db = LizzaricksUFDB.profiles[name]
     -- 0.3.0: pets are coloured by happiness, as in Luna
     if not self.db.migrated030 then
         self.db.migrated030 = true
@@ -169,7 +169,7 @@ function ns:SetProfile(name)
             self.db.units.pet.healthBar.colorType = "happiness"
         end
     end
-    -- 0.3.1: FUF's own smooth texture replaces Blizzard's banded one
+    -- 0.3.1: our own smooth texture replaces Blizzard's banded one
     if not self.db.migrated031 then
         self.db.migrated031 = true
         if self.db.texture == "Blizzard" then self.db.texture = "Smooth" end
@@ -190,15 +190,15 @@ function ns:SetProfile(name)
 end
 
 function ns:ResetProfile()
-    FUFDB.profiles[self:CurrentProfile()] = nil
+    LizzaricksUFDB.profiles[self:CurrentProfile()] = nil
     self:SetProfile(self:CurrentProfile())
 end
 
 -- Copies another profile's settings into the current one.
 function ns:CopyProfile(from)
-    local src = FUFDB.profiles[from]
+    local src = LizzaricksUFDB.profiles[from]
     if not src or from == self:CurrentProfile() then return end
-    FUFDB.profiles[self:CurrentProfile()] = deepCopy(src)
+    LizzaricksUFDB.profiles[self:CurrentProfile()] = deepCopy(src)
     self:SetProfile(self:CurrentProfile())
 end
 
@@ -206,16 +206,16 @@ end
 -- except possibly others; the current one cannot be deleted.
 function ns:DeleteProfile(name)
     if name == self:CurrentProfile() then return false end
-    FUFDB.profiles[name] = nil
-    for char, p in pairs(FUFDB.chars) do
-        if p == name then FUFDB.chars[char] = "Default" end
+    LizzaricksUFDB.profiles[name] = nil
+    for char, p in pairs(LizzaricksUFDB.chars) do
+        if p == name then LizzaricksUFDB.chars[char] = "Default" end
     end
     return true
 end
 
 function ns:ProfileNames()
     local list = {}
-    for n in pairs(FUFDB.profiles) do table.insert(list, n) end
+    for n in pairs(LizzaricksUFDB.profiles) do table.insert(list, n) end
     table.sort(list)
     return list
 end

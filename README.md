@@ -1,28 +1,32 @@
-# FUF – Forever Unit Frames
+# Lizzarick's Unit Frames
 
 Unit Frames im Stil von **Luna Unit Frames** für **World of Warcraft: Forever**
 (Client 1.60.1, `## Interface: 16001`). Ohne fremde Libraries.
 
 Luna selbst lässt sich nicht portieren. Forever ist technisch ein Retail-Client mit den
-Midnight-Addon-Sperren (Secret Values, kein Combat Log). FUF übernimmt deshalb Aussehen und
+Midnight-Addon-Sperren (Secret Values, kein Combat Log). Lizzarick's Unit Frames übernimmt deshalb Aussehen und
 Bedienung von Luna, ist intern aber neu und Secret-sicher gebaut. Die Funktionsbeschreibung
 und die Machbarkeit pro Feature stehen in [docs/spec.md](docs/spec.md).
 
 ## Installation
 
-**Am einfachsten:** Unter **Releases → FUF latest** die Datei `FUF.zip` laden und direkt nach
+Hinweis: Bis 0.7.1 hieß das Addon „FUF – Forever Unit Frames“ (Ordner `FUF`). Den alten Ordner
+`AddOns/FUF` löschen; die Einstellungen von damals werden nicht übernommen.
+
+
+**Am einfachsten:** Unter **Releases → Lizzarick's Unit Frames (latest)** die Datei `LizzaricksUnitFrames.zip` laden und direkt nach
 `World of Warcraft/_classic_beta_/Interface/AddOns/` entpacken. Sie wird bei jedem Push neu gebaut.
 
 **Oder über „Code → Download ZIP“:** Im Zip liegt ein Ordner `FUF-main`. Aus ihm nur den inneren
-Ordner **`FUF`** nach `…/Interface/AddOns/` kopieren.
+Ordner **`LizzaricksUnitFrames`** nach `…/Interface/AddOns/` kopieren.
 
-Richtig ist es, wenn die Datei hier liegt: `…/Interface/AddOns/FUF/FUF.toc`.
-Einen Ordner, der anders heißt als `FUF` (zum Beispiel `FUF-main`), zeigt WoW nicht an.
+Richtig ist es, wenn die Datei hier liegt: `…/Interface/AddOns/LizzaricksUnitFrames/LizzaricksUnitFrames.toc`.
+Einen Ordner, der anders heißt als `LizzaricksUnitFrames` (zum Beispiel `FUF-main`), zeigt WoW nicht an.
 
 ## Repo-Aufbau
 
 ```
-FUF/        das Addon (dieser Ordner kommt nach Interface/AddOns), Texturen in FUF/Media
+LizzaricksUnitFrames/   das Addon (dieser Ordner kommt nach Interface/AddOns), Texturen in Media/
 docs/       Spezifikation (Luna-Recherche) und Roadmap
 tools/      Smoke-Test und Paket-Skript
 ```
@@ -31,18 +35,18 @@ tools/      Smoke-Test und Paket-Skript
 
 - **Minimap-Button** (Mondsymbol): Linksklick öffnet das Menü, Rechtsklick entsperrt (unlock) oder sperrt
   die Frames zum Verschieben, Ziehen verschiebt den Button.
-- Das Menü öffnet sich auch über das Addon-Menü am Minimap-Rand, über Optionen → AddOns → FUF und mit `/fuf`.
+- Das Menü öffnet sich auch über das Addon-Menü am Minimap-Rand, über Optionen → AddOns → Lizzarick's Unit Frames und mit `/lzuf` (oder `/lizuf`).
 
 | Befehl | Wirkung |
 |---|---|
-| `/fuf` | Optionsmenü öffnen/schließen |
-| `/fuf unlock` | Config-Mode: alle Frames zeigen und mit der linken Maustaste verschieben |
-| `/fuf lock` | Config-Mode beenden (passiert beim Kampfbeginn automatisch) |
-| `/fuf profile [name]` | Profil anzeigen oder wechseln (neue Namen werden angelegt) |
-| `/fuf reset` | aktuelles Profil auf Standard zurücksetzen |
-| `/fuf tags` | Tag-Übersicht im Menü |
+| `/lzuf` | Optionsmenü öffnen/schließen |
+| `/lzuf unlock` | Config-Mode: alle Frames zeigen und mit der linken Maustaste verschieben |
+| `/lzuf lock` | Config-Mode beenden (passiert beim Kampfbeginn automatisch) |
+| `/lzuf profile [name]` | Profil anzeigen oder wechseln (neue Namen werden angelegt) |
+| `/lzuf reset` | aktuelles Profil auf Standard zurücksetzen |
+| `/lzuf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.7.0)
+## Stand (0.8.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4), die Begleiter der Gruppenmitglieder und **Raid** (40 Frames, eine Spalte pro
@@ -76,11 +80,11 @@ Etappen und offene Punkte: [docs/roadmap.md](docs/roadmap.md).
 ## Entwicklung
 
 - Regeln für den Code: [CLAUDE.md](CLAUDE.md)
-- Syntax-Check: `for f in $(find FUF -name '*.lua'); do luac5.1 -p $f; done`
+- Syntax-Check: `for f in $(find LizzaricksUnitFrames -name '*.lua'); do luac5.1 -p $f; done`
 - Smoke-Test mit simuliertem Client. Secret Values werfen dort bei Rechnen und Vergleichen einen
   Fehler, der Test klickt alle Menüseiten durch: `lua5.1 tools/smoketest.lua`
 - Test im Spiel ohne Kampf: `/console addonCombatRestrictionsForced 1` (wieder auf 0 stellen!)
 
 ## Lizenz
 
-WTFPL wie Luna Unit Frames, auf dessen Design (Aviana) FUF aufbaut. Code von Luna wurde nicht übernommen.
+WTFPL wie Luna Unit Frames, auf dessen Design (Aviana) Lizzarick's Unit Frames aufbaut. Code von Luna wurde nicht übernommen.

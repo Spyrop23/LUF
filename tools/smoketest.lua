@@ -1,4 +1,4 @@
--- FUF smoke test: loads the addon in a mocked client, fires the login
+-- Lizzarick's Unit Frames smoke test: loads the addon in a mocked client, fires the login
 -- sequence, casts, and clicks through every page of the options window.
 -- Secret values are userdata that throw on arithmetic and comparison, like
 -- the real client. Run from the repository root: lua5.1 tools/smoketest.lua
@@ -222,10 +222,10 @@ SlashCmdList = {}
 
 -- load in TOC order -------------------------------------------------------
 local ns = {}
-for line in io.lines("FUF/FUF.toc") do
+for line in io.lines("LizzaricksUnitFrames/LizzaricksUnitFrames.toc") do
     if line:match("%.lua$") then
-        local chunk = assert(loadfile("FUF/" .. line:gsub("\\", "/")))
-        chunk("FUF", ns)
+        local chunk = assert(loadfile("LizzaricksUnitFrames/" .. line:gsub("\\", "/")))
+        chunk("LizzaricksUnitFrames", ns)
     end
 end
 
@@ -316,7 +316,7 @@ assert(rdb.groupPos[3], "group position saved")
 rdb.separateGroups, rdb.groupPos = false, {}
 ns.UF.ArrangeRaid()
 -- dragging a party frame hangs the others on it
-SlashCmdList.FUF("unlock")
+SlashCmdList.LIZUF("unlock")
 local p1, p3 = ns.UF.frames.party1, ns.UF.frames.party3
 p1.scripts.OnDragStart(p1)
 assert(p3.point[2] == p1, "party members follow while dragging")
@@ -327,7 +327,7 @@ assert(r6.moverLabel.text == "Grp 2" and ns.UF.frames.raid7.moverLabel.text == "
 r6.scripts.OnDragStart(r6)
 assert(ns.UF.frames.raid40.point[2] == r6, "raid follows while dragging")
 r6.scripts.OnDragStop(r6)
-SlashCmdList.FUF("lock")
+SlashCmdList.LIZUF("lock")
 
 -- party hides in raid through a state driver
 assert(ns.UF.frames.party1.driver, "party uses the hide-in-raid driver")
@@ -361,15 +361,15 @@ fire("UNIT_SPELLCAST_FAILED", "player")
 assert(not tcb.shown and not ns.UF.frames.player.castBar.shown, "cast bars hidden")
 
 -- config mode and dragging
-SlashCmdList.FUF("unlock")
+SlashCmdList.LIZUF("unlock")
 assert(ns.UF.frames.party3.shown and ns.UF.frames.party3.unit == "player", "party stand-in")
 ns.UF.frames.party3.scripts.OnDragStop(ns.UF.frames.party3)
 ns.UF.frames.partypet2.scripts.OnDragStop(ns.UF.frames.partypet2)
-SlashCmdList.FUF("lock")
+SlashCmdList.LIZUF("lock")
 assert(ns.UF.frames.party3.unit == "party3" and not ns.UF.frames.party3.shown, "party back")
 
 -- options window: open every page and use every control
-SlashCmdList.FUF("")
+SlashCmdList.LIZUF("")
 local nav = {}
 for _, w in ipairs(frames) do
     if w.kind == "Button" and w.sel then table.insert(nav, w) end
@@ -408,19 +408,19 @@ dump()
 
 -- minimap button
 local wasUnlocked = ns.unlocked
-FUFMinimapButton.scripts.OnMouseUp(FUFMinimapButton, "RightButton")
+LizUFMinimapButton.scripts.OnMouseUp(LizUFMinimapButton, "RightButton")
 assert(ns.unlocked ~= wasUnlocked, "right click toggles lock")
-FUFMinimapButton.scripts.OnMouseUp(FUFMinimapButton, "RightButton")
+LizUFMinimapButton.scripts.OnMouseUp(LizUFMinimapButton, "RightButton")
 assert(ns.unlocked == wasUnlocked, "right click toggles back")
-FUFMinimapButton.scripts.OnClick(FUFMinimapButton, "LeftButton")
-FUFMinimapButton.scripts.OnDragStart(FUFMinimapButton)
+LizUFMinimapButton.scripts.OnClick(LizUFMinimapButton, "LeftButton")
+LizUFMinimapButton.scripts.OnDragStart(LizUFMinimapButton)
 tick()
-FUFMinimapButton.scripts.OnDragStop(FUFMinimapButton)
-FUF_OnAddonCompartmentClick()
+LizUFMinimapButton.scripts.OnDragStop(LizUFMinimapButton)
+LizUF_OnAddonCompartmentClick()
 
-SlashCmdList.FUF("profile Raid")
-SlashCmdList.FUF("profile")
-SlashCmdList.FUF("reset")
-SlashCmdList.FUF("pet")
-assert(ns.Texture():find("FUF\\Media\\Smooth"), "default texture")
+SlashCmdList.LIZUF("profile Raid")
+SlashCmdList.LIZUF("profile")
+SlashCmdList.LIZUF("reset")
+SlashCmdList.LIZUF("pet")
+assert(ns.Texture():find("LizzaricksUnitFrames\\Media\\Smooth"), "default texture")
 print("OK")

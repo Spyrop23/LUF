@@ -1,7 +1,7 @@
--- FUF / Options / Window
+-- LizzaricksUnitFrames / Options / Window
 --
 -- The options window: page list on the left, the page on the right in a
--- scroll frame. Opened with /fuf, the minimap button or the addon
+-- scroll frame. Opened with /lzuf, the minimap button or the addon
 -- compartment. Changes apply at once (out of combat; in combat they wait).
 local _, ns = ...
 
@@ -62,8 +62,8 @@ addPage("general", "General", function(b)
     b:Header("General")
     b:Check("Lock frames (untick to move them)", function() return not ns.unlocked end,
         function(v) ns:SetLocked(v) end)
-    b:Check("Show minimap button", function() return not FUFDB.minimap.hide end,
-        function(v) FUFDB.minimap.hide = not v; ns.Minimap:Update() end)
+    b:Check("Show minimap button", function() return not LizzaricksUFDB.minimap.hide end,
+        function(v) LizzaricksUFDB.minimap.hide = not v; ns.Minimap:Update() end)
     b:Dropdown("Bar texture", function()
         local list = {}
         for _, t in ipairs(ns.textures) do table.insert(list, { t[1], t[1] }) end
@@ -75,7 +75,7 @@ addPage("general", "General", function(b)
     b:Text("Left click on a frame targets the unit, right click opens its menu.\n" ..
         "Hidden Blizzard frames come back after a /reload once you untick \"Hide Blizzard frame\".\n" ..
         "Settings changed in combat are applied when combat ends.", 48)
-    b:Text("Commands: /fuf (this window), /fuf unlock, /fuf lock, /fuf profile <name>, /fuf reset", 16)
+    b:Text("Commands: /lzuf (this window), /lzuf unlock, /lzuf lock, /lzuf profile <name>, /lzuf reset", 16)
 end)
 
 local function unitPage(key)
@@ -289,7 +289,7 @@ local function showPage(id)
 end
 
 local function build()
-    local w = CreateFrame("Frame", "FUFOptionsFrame", UIParent, "BackdropTemplate")
+    local w = CreateFrame("Frame", "LizUFOptionsFrame", UIParent, "BackdropTemplate")
     w:SetSize(WIDTH, HEIGHT)
     w:SetPoint("CENTER")
     w:SetFrameStrata("DIALOG")
@@ -308,11 +308,11 @@ local function build()
     w:SetBackdropColor(0.05, 0.05, 0.07, 0.95)
     w:SetBackdropBorderColor(0, 0, 0, 1)
     w:Hide()
-    table.insert(UISpecialFrames, "FUFOptionsFrame") -- Escape closes it
+    table.insert(UISpecialFrames, "LizUFOptionsFrame") -- Escape closes it
 
     local title = w:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 14, -12)
-    title:SetText("|cff9fd4ffFUF|r - Forever Unit Frames  |cff888888" .. ns.version .. "|r")
+    title:SetText("|cff9fd4ffLizzarick's|r Unit Frames  |cff888888" .. ns.version .. "|r")
 
     local close = CreateFrame("Button", nil, w, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -2, -2)
@@ -346,7 +346,7 @@ local function build()
     end
 
     -- page area
-    local scroll = CreateFrame("ScrollFrame", "FUFOptionsScroll", w, "UIPanelScrollFrameTemplate")
+    local scroll = CreateFrame("ScrollFrame", "LizUFOptionsScroll", w, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", nav, "TOPRIGHT", 10, 0)
     scroll:SetPoint("BOTTOMRIGHT", w, "BOTTOMRIGHT", -32, 10)
     content = CreateFrame("Frame", nil, scroll)
@@ -387,21 +387,21 @@ ns:OnLogin(function()
     local panel = CreateFrame("Frame")
     local text = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     text:SetPoint("TOPLEFT", 16, -16)
-    text:SetText("FUF - Forever Unit Frames\n\nType /fuf or click the minimap button.")
+    text:SetText("Lizzarick's Unit Frames\n\nType /lzuf or click the minimap button.")
     text:SetJustifyH("LEFT")
     local btn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
     btn:SetSize(200, 24)
     btn:SetPoint("TOPLEFT", text, "BOTTOMLEFT", 0, -12)
-    btn:SetText("Open FUF options")
+    btn:SetText("Open the options")
     btn:SetScript("OnClick", function()
         O:Open()
         if window then window:SetFrameStrata("FULLSCREEN_DIALOG") end
     end)
-    local ok, category = pcall(Settings.RegisterCanvasLayoutCategory, panel, "FUF")
+    local ok, category = pcall(Settings.RegisterCanvasLayoutCategory, panel, "Lizzarick's Unit Frames")
     if ok and category then pcall(Settings.RegisterAddOnCategory, category) end
 end)
 
 -- The addon compartment button (TOC: AddonCompartmentFunc).
-function FUF_OnAddonCompartmentClick()
+function LizUF_OnAddonCompartmentClick()
     O:Toggle()
 end

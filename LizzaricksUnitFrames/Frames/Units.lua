@@ -1,4 +1,4 @@
--- FUF / Frames / Units
+-- LizzaricksUnitFrames / Frames / Units
 --
 -- Which frames exist and in what order they are built. Party frames are
 -- four fixed SecureUnitButtons (party1..4) instead of a group header: the

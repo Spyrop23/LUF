@@ -1,4 +1,4 @@
--- FUF / Frames / HealPrediction
+-- LizzaricksUnitFrames / Frames / HealPrediction
 --
 -- Incoming heals and absorb shields on the health bar, as in Luna: own heals
 -- dark green, heals from others light green, absorbs white, each starting

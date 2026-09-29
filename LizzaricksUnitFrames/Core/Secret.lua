@@ -1,4 +1,4 @@
--- FUF / Core / Secret
+-- LizzaricksUnitFrames / Core / Secret
 --
 -- Forever runs the retail 12.x addon restrictions. Health, power and many
 -- other combat values reach addon code as SECRET VALUES: they may be stored,

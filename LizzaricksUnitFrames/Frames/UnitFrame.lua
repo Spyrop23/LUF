@@ -1,4 +1,4 @@
--- FUF / Frames / UnitFrame
+-- LizzaricksUnitFrames / Frames / UnitFrame
 --
 -- One Luna-style unit frame: optional portrait on the left or right, bars
 -- stacked in the remaining space (heights by weight), three tag texts
@@ -505,10 +505,10 @@ end
 -- anchorFrame (frame this one is placed relative to).
 function UF.Create(unit, opts)
     if UF.frames[unit] then return UF.frames[unit] end
-    assert(not InCombatLockdown(), "FUF: unit frames are created out of combat")
+    assert(not InCombatLockdown(), "Lizzarick's Unit Frames: unit frames are created out of combat")
     opts = opts or {}
 
-    local f = CreateFrame("Button", "FUF_" .. unit, UIParent, "SecureUnitButtonTemplate")
+    local f = CreateFrame("Button", "LizUF_" .. unit, UIParent, "SecureUnitButtonTemplate")
     f.unit = unit
     f.key = opts.key or unit
     f.index = opts.index

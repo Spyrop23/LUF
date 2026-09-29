@@ -1,4 +1,4 @@
--- FUF / Core / Tags
+-- LizzaricksUnitFrames / Core / Tags
 --
 -- Luna-style text tags: "[name] [smarthealth]" on a font string.
 --

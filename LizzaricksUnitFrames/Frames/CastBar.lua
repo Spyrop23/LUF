@@ -1,4 +1,4 @@
--- FUF / Frames / CastBar
+-- LizzaricksUnitFrames / Frames / CastBar
 --
 -- A cast bar below (or above) a unit frame, shown only while the unit casts.
 --

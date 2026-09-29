@@ -1,4 +1,4 @@
--- FUF / Core / Media
+-- LizzaricksUnitFrames / Core / Media
 --
 -- Textures, fonts and the colour tables (values as in Luna Unit Frames).
 local _, ns = ...
@@ -8,11 +8,11 @@ ns.media = {
     background = "Interface\\Buttons\\WHITE8X8",
 }
 
--- Bar textures. The first fifteen ship with FUF (smooth 8-bit gradients, no
+-- Bar textures. The first fifteen ship with the addon (smooth 8-bit gradients, no
 -- banding at any bar height); the others come with the client (paths
 -- checked in the 1.60.1 UI source). Blizzard's UI-StatusBar is made for
 -- thin bars and shows bands when stretched.
-local MEDIA = "Interface\\AddOns\\FUF\\Media\\"
+local MEDIA = "Interface\\AddOns\\LizzaricksUnitFrames\\Media\\"
 ns.textures = {
     { "Smooth", MEDIA .. "Smooth" },
     { "Soft", MEDIA .. "Soft" },

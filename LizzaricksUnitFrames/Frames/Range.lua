@@ -1,4 +1,4 @@
--- FUF / Frames / Range
+-- LizzaricksUnitFrames / Frames / Range
 --
 -- Out-of-range fading for group members and pets (Luna: alpha 0.4).
 --

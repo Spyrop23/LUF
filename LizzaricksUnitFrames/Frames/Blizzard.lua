@@ -1,4 +1,4 @@
--- FUF / Frames / Blizzard
+-- LizzaricksUnitFrames / Frames / Blizzard
 --
 -- Silences Blizzard's own unit frames when ours replace them.
 --
