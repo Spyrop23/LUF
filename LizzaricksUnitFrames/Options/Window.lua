@@ -34,6 +34,17 @@ local function unitPath(key, path)
     return get, set
 end
 
+-- Setter for "Hide Blizzard ..." boxes: unticking one that already hid a
+-- frame offers the reload that brings the Blizzard frame back.
+local function blizzardToggle(get, set, what, label)
+    return get, function(v)
+        set(v)
+        if not v and ns:IsBlizzardHidden(what) then
+            ns:AskReload(label .. " will show again.")
+        end
+    end
+end
+
 local COLOR_TYPES = {
     { "class", "Class (NPCs by reaction)" },
     { "reaction", "Reaction" },
@@ -86,7 +97,8 @@ local function unitPage(key)
         b:Header(label)
         b:Check("Enabled", p("enabled"))
         if ns.blizzardFrames[key] then
-            b:Check("Hide Blizzard frame", p("hideBlizzard"))
+            local g, s = p("hideBlizzard")
+            b:Check("Hide Blizzard frame", blizzardToggle(g, s, key, "Blizzard's " .. label:lower() .. " frame"))
         end
         b:Slider("Width", 20, 600, 1, p("width"))
         b:Slider("Height", 10, 300, 1, p("height"))
@@ -171,7 +183,8 @@ local function unitPage(key)
             b:Dropdown("Position", CAST_POS, p("castBar.position"))
             b:Check("Spell icon", p("castBar.icon"))
             if key == "player" then
-                b:Check("Hide Blizzard cast bar", p("castBar.hideBlizzard"))
+                local g, s = p("castBar.hideBlizzard")
+                b:Check("Hide Blizzard cast bar", blizzardToggle(g, s, "playercast", "Blizzard's cast bar"))
             end
         end
 

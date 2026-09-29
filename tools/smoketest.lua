@@ -154,6 +154,7 @@ function UnregisterStateDriver(f) f.driver = nil end
 function GetRaidRosterInfo(i) return "Member" .. i, 0, ({ 1, 3, 3, 2, 1 })[i] or 1 end
 local raidMode = false
 function IsInRaid() return raidMode end
+function ReloadUI() reloaded = true end
 function UnitInRange(u) return secret(u ~= "party1"), secret(true) end
 function UnitIsUnit(a, b) return a == b end
 function GetPetExperience() return 150, 600 end
@@ -403,6 +404,7 @@ end
 for _, w in ipairs(frames) do
     if w.check or w.slider or w.dropdown or w.edit then use(w) end
 end
+assert(ns:IsBlizzardHidden("playercast"), "player cast bar was hidden")
 print("options: " .. #nav .. " pages, " .. used .. " controls used")
 dump()
 

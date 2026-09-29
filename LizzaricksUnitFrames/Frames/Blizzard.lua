@@ -90,6 +90,44 @@ ns.blizzardFrames = { player = true, target = true, targettarget = true, pet = t
 
 local done = {}
 
+-- True when Blizzard's frame for `what` was hidden in this session.
+function ns:IsBlizzardHidden(what)
+    return done[what] == true
+end
+
+-- A hidden Blizzard frame only comes back with a reload (its events are
+-- off and calling its own methods from addon code would taint it). This
+-- small dialog offers the reload; ReloadUI is allowed from a click.
+local prompt
+function ns:AskReload(reason)
+    if not prompt then
+        prompt = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+        prompt:SetSize(340, 110)
+        prompt:SetPoint("CENTER", 0, 120)
+        prompt:SetFrameStrata("FULLSCREEN_DIALOG")
+        prompt:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
+        prompt:SetBackdropColor(0.05, 0.05, 0.07, 0.97)
+        prompt:SetBackdropBorderColor(0.62, 0.83, 1, 0.8)
+        prompt:EnableMouse(true)
+        prompt.text = prompt:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        prompt.text:SetPoint("TOPLEFT", 14, -14)
+        prompt.text:SetPoint("TOPRIGHT", -14, -14)
+        prompt.text:SetJustifyH("LEFT")
+        local yes = CreateFrame("Button", nil, prompt, "UIPanelButtonTemplate")
+        yes:SetSize(140, 24)
+        yes:SetPoint("BOTTOMLEFT", 14, 12)
+        yes:SetText("Reload now")
+        yes:SetScript("OnClick", function() ReloadUI() end)
+        local no = CreateFrame("Button", nil, prompt, "UIPanelButtonTemplate")
+        no:SetSize(140, 24)
+        no:SetPoint("BOTTOMRIGHT", -14, 12)
+        no:SetText("Later")
+        no:SetScript("OnClick", function() prompt:Hide() end)
+    end
+    prompt.text:SetText(reason .. "\nThe Blizzard frame comes back after reloading the interface.")
+    prompt:Show()
+end
+
 local function silence(what)
     if done[what] or not SILENCER[what] then return end
     ns:RunOutOfCombat(function()
