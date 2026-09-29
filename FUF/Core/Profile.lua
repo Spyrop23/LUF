@@ -62,7 +62,7 @@ local noPortrait = { portrait = { enabled = false } }
 
 ns.defaults = {
     locked = true,
-    texture = "Blizzard",
+    texture = "Smooth",
     backgroundAlpha = 0.8,
     units = {
         player = unitDefaults({ castBar = { enabled = true } }),
@@ -141,6 +141,11 @@ function ns:SetProfile(name)
         if self.db.units.pet.healthBar.colorType == "class" then
             self.db.units.pet.healthBar.colorType = "happiness"
         end
+    end
+    -- 0.3.1: FUF's own smooth texture replaces Blizzard's banded one
+    if not self.db.migrated031 then
+        self.db.migrated031 = true
+        if self.db.texture == "Blizzard" then self.db.texture = "Smooth" end
     end
     if self.OnProfileChanged then self:OnProfileChanged() end
 end

@@ -22,7 +22,7 @@ Einen Ordner, der anders heißt als `FUF` (zum Beispiel `FUF-main`), zeigt WoW n
 ## Repo-Aufbau
 
 ```
-FUF/        das Addon (dieser Ordner kommt nach Interface/AddOns)
+FUF/        das Addon (dieser Ordner kommt nach Interface/AddOns), Texturen in FUF/Media
 docs/       Spezifikation (Luna-Recherche) und Roadmap
 tools/      Smoke-Test und Paket-Skript
 ```
@@ -42,12 +42,13 @@ tools/      Smoke-Test und Paket-Skript
 | `/fuf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/fuf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.3.0)
+## Stand (0.3.1)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4) und die Begleiter der Gruppenmitglieder, jeweils im Luna-Standardlayout.
 - **Leisten:** Lebens- und Ressourcenbalken (Farbe nach Klasse, Reaktion, Gesundheit oder fest),
   3D/2D-Portrait, Zauberleiste für Spieler, Ziel und Gruppe, auch bei Gegnern.
+- **Eigene Leisten-Texturen** ohne Streifen (Smooth, Minimalist, Gloss), dazu Blizzard/Raid/Flat.
 - **Begleiter-Zufriedenheit** wie bei Luna: Lebensleiste rot/gelb/grün, Gesicht-Icon, Tags
   `[happiness]` und `[loyalty]`.
 - **Tags:** 30 Luna-Tags auf drei Textfeldern pro Leiste, siehe Tag-Seite im Menü.
