@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   zip:
     runs-on: ubuntu-latest
@@ -13,14 +16,17 @@ jobs:
       - name: Lua syntax check and smoke test
         run: |
           sudo apt-get install -y lua5.1 >/dev/null
-          for f in $(find Core Frames Options -name '*.lua'); do luac5.1 -p -o /dev/null "$f"; done
+          for f in $(find FUF -name '*.lua'); do luac5.1 -p -o /dev/null "$f"; done
           lua5.1 tools/smoketest.lua
       - name: Build FUF.zip
         run: sh tools/package.sh
-      - uses: actions/upload-artifact@v4
-        with:
-          name: FUF
-          # the artifact holds the folder FUF/ itself, so unzipping keeps the name
-          path: |
-            dist/
-            !dist/FUF.zip
+      # Always the newest build under Releases -> "latest": FUF.zip unzips
+      # straight into Interface/AddOns with the right folder name.
+      - name: Publish release "latest"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest dist/FUF.zip --title "FUF latest" \
+            --notes "Newest build of main ($GITHUB_SHA). Unzip FUF.zip into World of Warcraft/_classic_beta_/Interface/AddOns." \
+            --target "$GITHUB_SHA" --latest

@@ -10,12 +10,22 @@ und die Machbarkeit pro Feature stehen in [docs/spec.md](docs/spec.md).
 
 ## Installation
 
-1. Das fertige Paket laden: auf GitHub unter **Actions → package → neuester Lauf → Artifacts → FUF**
-   (oder selbst bauen mit `sh tools/package.sh`, ergibt `dist/FUF.zip`).
-2. Entpacken nach `World of Warcraft/_classic_beta_/Interface/AddOns/`, sodass die Datei hier liegt:
-   `…/Interface/AddOns/FUF/FUF.toc`
-3. **Der Ordner muss exakt `FUF` heißen.** Der „Download ZIP“-Knopf von GitHub erzeugt `FUF-main`.
-   Einen so benannten Ordner zeigt WoW nicht an.
+**Am einfachsten:** Unter **Releases → FUF latest** die Datei `FUF.zip` laden und direkt nach
+`World of Warcraft/_classic_beta_/Interface/AddOns/` entpacken. Sie wird bei jedem Push neu gebaut.
+
+**Oder über „Code → Download ZIP“:** Im Zip liegt ein Ordner `FUF-main`. Aus ihm nur den inneren
+Ordner **`FUF`** nach `…/Interface/AddOns/` kopieren.
+
+Richtig ist es, wenn die Datei hier liegt: `…/Interface/AddOns/FUF/FUF.toc`.
+Einen Ordner, der anders heißt als `FUF` (zum Beispiel `FUF-main`), zeigt WoW nicht an.
+
+## Repo-Aufbau
+
+```
+FUF/        das Addon (dieser Ordner kommt nach Interface/AddOns)
+docs/       Spezifikation (Luna-Recherche) und Roadmap
+tools/      Smoke-Test und Paket-Skript
+```
 
 ## Bedienung
 
@@ -49,7 +59,7 @@ Etappen und offene Punkte: [docs/roadmap.md](docs/roadmap.md).
 ## Entwicklung
 
 - Regeln für den Code: [CLAUDE.md](CLAUDE.md)
-- Syntax-Check: `for f in $(find Core Frames Options -name '*.lua'); do luac5.1 -p $f; done`
+- Syntax-Check: `for f in $(find FUF -name '*.lua'); do luac5.1 -p $f; done`
 - Smoke-Test mit simuliertem Client. Secret Values werfen dort bei Rechnen und Vergleichen einen
   Fehler, der Test klickt alle Menüseiten durch: `lua5.1 tools/smoketest.lua`
 - Test im Spiel ohne Kampf: `/console addonCombatRestrictionsForced 1` (wieder auf 0 stellen!)

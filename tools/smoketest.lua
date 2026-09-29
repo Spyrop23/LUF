@@ -168,9 +168,9 @@ SlashCmdList = {}
 
 -- load in TOC order -------------------------------------------------------
 local ns = {}
-for line in io.lines("FUF.toc") do
+for line in io.lines("FUF/FUF.toc") do
     if line:match("%.lua$") then
-        local chunk = assert(loadfile((line:gsub("\\", "/"))))
+        local chunk = assert(loadfile("FUF/" .. line:gsub("\\", "/")))
         chunk("FUF", ns)
     end
 end

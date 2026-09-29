@@ -1,9 +1,9 @@
 #!/bin/sh
-# Builds dist/FUF.zip with the addon in a folder named FUF, ready to unzip
-# into Interface/AddOns. Only the files the client needs go in.
+# Builds dist/FUF.zip with the addon folder FUF/ at the top, ready to unzip
+# into Interface/AddOns.
 set -e
 cd "$(dirname "$0")/.."
-rm -rf dist && mkdir -p dist/FUF
-cp -r FUF.toc Core Frames Options README.md dist/FUF/
+rm -rf dist && mkdir -p dist
+cp -r FUF dist/FUF
 (cd dist && zip -qr FUF.zip FUF)
 echo "dist/FUF.zip"
