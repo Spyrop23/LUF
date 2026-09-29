@@ -4,7 +4,9 @@ Addon für **World of Warcraft: Forever**, Client 1.60.1, `## Interface: 16001`,
 Forever ist ein **Mainline-Client** (Spieltyp `camelot`) mit den Retail-12.x-Addon-Sperren.
 
 1. **Keine fremden Libraries.** Weder Ace3 noch oUF noch LibSharedMedia. Alles lebt auf `ns`;
-   die einzigen Globals sind `FUFDB`, `SLASH_FUF1` und die benannten Frames `FUF_<unit>`.
+   die einzigen Globals sind `FUFDB`, `SLASH_FUF1`, `FUF_OnAddonCompartmentClick` und die benannten
+   Frames (`FUF_<unit>`, `FUFOptionsFrame`, `FUFOptionsScroll`, `FUFMinimapButton`).
+   Nie `a, _, b = f()` ohne `local` schreiben, sonst wird die globale Variable `_` beschrieben (Taint).
 2. **Nur Retail-API:** `C_UnitAuras`, `C_Spell`, `C_Item`, `C_AddOns`, `MenuUtil`, Settings-API.
    Classic-Globals (`UnitAura`, `GetSpellInfo`, `IsAddOnLoaded`, `EasyMenu`,
    `InterfaceOptions_AddCategory`) gibt es nicht.
@@ -27,3 +29,5 @@ Forever ist ein **Mainline-Client** (Spieltyp `camelot`) mit den Retail-12.x-Add
    `Ketho/BlizzardInterfaceResources` Branch `forever` (`Resources/GlobalAPI.lua`, `Events.lua`).
    Stellen, die erst im Beta-Client bestätigt werden müssen, mit `-- TODO(beta)` markieren.
 10. Vor jedem Commit: `luac5.1 -p` für alle Dateien und `lua5.1 tools/smoketest.lua` ausführen.
+11. Menü-Änderungen gehen über `ns:ApplyKey(key)`. Das sammelt Änderungen und wendet sie außerhalb
+    des Kampfes an. Frames nie direkt aus einem Setter heraus umbauen.

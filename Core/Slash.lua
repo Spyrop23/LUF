@@ -1,45 +1,40 @@
 -- FUF / Core / Slash
 --
--- /fuf                    help
+-- /fuf                    options window
 -- /fuf lock | unlock      config mode off / on
 -- /fuf profile [name]     show or switch the profile (new names are created)
 -- /fuf reset              reset the current profile to defaults
--- /fuf tags               list the available tags
+-- /fuf help               this list
 local _, ns = ...
 
 local function help()
     ns:Print("v%s commands:", ns.version)
+    print("  /fuf - options window")
     print("  /fuf unlock - move the frames (config mode)")
     print("  /fuf lock - end config mode")
     print("  /fuf profile [name] - show or switch the profile")
     print("  /fuf reset - reset the current profile")
-    print("  /fuf tags - list the available tags")
 end
 
 local commands = {
+    [""] = function() ns.Options:Toggle() end,
+    options = function() ns.Options:Toggle() end,
+    help = help,
     lock = function() ns:SetLocked(true) end,
     unlock = function() ns:SetLocked(false) end,
     profile = function(arg)
         if arg == "" then
             ns:Print("Profile: %s (all: %s)", ns:CurrentProfile(), table.concat(ns:ProfileNames(), ", "))
-        elseif InCombatLockdown() then
-            ns:Print("Not in combat.")
         else
             ns:SetProfile(arg)
             ns:Print("Profile: %s", arg)
         end
     end,
     reset = function()
-        if InCombatLockdown() then
-            ns:Print("Not in combat.")
-            return
-        end
         ns:ResetProfile()
         ns:Print("Profile %s reset.", ns:CurrentProfile())
     end,
-    tags = function()
-        ns:Print("Tags: %s", "[" .. table.concat(ns.Tags.List(), "] [") .. "]")
-    end,
+    tags = function() ns.Options:Open("tags") end,
 }
 
 SLASH_FUF1 = "/fuf"

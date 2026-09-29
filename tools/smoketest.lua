@@ -1,11 +1,11 @@
--- FUF smoke test: loads the addon in a mocked client and fires the login
--- sequence. Secret values are userdata that throw on arithmetic and
--- comparison, like the real client. Run: lua5.1 tools/smoketest.lua
+-- FUF smoke test: loads the addon in a mocked client, fires the login
+-- sequence, casts, and clicks through every page of the options window.
+-- Secret values are userdata that throw on arithmetic and comparison, like
+-- the real client. Run from the repository root: lua5.1 tools/smoketest.lua
 local secretMeta = {}
 local function secret(v)
     local p = newproxy(true)
     local m = getmetatable(p)
-    m.__secret = v
     local function boom() error("attempt to use a secret value", 2) end
     m.__add, m.__sub, m.__mul, m.__div, m.__lt, m.__le, m.__concat, m.__unm = boom, boom, boom, boom, boom, boom, boom, boom
     m.__index = function() error("attempt to index a secret value", 2) end
@@ -27,7 +27,7 @@ Widget.__index = function(t, k)
     if k:match("^%u%l") and not k:match("^PlayerFrame") then return function() end end
 end
 local function newWidget(kind, name)
-    local w = setmetatable({ kind = kind, shown = true, scripts = {}, events = {}, points = {}, w = 100, h = 20, children = {} }, Widget)
+    local w = setmetatable({ kind = kind, shown = true, scripts = {}, events = {}, w = 100, h = 20 }, Widget)
     table.insert(frames, w)
     if name then _G[name] = w end
     return w
@@ -35,13 +35,14 @@ end
 function Widget:CreateTexture() return newWidget("Texture") end
 function Widget:CreateFontString() return newWidget("FontString") end
 function Widget:SetScript(k, fn) self.scripts[k] = fn end
+function Widget:GetScript(k) return self.scripts[k] end
 function Widget:HookScript(k, fn) self.scripts[k] = fn end
 function Widget:RegisterEvent(e) self.events[e] = true end
 function Widget:RegisterUnitEvent(e, unit) self.events[e] = unit or true end
 function Widget:UnregisterEvent(e) self.events[e] = nil end
 function Widget:Show() self.shown = true; if self.scripts.OnShow then self.scripts.OnShow(self) end end
 function Widget:Hide() self.shown = false end
-function Widget:SetShown(s) self.shown = s end
+function Widget:SetShown(s) self.shown = s and true or false end
 function Widget:IsShown() return self.shown end
 function Widget:IsVisible() return self.shown end
 function Widget:SetSize(w, h) self.w, self.h = w, h end
@@ -50,7 +51,9 @@ function Widget:SetHeight(h) self.h = h end
 function Widget:GetWidth() return self.w end
 function Widget:GetHeight() return self.h end
 function Widget:GetLeft() return 10 end
+function Widget:GetRight() return 110 end
 function Widget:GetTop() return 700 end
+function Widget:GetCenter() return 60, 690 end
 function Widget:GetEffectiveScale() return 1 end
 function Widget:GetChildren() return end
 function Widget:SetFormattedText(fmt, ...)
@@ -59,32 +62,65 @@ function Widget:SetFormattedText(fmt, ...)
     self.text = string.format(fmt, unpack(args, 1, select("#", ...)))
 end
 function Widget:SetText(t) self.text = reveal(t) end
-function Widget:SetValue(v) self.value = reveal(v) end
+function Widget:GetText() return self.text end
+function Widget:SetValue(v)
+    self.value = reveal(v)
+    if self.scripts.OnValueChanged then self.scripts.OnValueChanged(self, self.value, true) end
+end
+function Widget:GetValue() return self.value end
 function Widget:SetMinMaxValues(a, b) self.min, self.max = reveal(a), reveal(b) end
+function Widget:SetChecked(c) self.checked = c end
+function Widget:GetChecked() return self.checked end
+function Widget:SetTimerDuration(d) self.duration = d end
+function Widget:SetupMenu(gen) self.menuGen = gen; self:GenerateMenu() end
+function Widget:GenerateMenu()
+    local radios = {}
+    local root = { CreateRadio = function(_, text, isSel, setSel, data)
+        table.insert(radios, { text = text, isSel = isSel, set = setSel })
+    end }
+    self.menuGen(self, root)
+    self.radios = radios
+    for _, r in ipairs(radios) do r.isSel() end
+end
 function CreateFrame(kind, name) return newWidget(kind, name) end
 UIParent = newWidget("Frame", "UIParent")
+Minimap = newWidget("Frame", "Minimap")
+GameTooltip = newWidget("GameTooltip", "GameTooltip")
 PlayerFrame = newWidget("Frame", "PlayerFrame")
 PlayerFrame.PlayerFrameContainer = newWidget("Frame")
 TargetFrame = newWidget("Frame", "TargetFrame")
 TargetFrame.totFrame = newWidget("Frame")
+newWidget("Frame", "PetFrame")
+newWidget("Frame", "PartyFrame")
+newWidget("Frame", "PlayerCastingBarFrame")
+UISpecialFrames = {}
 
 -- API --------------------------------------------------------------------
 STANDARD_TEXT_FONT = "Fonts\\FRIZQT__.TTF"
+Enum = {
+    StatusBarTimerDirection = { ElapsedTime = 0, RemainingTime = 1 },
+    StatusBarInterpolation = { Immediate = 0 },
+}
 CurveConstants = { ScaleTo100 = { curve = true } }
 C_SwingTimer = {}
-C_AddOns = { GetAddOnMetadata = function() return "0.1.0" end }
+C_AddOns = { GetAddOnMetadata = function() return "0.2.0" end }
 C_Timer = { After = function(_, fn) fn() end }
 C_CurveUtil = { CreateColorCurve = function()
     return { AddPoint = function() end }
 end }
+Settings = {
+    RegisterCanvasLayoutCategory = function() return {} end,
+    RegisterAddOnCategory = function() end,
+}
 function CreateColor(r, g, b) return { r = r, g = g, b = b } end
 function GetBuildInfo() return "1.60.1", "69977", "", 16001 end
+function GetCursorPosition() return 100, 100 end
 function InCombatLockdown() return false end
 function hooksecurefunc() end
 function RegisterUnitWatch(f) f.watched = true; f.shown = UnitExists(f.unit) end
 function UnregisterUnitWatch(f) f.watched = false end
 function GetRealmName() return "Forever" end
-local units = { player = true, target = true, targettarget = true }
+local units = { player = true, target = true, targettarget = true, pet = true, party1 = true }
 function UnitExists(u) return units[u] or false end
 function UnitName(u) if u == "player" then return "Thrall", nil end return secret("Name-" .. u), nil end
 function UnitGUID(u) return u == "player" and "Player-1-0001" or secret("guid") end
@@ -103,19 +139,32 @@ function UnitPowerPercent() return secret(50) end
 function UnitPowerType() return 0, "MANA" end
 function UnitClass(u) if u == "target" then return secret("Mage"), secret("MAGE") end return "Warrior", "WARRIOR" end
 function UnitReaction() return 4 end
-function UnitIsPlayer(u) return u ~= "targettarget" end
+function UnitIsPlayer(u) return u ~= "targettarget" and u ~= "pet" end
 function UnitIsConnected() return true end
 function UnitIsGhost() return false end
 function UnitIsDead(u) return u == "targettarget" end
+function UnitIsAFK(u) return u == "party1" end
+function UnitAffectingCombat() return secret(true) end
+function GetGuildInfo(u) return u == "player" and "Forever Guild" or nil end
+function UnitXP() return 300 end
+function UnitXPMax() return 1200 end
 function UnitIsTapDenied() return false end
 function UnitLevel(u) return u == "target" and -1 or 60 end
 function UnitClassification(u) return u == "target" and "worldboss" or "elite" end
 function UnitCreatureType() return "Humanoid" end
+local targetCasting = false
+function UnitCastingInfo(u)
+    if u == "target" and targetCasting then return secret("Fireball"), secret(""), secret(135812) end
+    if u == "player" and targetCasting then return "Aimed Shot", "", 135130 end
+end
+function UnitChannelInfo() end
+local duration = { GetRemainingDuration = function() return secret(1.25) end }
+function UnitCastingDuration() return duration end
+function UnitChannelDuration() return duration end
 function AbbreviateNumbers(v) return secretMeta[v] and secret(tostring(secretMeta[v])) or tostring(v) end
 function GetCreatureDifficultyColor() return { r = 1, g = 0.8, b = 0 } end
 function SetPortraitTexture() end
 SlashCmdList = {}
-newproxy = newproxy
 
 -- load in TOC order -------------------------------------------------------
 local ns = {}
@@ -135,21 +184,109 @@ local function fire(event, ...)
         end
     end
 end
+local function tick()
+    for _, w in ipairs(frames) do
+        if w.scripts.OnUpdate then w.scripts.OnUpdate(w, 1) end
+    end
+end
+
 fire("PLAYER_LOGIN")
 fire("PLAYER_ENTERING_WORLD")
 fire("UNIT_HEALTH", "player")
 fire("PLAYER_TARGET_CHANGED")
-for _, u in ipairs(ns.unitOrder) do
-    local f = ns.UF.frames[u]
-    assert(f, "frame missing: " .. u)
-    local function t(bar, side) return bar.text[side].text or "" end
-    print(string.format("%-20s health=%s power=%s | %s | %s || %s | %s", u,
-        tostring(f.healthBar.value), tostring(f.powerBar.value),
-        t(f.healthBar, "left"), t(f.healthBar, "right"), t(f.powerBar, "left"), t(f.powerBar, "right")))
+tick()
+
+local function dump()
+    local list = {}
+    for unit in pairs(ns.UF.frames) do table.insert(list, unit) end
+    table.sort(list)
+    for _, u in ipairs(list) do
+        local f = ns.UF.frames[u]
+        if f.shown then
+            local function t(bar, side) return bar.text[side].text or "" end
+            print(string.format("%-20s | %s | %s || %s | %s", u,
+                t(f.healthBar, "left"), t(f.healthBar, "right"), t(f.powerBar, "left"), t(f.powerBar, "right")))
+        end
+    end
 end
+dump()
+assert(ns.UF.frames.party1.shown and not ns.UF.frames.party2.shown, "party visibility")
+assert(ns.UF.frames.pet.shown, "pet shown")
+
+-- tags with arguments
+local fs = newWidget("FontString")
+ns.Tags.Render(fs, "[shortname:3] [color:ff0000]x[nocolor] [smartlevel] [guild] [xp] [percxp] [afk][combat]", "player")
+print("tags: " .. fs.text)
+assert(fs.text:find("^Thr "), "shortname")
+
+-- casts (target: all secret)
+targetCasting = true
+fire("UNIT_SPELLCAST_START", "target")
+fire("UNIT_SPELLCAST_START", "player")
+tick()
+local tcb = ns.UF.frames.target.castBar
+print("target cast: " .. tostring(tcb.name.text) .. " " .. tostring(tcb.time.text) .. " shown=" .. tostring(tcb.shown))
+assert(tcb.shown and tcb.name.text == "Fireball" and tcb.time.text == "1.2", "target cast bar")
+targetCasting = false
+fire("UNIT_SPELLCAST_STOP", "target")
+fire("UNIT_SPELLCAST_FAILED", "player")
+assert(not tcb.shown and not ns.UF.frames.player.castBar.shown, "cast bars hidden")
+
+-- config mode and dragging
 SlashCmdList.FUF("unlock")
+assert(ns.UF.frames.party3.shown and ns.UF.frames.party3.unit == "player", "party stand-in")
+ns.UF.frames.party3.scripts.OnDragStop(ns.UF.frames.party3)
+ns.UF.frames.partypet2.scripts.OnDragStop(ns.UF.frames.partypet2)
 SlashCmdList.FUF("lock")
-SlashCmdList.FUF("tags")
+assert(ns.UF.frames.party3.unit == "party3" and not ns.UF.frames.party3.shown, "party back")
+
+-- options window: open every page and use every control
+SlashCmdList.FUF("")
+local nav = {}
+for _, w in ipairs(frames) do
+    if w.kind == "Button" and w.sel then table.insert(nav, w) end
+end
+assert(#nav >= 11, "navigation buttons: " .. #nav)
+local used = 0
+local function use(w)
+    if w.check then
+        w.check:SetChecked(not w.check:GetChecked())
+        w.check.scripts.OnClick(w.check)
+        w.check:SetChecked(not w.check:GetChecked())
+        w.check.scripts.OnClick(w.check)
+    elseif w.slider then
+        w.slider:SetValue(((w.slider.min or 0) + (w.slider.max or 1)) / 2)
+    elseif w.dropdown then
+        w.dropdown:GenerateMenu()
+        local r = w.dropdown.radios[1]
+        if r then r.set() end
+    elseif w.edit then
+        local old = w.edit:GetText() or ""
+        w.edit:SetText(tonumber(old) and "25" or (old .. " [perhp]"))
+        w.edit.scripts.OnEnterPressed(w.edit)
+    else
+        return
+    end
+    used = used + 1
+end
+for _, btn in ipairs(nav) do
+    btn.scripts.OnClick(btn)
+end
+for _, w in ipairs(frames) do
+    if w.check or w.slider or w.dropdown or w.edit then use(w) end
+end
+print("options: " .. #nav .. " pages, " .. used .. " controls used")
+dump()
+
+-- minimap button
+FUFMinimapButton.scripts.OnClick(FUFMinimapButton, "RightButton")
+FUFMinimapButton.scripts.OnClick(FUFMinimapButton, "LeftButton")
+FUFMinimapButton.scripts.OnDragStart(FUFMinimapButton)
+tick()
+FUFMinimapButton.scripts.OnDragStop(FUFMinimapButton)
+FUF_OnAddonCompartmentClick()
+
 SlashCmdList.FUF("profile Raid")
 SlashCmdList.FUF("profile")
+SlashCmdList.FUF("reset")
 print("OK")
