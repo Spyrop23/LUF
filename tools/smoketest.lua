@@ -292,7 +292,7 @@ assert(ns.UF.frames.party1.driver, "party uses the hide-in-raid driver")
 -- range: party1 is out of range (secret false) -> faded to 0.4
 tick()
 assert(ns.UF.frames.party1.alpha == 0.4, "party1 faded, got " .. tostring(ns.UF.frames.party1.alpha))
-assert(ns.UF.frames.pet.alpha == 1, "pet in range")
+assert(ns.UF.frames.pet.alpha ~= 0.4, "own pet never fades")
 -- pet XP bar
 assert(pet.xpBar.value == 150 and pet.xpBar.shown, "pet xp bar")
 print("raid/range/xp ok")

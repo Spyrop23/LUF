@@ -47,7 +47,7 @@ tools/      Smoke-Test und Paket-Skript
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4), die Begleiter der Gruppenmitglieder und **Raid** (40 Frames, eine Spalte pro
   Raidgruppe), jeweils im Luna-Standardlayout. Die Gruppe blendet sich im Raid auf Wunsch aus.
-- **Reichweite:** Gruppe, Raid und Begleiter werden außer Reichweite transparent (Standard 0.4).
+- **Reichweite:** Gruppe, Gruppen-Begleiter und Raid werden außer Reichweite transparent (Standard 0.4).
 - **XP-Leiste** für Spieler (lila, erholter Teil blau) und Begleiter, mit Tags `[xp] [percxp]`
   und `[xppet] [percxppet]`.
 - **Leisten:** Lebens- und Ressourcenbalken (Farbe nach Klasse, Reaktion, Gesundheit oder fest),
