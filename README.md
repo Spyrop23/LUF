@@ -10,9 +10,12 @@ und die Machbarkeit pro Feature stehen in [docs/spec.md](docs/spec.md).
 
 ## Installation
 
-Den Ordner als `FUF` nach `World of Warcraft/_classic_beta_/Interface/AddOns/` kopieren
-(später `_forever_` bzw. der Ordner des Release-Clients). Die einzige TOC-Datei ist
-`FUF_Camelot.toc`; `Camelot` ist der Spieltyp von Forever, andere Clients zeigen das Addon nicht an.
+1. Das fertige Paket laden: auf GitHub unter **Actions → package → neuester Lauf → Artifacts → FUF**
+   (oder selbst bauen mit `sh tools/package.sh`, ergibt `dist/FUF.zip`).
+2. Entpacken nach `World of Warcraft/_classic_beta_/Interface/AddOns/`, sodass die Datei hier liegt:
+   `…/Interface/AddOns/FUF/FUF.toc`
+3. **Der Ordner muss exakt `FUF` heißen.** Der „Download ZIP“-Knopf von GitHub erzeugt `FUF-main`.
+   Einen so benannten Ordner zeigt WoW nicht an.
 
 ## Befehle
 

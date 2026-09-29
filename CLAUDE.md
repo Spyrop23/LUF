@@ -1,6 +1,6 @@
 # FUF – Regeln für den Code
 
-Addon für **World of Warcraft: Forever**, Client 1.60.1, `## Interface: 16001`, TOC `FUF_Camelot.toc`.
+Addon für **World of Warcraft: Forever**, Client 1.60.1, `## Interface: 16001`, TOC `FUF.toc` (Ordner muss `FUF` heißen).
 Forever ist ein **Mainline-Client** (Spieltyp `camelot`) mit den Retail-12.x-Addon-Sperren.
 
 1. **Keine fremden Libraries.** Weder Ace3 noch oUF noch LibSharedMedia. Alles lebt auf `ns`;

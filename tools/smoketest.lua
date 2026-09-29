@@ -119,7 +119,7 @@ newproxy = newproxy
 
 -- load in TOC order -------------------------------------------------------
 local ns = {}
-for line in io.lines("FUF_Camelot.toc") do
+for line in io.lines("FUF.toc") do
     if line:match("%.lua$") then
         local chunk = assert(loadfile((line:gsub("\\", "/"))))
         chunk("FUF", ns)

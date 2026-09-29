@@ -8,7 +8,7 @@
 ## Category: Unit Frames
 ## Category-deDE: Einheitenfenster
 
-# Only WoW: Forever loads this file: "Camelot" is Forever's game type.
+# The folder must be named FUF (same as this file) or the client ignores it.
 
 Core\Init.lua
 Core\Secret.lua
