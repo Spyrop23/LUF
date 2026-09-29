@@ -20,6 +20,15 @@ Portrait und Texten, Blizzard-Frames ausblenden, Config-Mode, `/fuf`.
   Initializer mit Größe, Icon, Cooldown, Stapelzahl, Restzeit, Dispel-Farbrahmen). Kein Aura-Wert
   wird von FUF gelesen, deshalb funktioniert es auch im Kampf *(im Kampf noch zu bestätigen)*.
 
+## Zwischenschritt 0.5.0 – Heilvorhersage ✅
+- `CreateUnitHealPredictionCalculator` + `UnitGetDetailedHealPrediction(unit, "player", calc)`:
+  `GetIncomingHeals()` liefert gesamt / vom Spieler / von anderen, geklemmt auf fehlendes Leben
+  plus Overflow (`SetIncomingHealOverflowPercent`). Die Spec (G) hielt die Trennung eigene/fremde
+  für unmöglich, mit dem Rechner geht sie. Weiter nicht möglich: HoT und Direktheilung getrennt,
+  Zeitfenster.
+- Drei StatusBars (eigene, fremde, Absorbs) jeweils an das Füllende der vorherigen geankert,
+  in einem Clip-Frame so breit wie Leiste × Overflow *(im Client zu bestätigen)*.
+
 ## Etappe 3 – Leisten und Raid
 - Bar-Slots wie Luna (Gruppen links/mitte/rechts, Order, vertikal, Invertieren über `SetReverseFill`)
 - XP-/Ruf-Bar, Empty Bar, Druiden-Manabar, Combo Points

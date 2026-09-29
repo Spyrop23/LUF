@@ -42,7 +42,7 @@ tools/      Smoke-Test und Paket-Skript
 | `/fuf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/fuf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.4.0)
+## Stand (0.5.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4) und die Begleiter der Gruppenmitglieder, jeweils im Luna-Standardlayout.
@@ -54,6 +54,9 @@ tools/      Smoke-Test und Paket-Skript
   Sie laufen über Blizzards Aura-Container, mit Tooltip, Restzeit, Stapelzahl und Debuff-Rahmen
   nach Typ. Filter: alle / nur eigene / wirkbare bzw. bannbare. Position, Größe und Anzahl sind
   einstellbar. Standard: an bei Begleiter und Ziel, Debuffs bei der Gruppe.
+- **Eingehende Heilung** wie bei Luna: eigene dunkelgrün, fremde hellgrün, dazu Schilde (Absorbs).
+  Die Anzeige darf über die Leiste hinausragen (einstellbar bis 130 %). Die Werte berechnet Blizzards
+  Heal-Prediction-Rechner.
 - **Begleiter-Zufriedenheit** wie bei Luna: Lebensleiste rot/gelb/grün, Tags
   `[happiness]` und `[loyalty]`.
 - **Tags:** 30 Luna-Tags auf drei Textfeldern pro Leiste, siehe Tag-Seite im Menü.

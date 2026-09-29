@@ -36,6 +36,7 @@ function Widget:CreateTexture() return newWidget("Texture") end
 function Widget:CreateFontString() return newWidget("FontString") end
 function Widget:SetScript(k, fn) self.scripts[k] = fn end
 function Widget:GetScript(k) return self.scripts[k] end
+function Widget:GetStatusBarTexture() self.fill = self.fill or newWidget("Texture"); return self.fill end
 function Widget:HookScript(k, fn) self.scripts[k] = fn end
 function Widget:RegisterEvent(e) self.events[e] = true end
 function Widget:RegisterUnitEvent(e, unit) self.events[e] = unit or true end
@@ -183,6 +184,16 @@ end
 function UnitChannelInfo() end
 local duration = { GetRemainingDuration = function() return secret(1.25) end }
 function UnitCastingDuration() return duration end
+Enum = Enum or {}
+function CreateUnitHealPredictionCalculator()
+    local c = {}
+    function c:SetIncomingHealOverflowPercent(v) self.overflow = v end
+    function c:SetIncomingHealClampMode() end
+    function c:GetIncomingHeals() return secret(500), secret(200), secret(300), secret(false) end
+    function c:GetDamageAbsorbs() return secret(50), secret(false) end
+    return c
+end
+function UnitGetDetailedHealPrediction(unit, healer, calc) assert(calc.GetIncomingHeals) end
 function UnitChannelDuration() return duration end
 function AbbreviateNumbers(v) return secretMeta[v] and secret(tostring(secretMeta[v])) or tostring(v) end
 function GetCreatureDifficultyColor() return { r = 1, g = 0.8, b = 0 } end
@@ -243,6 +254,12 @@ local pfs = newWidget("FontString")
 ns.Tags.Render(pfs, "[happiness] [loyalty]", "pet")
 print("pet tags: " .. pfs.text)
 assert(pfs.text:find("Content") and pfs.text:find("Loyal"), "pet tags")
+
+-- heal prediction: own/others split from the calculator, secrets passed through
+local ph = ns.UF.frames.player.heal
+fire("UNIT_HEAL_PREDICTION", "player")
+assert(ph.own.value == 200 and ph.others.value == 300 and ph.absorb.value == 50, "heal prediction values")
+print("heal prediction: own=" .. ph.own.value .. " others=" .. ph.others.value .. " absorb=" .. ph.absorb.value)
 
 -- auras: pet has a container with both groups, bound to its unit
 local pc = pet.auraContainer

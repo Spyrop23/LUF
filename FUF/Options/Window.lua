@@ -114,6 +114,12 @@ local function unitPage(key)
         b:Check("Background", p("healthBar.background"))
         b:Slider("Background alpha", 0, 1, 0.05, p("healthBar.backgroundAlpha"))
 
+        b:Header("Incoming heals")
+        b:Check("Show incoming heals (own dark green, others light green)", p("healPrediction.enabled"))
+        b:Slider("May reach past the bar (1 = no, 1.3 = 30%)", 1, 1.3, 0.01, p("healPrediction.overflow"))
+        b:Slider("Opacity", 0.1, 1, 0.05, p("healPrediction.alpha"))
+        b:Check("Show absorb shields", p("healPrediction.absorbs"))
+
         b:Header("Power bar")
         b:Check("Enabled", p("powerBar.enabled"))
         local gpw, spw = p("powerBar.weight")

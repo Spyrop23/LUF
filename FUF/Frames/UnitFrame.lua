@@ -43,7 +43,7 @@ local UNIT_EVENTS = {
     "UNIT_NAME_UPDATE", "UNIT_LEVEL", "UNIT_FACTION", "UNIT_FLAGS",
     "UNIT_CONNECTION", "UNIT_CLASSIFICATION_CHANGED",
     "UNIT_PORTRAIT_UPDATE", "UNIT_MODEL_CHANGED", "PLAYER_FLAGS_CHANGED",
-    "UNIT_HAPPINESS",
+    "UNIT_HAPPINESS", "UNIT_HEAL_PREDICTION", "UNIT_ABSORB_AMOUNT_CHANGED",
 }
 
 local BAR_KEYS = { "healthBar", "powerBar" }
@@ -81,6 +81,7 @@ local function buildRegions(f)
 
     f.healthBar = createBar(f)
     f.powerBar = createBar(f)
+    if ns.HealPrediction then ns.HealPrediction.Create(f) end
 
     f.portrait3D = CreateFrame("PlayerModel", nil, f)
     f.portrait2D = f:CreateTexture(nil, "ARTWORK")
@@ -227,6 +228,7 @@ function UF.Layout(f)
         f.happiness:SetPoint("CENTER", f, "TOPRIGHT", -size / 2, 0)
     end
 
+    if ns.HealPrediction then ns.HealPrediction.Layout(f, db.width - left - right) end
     if ns.CastBar then ns.CastBar.Layout(f) end
     if ns.Auras then ns.Auras.Layout(f) end
     UF.Update(f)
@@ -243,7 +245,7 @@ local function readableFlag(v)
     return ns.CanRead(v) and v
 end
 
-function UF.UpdateHealth(f)
+local function updateHealthBar(f)
     local unit, bar, bdb = f.unit, f.healthBar, f.db.healthBar
     ns.SetHealthFill(bar, unit)
 
@@ -278,6 +280,11 @@ function UF.UpdateHealth(f)
         end
     end
     applyColor(bar, c or ns.colors.static, bdb.backgroundAlpha)
+end
+
+function UF.UpdateHealth(f)
+    updateHealthBar(f)
+    if ns.HealPrediction then ns.HealPrediction.Update(f) end
 end
 
 function UF.UpdatePower(f)
@@ -341,6 +348,7 @@ end
 -- Which parts an event touches; everything else redraws the whole frame.
 local EVENT_PARTS = {
     UNIT_HEALTH = "health", UNIT_MAXHEALTH = "health",
+    UNIT_HEAL_PREDICTION = "health", UNIT_ABSORB_AMOUNT_CHANGED = "health",
     UNIT_POWER_UPDATE = "power", UNIT_MAXPOWER = "power", UNIT_DISPLAYPOWER = "power",
     UNIT_PORTRAIT_UPDATE = "portrait", UNIT_MODEL_CHANGED = "portrait",
 }

@@ -38,6 +38,7 @@ local function unitDefaults(o)
         powerBar  = { enabled = true, weight = 4.5, background = true, backgroundAlpha = 0.2 },
         portrait  = { enabled = true, type = "3D", side = "LEFT", width = 0.22 },
         castBar   = { enabled = false, height = 10, position = "BELOW", icon = true, hideBlizzard = true },
+        healPrediction = { enabled = true, overflow = 1.05, alpha = 0.8, absorbs = true },
         auras     = {
             buffs = false, debuffs = false,
             buffFilter = "all", debuffFilter = "all",
