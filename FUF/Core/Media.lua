@@ -8,15 +8,27 @@ ns.media = {
     background = "Interface\\Buttons\\WHITE8X8",
 }
 
--- Bar textures. The first three ship with FUF (smooth 8-bit gradients, no
+-- Bar textures. The first fifteen ship with FUF (smooth 8-bit gradients, no
 -- banding at any bar height); the others come with the client (paths
 -- checked in the 1.60.1 UI source). Blizzard's UI-StatusBar is made for
 -- thin bars and shows bands when stretched.
 local MEDIA = "Interface\\AddOns\\FUF\\Media\\"
 ns.textures = {
     { "Smooth", MEDIA .. "Smooth" },
+    { "Soft", MEDIA .. "Soft" },
+    { "Dark", MEDIA .. "Dark" },
+    { "Charcoal", MEDIA .. "Charcoal" },
+    { "Matte", MEDIA .. "Matte" },
     { "Minimalist", MEDIA .. "Minimalist" },
     { "Gloss", MEDIA .. "Gloss" },
+    { "Glass", MEDIA .. "Glass" },
+    { "Split", MEDIA .. "Split" },
+    { "Tube", MEDIA .. "Tube" },
+    { "Inset", MEDIA .. "Inset" },
+    { "Bevel", MEDIA .. "Bevel" },
+    { "Lines", MEDIA .. "Lines" },
+    { "Grain", MEDIA .. "Grain" },
+    { "Brushed", MEDIA .. "Brushed" },
     { "Blizzard", "Interface\\TargetingFrame\\UI-StatusBar" },
     { "Raid", "Interface\\RaidFrame\\Raid-Bar-Hp-Fill" },
     { "Flat", "Interface\\Buttons\\WHITE8X8" },
