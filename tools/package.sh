@@ -4,6 +4,6 @@
 set -e
 cd "$(dirname "$0")/.."
 rm -rf dist && mkdir -p dist/FUF
-cp -r FUF.toc Core Frames README.md dist/FUF/
+cp -r FUF.toc Core Frames Options README.md dist/FUF/
 (cd dist && zip -qr FUF.zip FUF)
 echo "dist/FUF.zip"
