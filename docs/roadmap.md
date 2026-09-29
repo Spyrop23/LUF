@@ -18,7 +18,7 @@ Portrait und Texten, Blizzard-Frames ausblenden, Config-Mode, `/fuf`.
 ## Zwischenschritt 0.4.0 – Auren ✅
 - Buffs/Debuffs über `CustomAuraContainerTemplate` (Gruppen "buffs"/"debuffs", Filterstrings,
   Initializer mit Größe, Icon, Cooldown, Stapelzahl, Restzeit, Dispel-Farbrahmen). Kein Aura-Wert
-  wird von FUF gelesen, deshalb funktioniert es auch im Kampf *(im Client zu bestätigen)*.
+  wird von FUF gelesen, deshalb funktioniert es auch im Kampf *(im Kampf noch zu bestätigen)*.
 
 ## Etappe 3 – Leisten und Raid
 - Bar-Slots wie Luna (Gruppen links/mitte/rechts, Order, vertikal, Invertieren über `SetReverseFill`)
@@ -53,6 +53,9 @@ Portrait und Texten, Blizzard-Frames ausblenden, Config-Mode, `/fuf`.
 - Health-/Power-Fill, Klassen- und Powerfarben, `[levelcolor][level] [smartclass]`, 3D-Portrait.
 - Blizzard-PlayerFrame wird ausgeblendet, PetFrame bleibt (gewollt).
 - `/fuf unlock` zeigt alle Frames mit dem Spieler als Platzhalter.
+- Begleiter-Zufriedenheit über `C_PetInfo.GetPetHappiness` (Leistenfarbe gelb/grün gesehen).
+- Aura-Container: Füttern-Buff am Begleiter mit Restzeit vom Client („17 s“).
+- Eigene TGA-Texturen laden aus `Interface\AddOns\FUF\Media`.
 
 ## Bekannte Beta-Risiken
 - **SavedVariables:** Die Beta lädt accountweite SVs nach einem Kaltstart oft nicht und überschreibt
