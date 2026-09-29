@@ -73,6 +73,27 @@ local function canBuild()
     return available
 end
 
+-- Compact remaining time: "36", "58m", "2h" (the client's default reads
+-- "58 m" and runs into the next icon). The client formats the secret time.
+local durationFormatter
+local function compactFormatter()
+    if durationFormatter ~= nil then return durationFormatter or nil end
+    durationFormatter = false
+    if not (C_StringUtil and C_StringUtil.CreateNumericRuleFormatter) then return nil end
+    local ok, f = pcall(C_StringUtil.CreateNumericRuleFormatter)
+    if not ok or not f then return nil end
+    local up = Enum.NumericRuleFormatRounding and Enum.NumericRuleFormatRounding.Up
+    -- rounding belongs on the component, or 91 s would read "2m"
+    if not pcall(f.SetBreakpoints, f, {
+        { threshold = 0, format = "%d" },
+        { threshold = 60, format = "%dm", components = { { div = 60, rounding = up } } },
+        { threshold = 3600, format = "%dh", components = { { div = 3600, rounding = up } } },
+        { threshold = 86400, format = "%dd", components = { { div = 86400, rounding = up } } },
+    }) then return nil end
+    durationFormatter = f
+    return f
+end
+
 -- ------------------------------------------------------------ buttons --
 
 local function initializer(db, debuffs)
@@ -127,7 +148,10 @@ local function initializer(db, debuffs)
             local text = button:CreateFontString(nil, "OVERLAY")
             text:SetFont(ns.media.font, math.max(6, math.floor(size * 0.45)), "OUTLINE")
             text:SetPoint("TOP", button, "BOTTOM", 0, 1)
-            try(button, "SetDurationText", text, {})
+            local f = compactFormatter()
+            if not (f and try(button, "SetDurationText", text, { textFormatter = f })) then
+                try(button, "SetDurationText", text, {})   -- the client's own wording
+            end
         end
 
         -- Hover shows the client's tooltip; clicks go through to the frame.

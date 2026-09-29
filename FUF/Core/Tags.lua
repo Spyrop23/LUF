@@ -46,6 +46,25 @@ local function percent(fn, u)
     return "%.0f%%", fn(u, true, ns.ScaleTo100)
 end
 
+local function full(v)
+    if BreakUpLargeNumbers then return BreakUpLargeNumbers(v) end
+    return AbbreviateNumbers(v)
+end
+
+local function short(v)
+    return AbbreviateNumbers(v)
+end
+
+-- health/max (and percent), or the status text for dead and offline units
+local function smartHealth(u, fmt, withPercent)
+    local s = statusText(u)
+    if s then return lit(s) end
+    if withPercent and ns.ScaleTo100 then
+        return "%s/%s %.0f%%", fmt(UnitHealth(u)), fmt(UnitHealthMax(u)), UnitHealthPercent(u, true, ns.ScaleTo100)
+    end
+    return "%s/%s", fmt(UnitHealth(u)), fmt(UnitHealthMax(u))
+end
+
 -- ---------------------------------------------------------- the tags --
 --
 -- Each entry: function(unit) -> formatPiece, values...
@@ -112,28 +131,26 @@ Tags.methods = {
     nocolor = function() return "|r" end,
 
     -- health
-    hp = function(u) return "%s", AbbreviateNumbers(UnitHealth(u)) end,
-    maxhp = function(u) return "%s", AbbreviateNumbers(UnitHealthMax(u)) end,
-    missinghp = function(u) return "%s", AbbreviateNumbers(UnitHealthMissing(u, true)) end,
+    -- Full numbers with thousands separators, as in Luna; the s-variants
+    -- are short (1.2K). Both formatters take secrets.
+    hp = function(u) return "%s", full(UnitHealth(u)) end,
+    maxhp = function(u) return "%s", full(UnitHealthMax(u)) end,
+    shp = function(u) return "%s", short(UnitHealth(u)) end,
+    smaxhp = function(u) return "%s", short(UnitHealthMax(u)) end,
+    missinghp = function(u) return "%s", full(UnitHealthMissing(u, true)) end,
     perhp = function(u) return percent(UnitHealthPercent, u) end,
     status = function(u) return lit(statusText(u) or EMPTY) end,
-    smarthealth = function(u)
-        local s = statusText(u)
-        if s then return lit(s) end
-        return "%s/%s", AbbreviateNumbers(UnitHealth(u)), AbbreviateNumbers(UnitHealthMax(u))
-    end,
-    smarthealthp = function(u)
-        local s = statusText(u)
-        if s then return lit(s) end
-        if not ns.ScaleTo100 then return Tags.methods.smarthealth(u) end
-        return "%s/%s %.0f%%", AbbreviateNumbers(UnitHealth(u)), AbbreviateNumbers(UnitHealthMax(u)),
-            UnitHealthPercent(u, true, ns.ScaleTo100)
-    end,
+    smarthealth = function(u) return smartHealth(u, full, false) end,
+    smarthealthp = function(u) return smartHealth(u, full, true) end,
+    ssmarthealth = function(u) return smartHealth(u, short, false) end,
+    ssmarthealthp = function(u) return smartHealth(u, short, true) end,
 
     -- power
-    pp = function(u) return "%s", AbbreviateNumbers(UnitPower(u)) end,
-    maxpp = function(u) return "%s", AbbreviateNumbers(UnitPowerMax(u)) end,
-    missingpp = function(u) return "%s", AbbreviateNumbers(UnitPowerMissing(u)) end,
+    pp = function(u) return "%s", full(UnitPower(u)) end,
+    maxpp = function(u) return "%s", full(UnitPowerMax(u)) end,
+    spp = function(u) return "%s", short(UnitPower(u)) end,
+    smaxpp = function(u) return "%s", short(UnitPowerMax(u)) end,
+    missingpp = function(u) return "%s", full(UnitPowerMissing(u)) end,
     perpp = function(u)
         if not ns.ScaleTo100 then return EMPTY end
         return "%.0f%%", UnitPowerPercent(u, nil, false, ns.ScaleTo100)
@@ -234,14 +251,20 @@ Tags.help = {
     { "guild", "Guild name" },
     { "status", "Dead / Ghost / Offline" },
     { "combat", "(Combat) while in combat" },
-    { "hp", "Current health" },
+    { "hp", "Current health (1,234)" },
     { "maxhp", "Maximum health" },
+    { "shp", "Current health, short (1.2K)" },
+    { "smaxhp", "Maximum health, short" },
     { "missinghp", "Missing health" },
     { "perhp", "Health in percent" },
     { "smarthealth", "Health/max, or Dead/Offline" },
     { "smarthealthp", "Health/max and percent" },
+    { "ssmarthealth", "Like smarthealth, short numbers" },
+    { "ssmarthealthp", "Like smarthealthp, short numbers" },
     { "pp", "Current power" },
     { "maxpp", "Maximum power" },
+    { "spp", "Current power, short" },
+    { "smaxpp", "Maximum power, short" },
     { "missingpp", "Missing power" },
     { "perpp", "Power in percent" },
     { "happiness", "Pet happiness (Happy / Content / Unhappy, coloured)" },

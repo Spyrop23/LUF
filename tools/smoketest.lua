@@ -195,6 +195,8 @@ function CreateUnitHealPredictionCalculator()
 end
 function UnitGetDetailedHealPrediction(unit, healer, calc) assert(calc.GetIncomingHeals) end
 function UnitChannelDuration() return duration end
+function BreakUpLargeNumbers(v) local n = reveal(v); local s = tostring(n):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", ""); return secretMeta[v] and secret(s) or s end
+C_StringUtil = { CreateNumericRuleFormatter = function() return { SetBreakpoints = function() end } end }
 function AbbreviateNumbers(v) return secretMeta[v] and secret(tostring(secretMeta[v])) or tostring(v) end
 function GetCreatureDifficultyColor() return { r = 1, g = 0.8, b = 0 } end
 function SetPortraitTexture() end
@@ -272,6 +274,8 @@ local fs = newWidget("FontString")
 ns.Tags.Render(fs, "[shortname:3] [color:ff0000]x[nocolor] [smartlevel] [guild] [xp] [percxp] [afk][combat]", "player")
 print("tags: " .. fs.text)
 assert(fs.text:find("^Thr "), "shortname")
+ns.Tags.Render(fs, "[smarthealth] [ssmarthealth] [shp]", "player")
+print("number tags: " .. fs.text)
 
 -- casts (target: all secret)
 targetCasting = true

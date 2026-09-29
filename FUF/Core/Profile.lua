@@ -42,7 +42,7 @@ local function unitDefaults(o)
         auras     = {
             buffs = false, debuffs = false,
             buffFilter = "all", debuffFilter = "all",
-            size = 18, spacing = 1, perRow = 8,
+            size = 18, spacing = 2, perRow = 8,
             maxBuffs = 16, maxDebuffs = 16,
             position = "BOTTOM",
             duration = true, swipe = true, dispelColors = true,
