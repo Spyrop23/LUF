@@ -150,7 +150,9 @@ function RegisterStateDriver(f, state, rule)
     f.shown = not inRaid and UnitExists(f.unit)
 end
 function UnregisterStateDriver(f) f.driver = nil end
-function GetRaidRosterInfo(i) return "Member" .. i, 0, ({ 1, 3, 3, 2, 1 })[i] or 8 end
+function GetRaidRosterInfo(i) return "Member" .. i, 0, ({ 1, 3, 3, 2, 1 })[i] or 1 end
+local raidMode = false
+function IsInRaid() return raidMode end
 function UnitInRange(u) return secret(u ~= "party1"), secret(true) end
 function UnitIsUnit(a, b) return a == b end
 function GetPetExperience() return 150, 600 end
@@ -280,11 +282,17 @@ print("heal prediction: own=" .. ph.own.value .. " others=" .. ph.others.value .
 -- auras: pet has a container with both groups, bound to its unit
 local pc = pet.auraContainer
 assert(pc and pc.unitSet == "pet" and pc.groups.buffs.filter == "HELPFUL" and pc.groups.debuffs.max == 16, "pet auras")
+assert(ns.db.units.pet.auras.debuffSize > ns.db.units.pet.auras.size, "debuffs larger than buffs")
 assert(not ns.UF.frames.player.auraContainer, "player auras off by default")
 print("pet auras: buffs=" .. pc.groups.buffs.filter .. " debuffs=" .. pc.groups.debuffs.filter)
 
--- raid: 40 frames, sorted into subgroup columns
-assert(ns.UF.frames.raid40, "raid frames")
+-- raid: outside a raid the roster is ignored -> fixed 8x5 grid
+assert(ns.UF.frames.raid40.raidGroup == 8 and ns.UF.frames.raid40.raidSlot == 5, "raid grid outside a raid")
+assert(ns.UF.frames.raid7.raidGroup == 2 and ns.UF.frames.raid7.raidSlot == 2, "raid grid")
+-- in a raid: sorted into subgroup columns
+raidMode = true
+for i = 1, 5 do units["raid" .. i] = true end
+ns.UF.ArrangeRaid()
 local r2, r3, r4 = ns.UF.frames.raid2, ns.UF.frames.raid3, ns.UF.frames.raid4
 assert(r2.raidGroup == 3 and r2.raidSlot == 1 and r3.raidSlot == 2 and r4.raidGroup == 2, "raid arranged by subgroup")
 -- party hides in raid through a state driver

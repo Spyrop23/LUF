@@ -44,7 +44,7 @@ local function unitDefaults(o)
         auras     = {
             buffs = false, debuffs = false,
             buffFilter = "all", debuffFilter = "all",
-            size = 18, spacing = 2, perRow = 8,
+            size = 18, debuffSize = 22, spacing = 2, perRow = 8,
             maxBuffs = 16, maxDebuffs = 16,
             position = "BOTTOM",
             duration = true, swipe = true, dispelColors = true,
@@ -82,7 +82,7 @@ ns.defaults = {
             y = -72, height = 30,
             healthBar = { colorType = "happiness" },
             happiness = { enabled = false, size = 14 },   -- the colour says enough
-            auras = { buffs = true, debuffs = true, size = 16 },
+            auras = { buffs = true, debuffs = true, size = 16, debuffSize = 20 },
             xpBar = { enabled = true },
             tags = { xpBar = { center = "[xppet] [percxppet]" } },
         }),
@@ -172,6 +172,13 @@ function ns:SetProfile(name)
     if not self.db.migrated031 then
         self.db.migrated031 = true
         if self.db.texture == "Blizzard" then self.db.texture = "Smooth" end
+    end
+    -- 0.6.2: debuffs larger than buffs (Luna's "bigger debuffs")
+    if not self.db.migrated062 then
+        self.db.migrated062 = true
+        for _, u in pairs(self.db.units) do
+            if u.auras then u.auras.debuffSize = (u.auras.size or 18) + 4 end
+        end
     end
     -- 0.3.3: the happiness face is off by default (the bar colour shows it)
     if not self.db.migrated033 then

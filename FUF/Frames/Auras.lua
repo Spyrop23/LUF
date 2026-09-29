@@ -97,7 +97,7 @@ end
 -- ------------------------------------------------------------ buttons --
 
 local function initializer(db, debuffs)
-    local size = db.size
+    local size = debuffs and (db.debuffSize or db.size) or db.size
     return function(button)
         button:SetSize(size, size)
 
@@ -167,7 +167,8 @@ local DIR = AnchorUtil and AnchorUtil.FlowDirection
 -- Where the container sits and which way it grows, by position setting.
 -- gap: space to keep free next to the frame (e.g. for the cast bar).
 local function place(c, f, db, gapBelow, gapAbove)
-    local pos, size, spacing = db.position, db.size, db.spacing
+    local pos, spacing = db.position, db.spacing
+    local size = math.max(db.size, db.debuffSize or db.size)
     c:ClearAllPoints()
     local anchor, h, v, line
     if pos == "TOP" then
@@ -201,7 +202,8 @@ local function buildContainer(f, db)
             sortDirection = sortDirection,
             initializeFrame = initializer(db, debuffs),
             layout = {
-                elementWidth = db.size, elementHeight = db.size + (db.duration and 8 or 0),
+                elementWidth = debuffs and db.debuffSize or db.size,
+                elementHeight = (debuffs and db.debuffSize or db.size) + (db.duration and 8 or 0),
                 elementSpacing = db.spacing, lineSpacing = db.spacing,
                 forceNewLine = debuffs,   -- debuffs start on their own row
             },
@@ -218,7 +220,7 @@ end
 -- means a new container.
 local function signature(db)
     return table.concat({
-        tostring(db.buffs), tostring(db.debuffs), db.size, db.spacing, db.maxBuffs, db.maxDebuffs,
+        tostring(db.buffs), tostring(db.debuffs), db.size, db.debuffSize, db.spacing, db.maxBuffs, db.maxDebuffs,
         db.buffFilter, db.debuffFilter, tostring(db.duration), tostring(db.swipe), tostring(db.dispelColors),
     }, ":")
 end

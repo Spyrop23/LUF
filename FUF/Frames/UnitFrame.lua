@@ -572,18 +572,32 @@ end
 function UF.ArrangeRaid()
     local frames = UF.byKey.raid
     if not frames then return end
+    -- The roster only counts in a real raid: outside of one the client still
+    -- answers GetRaidRosterInfo (subgroup 1 for everybody), which piled all
+    -- 40 frames into the first column.
+    local inRaid = IsInRaid and IsInRaid()
     local count = {}
     for i = 1, 40 do
         local f = UF.frames["raid" .. i]
         if f then
             local group
-            if GetRaidRosterInfo then
+            if inRaid and GetRaidRosterInfo and UnitExists("raid" .. i) then
                 local ok, _, _, subgroup = pcall(GetRaidRosterInfo, i)
-                if ok and ns.CanRead(subgroup) and type(subgroup) == "number" then group = subgroup end
+                if ok and ns.CanRead(subgroup) and type(subgroup) == "number"
+                    and subgroup >= 1 and subgroup <= 8 then
+                    group = subgroup
+                end
             end
-            group = group or math.ceil(i / 5)
-            count[group] = (count[group] or 0) + 1
-            f.raidGroup, f.raidSlot = group, math.min(count[group], 5)
+            local slot
+            if group then
+                count[group] = (count[group] or 0) + 1
+                slot = count[group]
+            end
+            if not group or slot > 5 then
+                -- fixed grid: raid1-5 in column 1, raid6-10 in column 2 ...
+                group, slot = math.ceil(i / 5), (i - 1) % 5 + 1
+            end
+            f.raidGroup, f.raidSlot = group, slot
             UF.Position(f)
         end
     end
