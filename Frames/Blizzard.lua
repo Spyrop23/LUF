@@ -70,19 +70,41 @@ local SILENCER = {
     target = function() silenceWhole(_G.TargetFrame) end,
     -- Blizzard's target-of-target frame is a child of TargetFrame.
     targettarget = function() silenceWhole(_G.TargetFrame and _G.TargetFrame.totFrame) end,
+    pet = function() silenceWhole(_G.PetFrame) end,
+    -- party members (and their pets) in both styles
+    party = function()
+        silenceWhole(_G.PartyFrame)
+        silenceWhole(_G.CompactPartyFrame)
+    end,
+    -- The player cast bar: moved to the hidden parent as a whole. Nothing
+    -- on it is written or called, which would taint its secret cast values.
+    playercast = function() silenceWhole(_G.PlayerCastingBarFrame) end,
 }
+
+-- Settings keys that have a Blizzard frame to hide.
+ns.blizzardFrames = { player = true, target = true, targettarget = true, pet = true, party = true }
 
 local done = {}
 
-function ns:HideBlizzard(unit)
-    local fn = SILENCER[unit]
-    if not fn or done[unit] then return end
+local function silence(what)
+    if done[what] or not SILENCER[what] then return end
     ns:RunOutOfCombat(function()
-        if done[unit] then return end
-        done[unit] = true
-        local ok, err = pcall(fn)
+        if done[what] then return end
+        done[what] = true
+        local ok, err = pcall(SILENCER[what])
         if not ok then
-            ns:Print("Could not hide Blizzard's %s frame: %s", unit, tostring(err))
+            ns:Print("Could not hide Blizzard's %s frame: %s", what, tostring(err))
         end
     end)
+end
+
+-- Hides what the settings for `key` ask for. Showing a hidden Blizzard frame
+-- again needs a /reload, as in Luna.
+function ns:HideBlizzard(key)
+    local db = ns.db.units[key]
+    if not db or not db.enabled then return end
+    if db.hideBlizzard then silence(key) end
+    if key == "player" and db.castBar.enabled and db.castBar.hideBlizzard then
+        silence("playercast")
+    end
 end

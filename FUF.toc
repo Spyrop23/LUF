@@ -3,12 +3,14 @@
 ## Notes: Luna-style unit frames for World of Warcraft: Forever.
 ## Notes-deDE: Unit Frames im Stil von Luna für World of Warcraft: Forever.
 ## Author: Spyrop23
-## Version: 0.1.0
+## Version: 0.2.0
 ## SavedVariables: FUFDB
+## IconTexture: Interface\Icons\Spell_Nature_StarFall
+## AddonCompartmentFunc: FUF_OnAddonCompartmentClick
 ## Category: Unit Frames
 ## Category-deDE: Einheitenfenster
 
-# Only WoW: Forever loads this file: "Camelot" is Forever's game type.
+# The folder must be named FUF (same as this file) or the client ignores it.
 
 Core\Init.lua
 Core\Secret.lua
@@ -17,8 +19,14 @@ Core\Profile.lua
 Core\Tags.lua
 
 Frames\UnitFrame.lua
+Frames\CastBar.lua
 Frames\Blizzard.lua
 Frames\Units.lua
 
 Core\Mover.lua
+
+Options\Widgets.lua
+Options\Window.lua
+Options\Minimap.lua
+
 Core\Slash.lua

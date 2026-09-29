@@ -1,0 +1,26 @@
+name: package
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lua syntax check and smoke test
+        run: |
+          sudo apt-get install -y lua5.1 >/dev/null
+          for f in $(find Core Frames Options -name '*.lua'); do luac5.1 -p -o /dev/null "$f"; done
+          lua5.1 tools/smoketest.lua
+      - name: Build FUF.zip
+        run: sh tools/package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FUF
+          # the artifact holds the folder FUF/ itself, so unzipping keeps the name
+          path: |
+            dist/
+            !dist/FUF.zip

@@ -6,21 +6,25 @@ Grundlage: [spec.md](spec.md), Abschnitt G (Machbarkeit). Jede Etappe muss für 
 TOC, Event-System, Profile, Tags, Secret-Helfer, Frames für player/target/ToT/ToToT mit Health, Power,
 Portrait und Texten, Blizzard-Frames ausblenden, Config-Mode, `/fuf`.
 
-## Etappe 2 – Castbar, Leisten, Tags
-- Castbar (eigene nie secret; fremde über `UnitCastingDuration` + `StatusBar:SetTimerDuration`),
-  `[castname]`, `[casttime]`, Zauber-Icon
+## Etappe 2 – Begleiter, Gruppe, Castbar, Menü ✅
+- pet, pettarget, party1–4 (feste Frames statt Group-Header), partypet1–4 an ihrem Besitzer
+- Castbar für player/target/party (Timer über `SetTimerDuration`, Name/Icon durchgereicht,
+  Restzeit per `SetFormattedText`), Blizzard-Castbar ausblendbar
+- Tags: `[shortname:x]`, `[smartlevel]`, `[afk]`, `[nameafk]`, `[combat]`, `[guild]`, `[xp]`,
+  `[percxp]`, `[color:rrggbb]`, `[combatcolor]`
+- Optionsmenü ohne Library (alle Frame-, Leisten-, Portrait-, Castbar- und Text-Einstellungen,
+  Textur, Profile, Tag-Hilfe), Minimap-Button, Addon-Compartment, Eintrag unter Optionen → AddOns
+
+## Etappe 3 – Leisten und Raid
 - Bar-Slots wie Luna (Gruppen links/mitte/rechts, Order, vertikal, Invertieren über `SetReverseFill`)
 - XP-/Ruf-Bar, Empty Bar, Druiden-Manabar, Combo Points
-- Tags: `[br]`, `[shortname:x]`, `[smartlevel]`, `[afk]`, `[nameafk]`, `[combat]`, `[group]`,
-  `[guild]`, `[pvp]`, `[happiness]`, `[loyalty]`, `[xp]`, `[percxp]`, `[threat]`,
-  `[color:rrggbb]`, `[combatcolor]`, `[aggrocolor]`
-- pet, pettarget, pettargettarget; focus, sofern `focus` in Forever zulässig ist *(TODO(beta))*
-
-## Etappe 3 – Gruppen
-- party, partypet, partytarget, raid (8 Gruppen), raidpet, maintank/mainassist
+- Tags: `[br]`, `[group]`, `[pvp]`, `[happiness]`, `[loyalty]`, `[threat]`, `[aggrocolor]`
+- pettargettarget, partytarget; focus, sofern `focus` in Forever zulässig ist *(TODO(beta))*
+- raid (8 Gruppen), raidpet, maintank/mainassist
 - **Achtung:** `SecureGroupHeaderTemplate` funktioniert, aber in der Beta fehlt `loadstring_untainted`,
-  deshalb werfen `initialConfigFunction` und `WrapScript` einen Fehler. Plan: Größe und Einheit ohne
-  Snippet setzen, sonst feste Frames party1–4 / raid1–40 mit `RegisterStateDriver(…, "visibility")`.
+  deshalb werfen `initialConfigFunction` und `WrapScript` einen Fehler. Party läuft deshalb schon über
+  feste Frames. Für den Raid gilt derselbe Plan: feste Frames raid1–40, oder ein Header ohne Snippet.
+- Party im Raid ausblenden (Luna-Option), sobald das mit dem Unit-Watch vereinbar ist
 - Reichweiten-Alpha (`UnitInRange`, `C_Spell.IsSpellInRange`, `SetAlphaFromBoolean`)
 - Indikatoren: Raid-Ziel, Anführer, Plündermeister, Bereitschaftscheck, Wiederbelebung, Rolle, PvP, Elite-Rahmen
 
@@ -37,12 +41,19 @@ Portrait und Texten, Blizzard-Frames ausblenden, Config-Mode, `/fuf`.
   sind, eingehängt über die Settings-API
 - Profile kopieren/löschen, Auto-Profile nach Gruppengröße, Import/Export über `C_EncodingUtil`
 
+## Im Client bestätigt (29.09.2026, Beta 1.60.1)
+- `FUF.toc` in einem Ordner `FUF` lädt; ein Ordner `FUF-main` wird ignoriert.
+- `SetFormattedText` mit Secret-Werten, `AbbreviateNumbers` und `CurveConstants.ScaleTo100`:
+  „138/138 100%“ wird korrekt angezeigt.
+- Health-/Power-Fill, Klassen- und Powerfarben, `[levelcolor][level] [smartclass]`, 3D-Portrait.
+- Blizzard-PlayerFrame wird ausgeblendet, PetFrame bleibt (gewollt).
+- `/fuf unlock` zeigt alle Frames mit dem Spieler als Platzhalter.
+
 ## Bekannte Beta-Risiken
 - **SavedVariables:** Die Beta lädt accountweite SVs nach einem Kaltstart oft nicht und überschreibt
   sie dann mit Standards. Prüfen, ob `## SavedVariablesPerCharacter` oder `## SavedVariablesMachine`
   zuverlässiger ist *(TODO(beta))*.
-- Bestätigen, dass `CurveConstants.ScaleTo100` Prozentwerte liefert und `SetFormattedText("%.0f%%", …)`
-  mit Secrets funktioniert.
+- Noch zu testen: Frames im Kampf (keine Lua-Fehler), `/fuf lock`, Positionen nach Neustart.
 - `UnitRace` kann den Beta-Client einfrieren und wird deshalb nicht verwendet.
 
 ## Nicht machbar (Forever)

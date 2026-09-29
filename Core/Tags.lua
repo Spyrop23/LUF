@@ -138,6 +138,106 @@ Tags.methods = {
         if not ns.ScaleTo100 then return EMPTY end
         return "%.0f%%", UnitPowerPercent(u, nil, false, ns.ScaleTo100)
     end,
+
+    -- state
+    afk = function(u)
+        local afk = UnitIsAFK(u)
+        if readable(afk) and afk then return "(AFK)" end
+        return EMPTY
+    end,
+    nameafk = function(u)
+        local afk = UnitIsAFK(u)
+        if readable(afk) and afk then return "(AFK)" end
+        return Tags.methods.name(u)
+    end,
+    combat = function(u)
+        local c = UnitAffectingCombat(u)
+        if readable(c) and c then return "(Combat)" end
+        return EMPTY
+    end,
+    smartlevel = function(u)
+        local c = classification(u)
+        if c == "worldboss" then return "Boss" end
+        local l = UnitLevel(u)
+        if not readable(l) then return "%s", l end
+        if l <= 0 then return "??" end
+        if c == "elite" or c == "rareelite" then return "%d+", l end
+        return "%d", l
+    end,
+    guild = function(u)
+        local g = GetGuildInfo(u)
+        if readable(g) and not g then return EMPTY end
+        return "%s", g
+    end,
+    combatcolor = function(u)
+        local c = UnitAffectingCombat(u)
+        if readable(c) and c then return "|cffff0000" end
+        return EMPTY
+    end,
+
+    -- experience of the player (the frame's unit does not matter)
+    xp = function()
+        local cur, max = UnitXP("player"), UnitXPMax("player")
+        return "%s/%s", AbbreviateNumbers(cur), AbbreviateNumbers(max)
+    end,
+    percxp = function()
+        local cur, max = UnitXP("player"), UnitXPMax("player")
+        if not (readable(cur) and readable(max)) or max == 0 then return EMPTY end
+        return "%.0f%%", cur / max * 100
+    end,
+}
+
+-- Tags with an argument after a colon: [shortname:5], [color:ff8000].
+Tags.argMethods = {
+    shortname = function(arg)
+        local n = tonumber(arg) or 12
+        return function(u)
+            local name = UnitName(u)
+            if not readable(name) then return "%s", name end
+            if not name then return EMPTY end
+            return "%s", name:sub(1, n)
+        end
+    end,
+    color = function(arg)
+        local hex = arg:match("^%x%x%x%x%x%x$")
+        return function() return hex and ("|cff" .. hex) or EMPTY end
+    end,
+}
+
+-- For the tag help in the options window.
+Tags.help = {
+    { "name", "Name" },
+    { "shortname:x", "First x letters of the name" },
+    { "nameafk", "Name, or (AFK)" },
+    { "afk", "(AFK) when away" },
+    { "level", "Level (?? for bosses)" },
+    { "smartlevel", "Level with + for elites, Boss for bosses" },
+    { "class", "Class" },
+    { "smartclass", "Class for players, creature type for NPCs" },
+    { "creature", "Creature type" },
+    { "classification", "Elite / Rare / Rare Elite / Boss" },
+    { "shortclassification", "+ / R / R+ / B" },
+    { "guild", "Guild name" },
+    { "status", "Dead / Ghost / Offline" },
+    { "combat", "(Combat) while in combat" },
+    { "hp", "Current health" },
+    { "maxhp", "Maximum health" },
+    { "missinghp", "Missing health" },
+    { "perhp", "Health in percent" },
+    { "smarthealth", "Health/max, or Dead/Offline" },
+    { "smarthealthp", "Health/max and percent" },
+    { "pp", "Current power" },
+    { "maxpp", "Maximum power" },
+    { "missingpp", "Missing power" },
+    { "perpp", "Power in percent" },
+    { "xp", "Experience/needed (player)" },
+    { "percxp", "Experience in percent (player)" },
+    { "classcolor", "Starts the class colour" },
+    { "reactcolor", "Starts the reaction colour" },
+    { "levelcolor", "Starts the level difficulty colour" },
+    { "combatcolor", "Starts red while in combat" },
+    { "color:rrggbb", "Starts your own colour, e.g. [color:ff8000]" },
+    { "nocolor", "Ends a colour" },
 }
 
 -- ------------------------------------------------------------ compile --
@@ -157,6 +257,10 @@ function Tags.Compile(line)
         end
         if s > pos then table.insert(parts, lit(line:sub(pos, s - 1))) end
         local fn = Tags.methods[tag]
+        if not fn then
+            local base, arg = tag:match("^(%w+):(.+)$")
+            if base and Tags.argMethods[base] then fn = Tags.argMethods[base](arg) end
+        end
         if fn then
             table.insert(parts, { fn = fn })
         else

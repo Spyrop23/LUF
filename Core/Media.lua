@@ -4,10 +4,24 @@
 local _, ns = ...
 
 ns.media = {
-    statusbar = "Interface\\TargetingFrame\\UI-StatusBar",
     font = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF",
     background = "Interface\\Buttons\\WHITE8X8",
 }
+
+-- Bar textures that ship with the client (paths checked in the 1.60.1 UI source).
+ns.textures = {
+    { "Blizzard", "Interface\\TargetingFrame\\UI-StatusBar" },
+    { "Raid", "Interface\\RaidFrame\\Raid-Bar-Hp-Fill" },
+    { "Flat", "Interface\\Buttons\\WHITE8X8" },
+}
+
+function ns.Texture()
+    local want = ns.db and ns.db.texture
+    for _, t in ipairs(ns.textures) do
+        if t[1] == want then return t[2] end
+    end
+    return ns.textures[1][2]
+end
 
 ns.colors = {
     class = {
@@ -39,6 +53,8 @@ ns.colors = {
         { 0.00, 0.60, 0.10 },
     },
     static  = { 0.20, 0.90, 0.20 },
+    cast    = { 1.00, 0.70, 0.30 },
+    channel = { 0.25, 0.25, 1.00 },
     tapped  = { 0.50, 0.50, 0.50 },
     offline = { 0.50, 0.50, 0.50 },
     unknownPower = { 0.60, 0.60, 0.60 },

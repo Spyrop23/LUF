@@ -1,9 +1,10 @@
 -- FUF / Core / Mover
 --
--- Config mode (Luna's "unlock"): every frame is shown, drawn with the
--- player as a stand-in when its own unit does not exist, and can be dragged.
--- Protected changes (show, move, unit watch) happen out of combat only;
--- entering combat locks the frames again.
+-- Config mode (Luna's "unlock"): every enabled frame is shown, drawn with
+-- the player as a stand-in when its own unit does not exist, and can be
+-- dragged. Dragging any party frame moves the whole party; party pets keep
+-- their offset to their owner. Protected changes (show, move, unit watch)
+-- happen out of combat only; entering combat locks the frames again.
 local _, ns = ...
 
 local UF = ns.UF
@@ -21,12 +22,22 @@ local function overlay(f)
     return o
 end
 
--- Top-left corner of f relative to UIParent's top-left, in f's own scale.
-local function topLeftOffset(f)
-    local s = f:GetEffectiveScale() / UIParent:GetEffectiveScale()
+-- Offsets for db.x/db.y from where the frame was dropped, in the frame's
+-- own scale (that is how SetPoint reads them).
+local function dropOffsets(f)
+    local s = f:GetEffectiveScale()
+    if f.anchorFrame then
+        local a = f.anchorFrame
+        local as = a:GetEffectiveScale()
+        return (f:GetLeft() * s - a:GetRight() * as) / s, (f:GetTop() * s - a:GetTop() * as) / s
+    end
+    local us = UIParent:GetEffectiveScale()
     local x = f:GetLeft()
-    local y = f:GetTop() - UIParent:GetTop() / s
-    return math.floor(x + 0.5), math.floor(y + 0.5)
+    local y = f:GetTop() - UIParent:GetTop() * us / s
+    if f.index and f.index > 1 then
+        y = y + (f.index - 1) * (f.db.height + (f.db.spacing or 0))
+    end
+    return x, y
 end
 
 local function onDragStart(f)
@@ -39,8 +50,10 @@ local function onDragStop(f)
     -- Our profile stores the position, not the client's layout cache.
     pcall(f.SetUserPlaced, f, false)
     if InCombatLockdown() then return end
-    f.db.x, f.db.y = topLeftOffset(f)
-    UF.Layout(f)
+    local x, y = dropOffsets(f)
+    f.db.x, f.db.y = math.floor(x + 0.5), math.floor(y + 0.5)
+    ns:ApplyKey(f.key)
+    if ns.Options then ns.Options:Refresh() end
 end
 
 -- While unlocked a frame without its unit shows the player instead, so
@@ -56,18 +69,26 @@ local function standIn(f, on)
     end
 end
 
-local function unlockFrame(f)
+-- Also called by UF.Apply while config mode is on.
+function ns.UnlockFrame(f)
     UnregisterUnitWatch(f)
+    if not f.db.enabled then
+        f:Hide()
+        return
+    end
     standIn(f, true)
     f:SetMovable(true)
     f:RegisterForDrag("LeftButton")
     f:SetScript("OnDragStart", onDragStart)
     f:SetScript("OnDragStop", onDragStop)
     overlay(f):Show()
-    f.moverLabel:SetText(ns.unitLabels[f.realUnit or f.unit] or f.unit)
+    local label = ns.unitLabels[f.key] or f.key
+    if f.index then label = label .. " " .. f.index end
+    f.moverLabel:SetText(label)
     f.moverLabel:Show()
     f:Show()
     UF.Update(f)
+    if ns.CastBar then ns.CastBar.Preview(f, true) end
 end
 
 local function lockFrame(f)
@@ -80,9 +101,11 @@ local function lockFrame(f)
         f.moverLabel:Hide()
     end
     standIn(f, false)
+    if ns.CastBar then ns.CastBar.Preview(f, false) end
+    UnregisterUnitWatch(f)
     if f.db.enabled then
         RegisterUnitWatch(f)
-        UF.Update(f)
+        UF.UnitChanged(f)
     else
         f:Hide()
     end
@@ -96,11 +119,12 @@ function ns:SetLocked(locked)
     ns.unlocked = not locked
     ns.db.locked = locked
     for _, f in pairs(UF.frames) do
-        if locked then lockFrame(f) else unlockFrame(f) end
+        if locked then lockFrame(f) else ns.UnlockFrame(f) end
     end
     if not locked then
         ns:Print("Frames unlocked: drag them with the left mouse button. |cffffff00/fuf lock|r when done.")
     end
+    if ns.Options then ns.Options:Refresh() end
 end
 
 -- Combat ends config mode. PLAYER_REGEN_DISABLED arrives just before the

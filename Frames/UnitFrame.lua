@@ -2,30 +2,39 @@
 --
 -- One Luna-style unit frame: optional portrait on the left or right, bars
 -- stacked in the remaining space (heights by weight), three tag texts
--- (left / center / right) on every bar.
+-- (left / center / right) on every bar, optional cast bar below or above.
 --
 -- Frames are SecureUnitButtons: left click targets, right click opens the
 -- unit menu, and RegisterUnitWatch shows/hides them with the unit, which
 -- keeps working in combat. Creation, size and position are protected and
 -- only change out of combat.
+--
+-- A frame knows its settings key (f.key: "party" for party1..4), its index
+-- within a group (f.index) and, for party pets, the frame it hangs on
+-- (f.anchorFrame).
 local _, ns = ...
 
 local UF = {}
 ns.UF = UF
-UF.frames = {}
+UF.frames = {}     -- by unit
+UF.byKey = {}      -- key -> { frames }
 
 local BORDER = 1
 local POLL_EVERY = 0.2
 
 -- Units the client sends no events for: polled while shown (Luna does the
 -- same for its "fake units").
-local POLLED = { targettarget = true, targettargettarget = true }
+local POLLED = { targettarget = true, targettargettarget = true, pettarget = true }
 
--- Global events that change which unit a frame shows.
+-- Global events that change which unit a frame shows, by settings key.
 local GLOBAL_EVENTS = {
     target = { "PLAYER_TARGET_CHANGED" },
     targettarget = { "PLAYER_TARGET_CHANGED" },
     targettargettarget = { "PLAYER_TARGET_CHANGED" },
+    pet = { "UNIT_PET" },
+    pettarget = { "UNIT_PET" },
+    party = { "GROUP_ROSTER_UPDATE" },
+    partypet = { "GROUP_ROSTER_UPDATE", "UNIT_PET" },
 }
 
 local UNIT_EVENTS = {
@@ -33,10 +42,11 @@ local UNIT_EVENTS = {
     "UNIT_POWER_UPDATE", "UNIT_MAXPOWER", "UNIT_DISPLAYPOWER",
     "UNIT_NAME_UPDATE", "UNIT_LEVEL", "UNIT_FACTION", "UNIT_FLAGS",
     "UNIT_CONNECTION", "UNIT_CLASSIFICATION_CHANGED",
-    "UNIT_PORTRAIT_UPDATE", "UNIT_MODEL_CHANGED",
+    "UNIT_PORTRAIT_UPDATE", "UNIT_MODEL_CHANGED", "PLAYER_FLAGS_CHANGED",
 }
 
 local BAR_KEYS = { "healthBar", "powerBar" }
+UF.BAR_KEYS = BAR_KEYS
 
 -- ------------------------------------------------------------ regions --
 
@@ -58,10 +68,8 @@ end
 
 local function createBar(f)
     local bar = CreateFrame("StatusBar", nil, f)
-    bar:SetStatusBarTexture(ns.media.statusbar)
     bar.bg = bar:CreateTexture(nil, "BACKGROUND")
     bar.bg:SetAllPoints()
-    bar.bg:SetTexture(ns.media.statusbar)
     bar.text = createText(bar)
     return bar
 end
@@ -69,7 +77,6 @@ end
 local function buildRegions(f)
     f.bg = f:CreateTexture(nil, "BACKGROUND")
     f.bg:SetAllPoints()
-    f.bg:SetColorTexture(0, 0, 0, 0.8)
 
     f.healthBar = createBar(f)
     f.powerBar = createBar(f)
@@ -81,16 +88,33 @@ end
 
 -- ------------------------------------------------------------ layout --
 
+-- Where the frame goes: party members stack below the first one, party
+-- pets hang on their owner's frame, everything else is placed on UIParent.
+function UF.Position(f)
+    local db = f.db
+    f:ClearAllPoints()
+    if f.anchorFrame then
+        f:SetPoint("TOPLEFT", f.anchorFrame, "TOPRIGHT", db.x, db.y)
+    else
+        local y = db.y
+        if f.index and f.index > 1 then
+            y = y - (f.index - 1) * (db.height + (db.spacing or 0))
+        end
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", db.x, y)
+    end
+end
+
 -- Applies size, position, portrait and bar geometry from the profile.
 -- Protected: out of combat only.
 function UF.Layout(f)
     local db = f.db
+    local texture = ns.Texture()
     f:SetScale(db.scale or 1)
     f:SetSize(db.width, db.height)
-    f:ClearAllPoints()
-    f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", db.x, db.y)
+    UF.Position(f)
+    f.bg:SetColorTexture(0, 0, 0, ns.db.backgroundAlpha or 0.8)
 
-    local inner = f:GetWidth() - 2 * BORDER
+    local inner = db.width - 2 * BORDER
     local left, right = BORDER, BORDER
 
     -- portrait
@@ -121,6 +145,8 @@ function UF.Layout(f)
     for _, key in ipairs(BAR_KEYS) do
         local bdb = db[key]
         local bar = f[key]
+        bar:SetStatusBarTexture(texture)
+        bar.bg:SetTexture(texture)
         if bdb.enabled ~= false then
             table.insert(shown, key)
             total = total + bdb.weight
@@ -128,7 +154,7 @@ function UF.Layout(f)
             bar:Hide()
         end
     end
-    local height = f:GetHeight() - 2 * BORDER - (#shown - 1) * BORDER
+    local height = db.height - 2 * BORDER - (#shown - 1) * BORDER
     local y = -BORDER
     for _, key in ipairs(shown) do
         local bar, bdb = f[key], db[key]
@@ -157,6 +183,7 @@ function UF.Layout(f)
         t.left:SetPoint("RIGHT", t.right, "LEFT", -4, 0)
     end
 
+    if ns.CastBar then ns.CastBar.Layout(f) end
     UF.Update(f)
 end
 
@@ -246,6 +273,21 @@ function UF.Update(f)
     UF.UpdateTexts(f)
 end
 
+-- Polled frames redraw bars and texts only: re-setting a 3D model five
+-- times a second would make it flicker.
+local function updateBarsAndTexts(f)
+    if not UnitExists(f.unit) then return end
+    UF.UpdateHealth(f)
+    UF.UpdatePower(f)
+    UF.UpdateTexts(f)
+end
+
+-- The unit behind the frame changed (new target, roster change, shown).
+function UF.UnitChanged(f)
+    UF.Update(f)
+    if ns.CastBar then ns.CastBar.Refresh(f) end
+end
+
 -- Which parts an event touches; everything else redraws the whole frame.
 local EVENT_PARTS = {
     UNIT_HEALTH = "health", UNIT_MAXHEALTH = "health",
@@ -272,14 +314,14 @@ end
 
 local function onGlobalEvent(ev)
     local f = ev.frame
-    if f:IsVisible() then UF.Update(f) end
+    if f:IsVisible() then UF.UnitChanged(f) end
 end
 
 local function onPoll(ev, elapsed)
     ev.wait = (ev.wait or 0) + elapsed
     if ev.wait < POLL_EVERY then return end
     ev.wait = 0
-    if ev.frame:IsVisible() then UF.Update(ev.frame) end
+    if ev.frame:IsVisible() then updateBarsAndTexts(ev.frame) end
 end
 
 local function wireEvents(f)
@@ -294,7 +336,7 @@ local function wireEvents(f)
     local glob = CreateFrame("Frame")
     glob.frame = f
     pcall(glob.RegisterEvent, glob, "PLAYER_ENTERING_WORLD")
-    for _, event in ipairs(GLOBAL_EVENTS[f.unit] or {}) do
+    for _, event in ipairs(GLOBAL_EVENTS[f.key] or {}) do
         pcall(glob.RegisterEvent, glob, event)
     end
     glob:SetScript("OnEvent", onGlobalEvent)
@@ -304,13 +346,19 @@ end
 
 -- ------------------------------------------------------------ create --
 
-function UF.Create(unit, db)
+-- opts: key (settings key, default unit), index (position in a group),
+-- anchorFrame (frame this one is placed relative to).
+function UF.Create(unit, opts)
     if UF.frames[unit] then return UF.frames[unit] end
     assert(not InCombatLockdown(), "FUF: unit frames are created out of combat")
+    opts = opts or {}
 
     local f = CreateFrame("Button", "FUF_" .. unit, UIParent, "SecureUnitButtonTemplate")
     f.unit = unit
-    f.db = db
+    f.key = opts.key or unit
+    f.index = opts.index
+    f.anchorFrame = opts.anchorFrame
+    f.db = ns.db.units[f.key]
     f:SetFrameStrata("LOW")
     f:RegisterForClicks("AnyUp")
     f:SetAttribute("unit", unit)
@@ -318,27 +366,67 @@ function UF.Create(unit, db)
     f:SetAttribute("*type2", "togglemenu")
 
     buildRegions(f)
+    if ns.CastBar then ns.CastBar.Create(f) end
     wireEvents(f)
-    f:HookScript("OnShow", UF.Update)
+    f:HookScript("OnShow", UF.UnitChanged)
 
     UF.frames[unit] = f
+    UF.byKey[f.key] = UF.byKey[f.key] or {}
+    table.insert(UF.byKey[f.key], f)
+    UF.Apply(f)
+    return f
+end
+
+-- Re-reads the profile (after a change or a profile switch).
+-- Protected: out of combat only.
+function UF.Apply(f)
+    f.db = ns.db.units[f.key]
     UF.Layout(f)
-    if db.enabled then
+    if ns.unlocked and ns.UnlockFrame then
+        ns.UnlockFrame(f)
+        return
+    end
+    UnregisterUnitWatch(f)
+    if f.db.enabled then
         RegisterUnitWatch(f)
     else
         f:Hide()
     end
-    return f
 end
 
--- Re-reads the profile for an existing frame (after a profile switch).
-function UF.Apply(f, db)
-    f.db = db
-    UF.Layout(f)
-    UnregisterUnitWatch(f)
-    if db.enabled then
-        RegisterUnitWatch(f)
-    else
-        f:Hide()
+-- ------------------------------------------------------ applying edits --
+
+-- Settings changes arrive in bursts (a slider drag); they are collected
+-- and applied once per frame, and only out of combat.
+local pending, scheduled = {}, false
+
+local function flush()
+    scheduled = false
+    ns:RunOutOfCombat(function()
+        for key in pairs(pending) do
+            for _, f in ipairs(UF.byKey[key] or {}) do UF.Apply(f) end
+            -- party pets hang on party frames: follow their size/position
+            if key == "party" then
+                for _, f in ipairs(UF.byKey.partypet or {}) do UF.Apply(f) end
+            end
+            if ns.db.units[key].enabled then ns:HideBlizzard(key) end
+        end
+        pending = {}
+    end)
+end
+
+function ns:ApplyKey(key)
+    pending[key] = true
+    if not scheduled then
+        scheduled = true
+        C_Timer.After(0, flush)
+    end
+end
+
+function ns:ApplyAll()
+    for key in pairs(ns.db.units) do pending[key] = true end
+    if not scheduled then
+        scheduled = true
+        C_Timer.After(0, flush)
     end
 end

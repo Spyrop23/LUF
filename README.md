@@ -10,39 +10,48 @@ und die Machbarkeit pro Feature stehen in [docs/spec.md](docs/spec.md).
 
 ## Installation
 
-Den Ordner als `FUF` nach `World of Warcraft/_classic_beta_/Interface/AddOns/` kopieren
-(später `_forever_` bzw. der Ordner des Release-Clients). Die einzige TOC-Datei ist
-`FUF_Camelot.toc`; `Camelot` ist der Spieltyp von Forever, andere Clients zeigen das Addon nicht an.
+1. Das fertige Paket laden: auf GitHub unter **Actions → package → neuester Lauf → Artifacts → FUF**
+   (oder selbst bauen mit `sh tools/package.sh`, ergibt `dist/FUF.zip`).
+2. Entpacken nach `World of Warcraft/_classic_beta_/Interface/AddOns/`, sodass die Datei hier liegt:
+   `…/Interface/AddOns/FUF/FUF.toc`
+3. **Der Ordner muss exakt `FUF` heißen.** Der „Download ZIP“-Knopf von GitHub erzeugt `FUF-main`.
+   Einen so benannten Ordner zeigt WoW nicht an.
 
-## Befehle
+## Bedienung
+
+- **Minimap-Button** (Mondsymbol): Linksklick öffnet das Menü, Rechtsklick entsperrt oder sperrt
+  die Frames zum Verschieben, Ziehen verschiebt den Button.
+- Das Menü öffnet sich auch über das Addon-Menü am Minimap-Rand, über Optionen → AddOns → FUF und mit `/fuf`.
 
 | Befehl | Wirkung |
 |---|---|
+| `/fuf` | Optionsmenü öffnen/schließen |
 | `/fuf unlock` | Config-Mode: alle Frames zeigen und mit der linken Maustaste verschieben |
 | `/fuf lock` | Config-Mode beenden (passiert beim Kampfbeginn automatisch) |
 | `/fuf profile [name]` | Profil anzeigen oder wechseln (neue Namen werden angelegt) |
 | `/fuf reset` | aktuelles Profil auf Standard zurücksetzen |
-| `/fuf tags` | verfügbare Tags auflisten |
+| `/fuf tags` | Tag-Übersicht im Menü |
 
-## Stand (Etappe 1)
+## Stand (Etappe 2)
 
-- Frames: player, target, targettarget, targettargettarget im Luna-Standardlayout
-- Health- und Power-Bar (Farbe nach Klasse, Reaktion, statisch oder Gesundheit), 3D/2D-Portrait
-- Tag-System mit 3 Texten pro Leiste: `[name] [level] [levelcolor] [classification]
-  [shortclassification] [class] [smartclass] [creature] [classcolor] [reactcolor] [nocolor]
-  [hp] [maxhp] [missinghp] [perhp] [smarthealth] [smarthealthp] [status] [pp] [maxpp]
-  [missingpp] [perpp]`
-- Blizzard-Frames für player/target/ToT werden ausgeblendet
-- Profile pro Charakter, Config-Mode
+- **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
+  Gruppe (party1–4) und die Begleiter der Gruppenmitglieder, jeweils im Luna-Standardlayout.
+- **Leisten:** Lebens- und Ressourcenbalken (Farbe nach Klasse, Reaktion, Gesundheit oder fest),
+  3D/2D-Portrait, Zauberleiste für Spieler, Ziel und Gruppe, auch bei Gegnern.
+- **Tags:** 30 Luna-Tags auf drei Textfeldern pro Leiste, siehe Tag-Seite im Menü.
+- **Menü:** pro Frame an/aus, Breite, Höhe, Skalierung, Position, Gruppenabstand, Leisten-Farben,
+  -Höhen und -Hintergrund, Portrait, Zauberleiste, Texte und Schriftgröße. Dazu Textur,
+  Hintergrund, Profile (anlegen, wechseln, kopieren, löschen, zurücksetzen) und die Tag-Hilfe.
+- **Blizzard-Frames** werden auf Wunsch ausgeblendet, auch Blizzards Zauberleiste.
 
 Etappen und offene Punkte: [docs/roadmap.md](docs/roadmap.md).
 
 ## Entwicklung
 
 - Regeln für den Code: [CLAUDE.md](CLAUDE.md)
-- Syntax-Check: `for f in $(find . -name '*.lua'); do luac5.1 -p $f; done`
-- Smoke-Test mit simuliertem Client (Secret Values werfen bei Rechnen und Vergleichen):
-  `lua5.1 tools/smoketest.lua`
+- Syntax-Check: `for f in $(find Core Frames Options -name '*.lua'); do luac5.1 -p $f; done`
+- Smoke-Test mit simuliertem Client. Secret Values werfen dort bei Rechnen und Vergleichen einen
+  Fehler, der Test klickt alle Menüseiten durch: `lua5.1 tools/smoketest.lua`
 - Test im Spiel ohne Kampf: `/console addonCombatRestrictionsForced 1` (wieder auf 0 stellen!)
 
 ## Lizenz
