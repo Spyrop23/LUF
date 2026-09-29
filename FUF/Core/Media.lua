@@ -58,7 +58,21 @@ ns.colors = {
     tapped  = { 0.50, 0.50, 0.50 },
     offline = { 0.50, 0.50, 0.50 },
     unknownPower = { 0.60, 0.60, 0.60 },
+    -- pet happiness as returned by C_PetInfo.GetPetHappiness (Luna colours)
+    happiness = {
+        { 0.90, 0.00, 0.00 },   -- 1 unhappy
+        { 0.93, 0.93, 0.00 },   -- 2 content
+        { 0.20, 0.90, 0.20 },   -- 3 happy
+    },
 }
+
+-- The player's pet happiness (1 unhappy, 2 content, 3 happy), or nil when
+-- the unit is not the player's pet or the pet has none (non-hunter pets).
+function ns.PetHappiness(unit)
+    if unit ~= "pet" or not (C_PetInfo and C_PetInfo.GetPetHappiness) then return end
+    local ok, h = pcall(C_PetInfo.GetPetHappiness)
+    if ok and ns.CanRead(h) and h and ns.colors.happiness[h] then return h end
+end
 
 -- Class token of a unit, or nil when it is secret (identity restricted).
 function ns.UnitClassToken(unit)

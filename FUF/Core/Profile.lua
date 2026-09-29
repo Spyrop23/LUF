@@ -66,7 +66,11 @@ ns.defaults = {
     backgroundAlpha = 0.8,
     units = {
         player = unitDefaults({ castBar = { enabled = true } }),
-        pet = unitDefaults({ y = -72, height = 30 }),
+        pet = unitDefaults({
+            y = -72, height = 30,
+            healthBar = { colorType = "happiness" },
+            happiness = { enabled = true, size = 14 },
+        }),
         pettarget = unitDefaults(small({ x = 260, y = -72, enabled = false })),
         target = unitDefaults({
             x = 260,
@@ -131,6 +135,13 @@ function ns:SetProfile(name)
     FUFDB.profiles[name] = copyDefaults(FUFDB.profiles[name] or {}, self.defaults)
     FUFDB.chars[charKey()] = name
     self.db = FUFDB.profiles[name]
+    -- 0.3.0: pets are coloured by happiness, as in Luna
+    if not self.db.migrated030 then
+        self.db.migrated030 = true
+        if self.db.units.pet.healthBar.colorType == "class" then
+            self.db.units.pet.healthBar.colorType = "happiness"
+        end
+    end
     if self.OnProfileChanged then self:OnProfileChanged() end
 end
 

@@ -42,12 +42,14 @@ tools/      Smoke-Test und Paket-Skript
 | `/fuf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/fuf tags` | Tag-Übersicht im Menü |
 
-## Stand (Etappe 2)
+## Stand (0.3.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4) und die Begleiter der Gruppenmitglieder, jeweils im Luna-Standardlayout.
 - **Leisten:** Lebens- und Ressourcenbalken (Farbe nach Klasse, Reaktion, Gesundheit oder fest),
   3D/2D-Portrait, Zauberleiste für Spieler, Ziel und Gruppe, auch bei Gegnern.
+- **Begleiter-Zufriedenheit** wie bei Luna: Lebensleiste rot/gelb/grün, Gesicht-Icon, Tags
+  `[happiness]` und `[loyalty]`.
 - **Tags:** 30 Luna-Tags auf drei Textfeldern pro Leiste, siehe Tag-Seite im Menü.
 - **Menü:** pro Frame an/aus, Breite, Höhe, Skalierung, Position, Gruppenabstand, Leisten-Farben,
   -Höhen und -Hintergrund, Portrait, Zauberleiste, Texte und Schriftgröße. Dazu Textur,

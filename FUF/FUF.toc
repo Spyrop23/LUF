@@ -3,7 +3,7 @@
 ## Notes: Luna-style unit frames for World of Warcraft: Forever.
 ## Notes-deDE: Unit Frames im Stil von Luna für World of Warcraft: Forever.
 ## Author: Spyrop23
-## Version: 0.2.0
+## Version: 0.3.0
 ## SavedVariables: FUFDB
 ## IconTexture: Interface\Icons\Spell_Nature_StarFall
 ## AddonCompartmentFunc: FUF_OnAddonCompartmentClick

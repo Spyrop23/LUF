@@ -99,7 +99,12 @@ local function unitPage(key)
         end
 
         b:Header("Health bar")
-        b:Dropdown("Colour", COLOR_TYPES, p("healthBar.colorType"))
+        local colorTypes = COLOR_TYPES
+        if key == "pet" then
+            colorTypes = { { "happiness", "Happiness (red / yellow / green)" } }
+            for _, c in ipairs(COLOR_TYPES) do table.insert(colorTypes, c) end
+        end
+        b:Dropdown("Colour", colorTypes, p("healthBar.colorType"))
         local ghw, shw = p("healthBar.weight")
         b:Slider("Height (weight)", 1, 10, 0.5, ghw, shw, "%.1f")
         b:Check("Background", p("healthBar.background"))
@@ -111,6 +116,12 @@ local function unitPage(key)
         b:Slider("Height (weight)", 1, 10, 0.5, gpw, spw, "%.1f")
         b:Check("Background", p("powerBar.background"))
         b:Slider("Background alpha", 0, 1, 0.05, p("powerBar.backgroundAlpha"))
+
+        if key == "pet" then
+            b:Header("Happiness")
+            b:Check("Show happiness icon", p("happiness.enabled"))
+            b:Slider("Icon size", 8, 32, 1, p("happiness.size"))
+        end
 
         b:Header("Portrait")
         b:Check("Enabled", p("portrait.enabled"))

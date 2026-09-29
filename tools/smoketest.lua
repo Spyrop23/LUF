@@ -55,6 +55,7 @@ function Widget:GetRight() return 110 end
 function Widget:GetTop() return 700 end
 function Widget:GetCenter() return 60, 690 end
 function Widget:GetEffectiveScale() return 1 end
+function Widget:GetFrameLevel() return 1 end
 function Widget:GetChildren() return end
 function Widget:SetFormattedText(fmt, ...)
     local args = { ... }
@@ -72,6 +73,8 @@ function Widget:SetMinMaxValues(a, b) self.min, self.max = reveal(a), reveal(b) 
 function Widget:SetChecked(c) self.checked = c end
 function Widget:GetChecked() return self.checked end
 function Widget:SetTimerDuration(d) self.duration = d end
+function Widget:SetTexture(t) self.texture = t; return true end
+function Widget:SetStatusBarColor(r, g, b) self.color = { r, g, b } end
 function Widget:SetupMenu(gen) self.menuGen = gen; self:GenerateMenu() end
 function Widget:GenerateMenu()
     local radios = {}
@@ -111,6 +114,10 @@ end }
 Settings = {
     RegisterCanvasLayoutCategory = function() return {} end,
     RegisterAddOnCategory = function() end,
+}
+C_PetInfo = {
+    GetPetHappiness = function() return 2, 100, 0 end,
+    GetPetLoyalty = function() return "Loyal" end,
 }
 function CreateColor(r, g, b) return { r = r, g = g, b = b } end
 function GetBuildInfo() return "1.60.1", "69977", "", 16001 end
@@ -212,6 +219,14 @@ end
 dump()
 assert(ns.UF.frames.party1.shown and not ns.UF.frames.party2.shown, "party visibility")
 assert(ns.UF.frames.pet.shown, "pet shown")
+local pet = ns.UF.frames.pet
+assert(pet.healthBar.color[1] == 0.93 and pet.healthBar.color[3] == 0, "pet coloured by happiness (content = yellow)")
+assert(pet.happiness.shown, "happiness icon shown")
+fire("UNIT_HAPPINESS", "pet")
+local pfs = newWidget("FontString")
+ns.Tags.Render(pfs, "[happiness] [loyalty]", "pet")
+print("pet tags: " .. pfs.text)
+assert(pfs.text:find("Content") and pfs.text:find("Loyal"), "pet tags")
 
 -- tags with arguments
 local fs = newWidget("FontString")

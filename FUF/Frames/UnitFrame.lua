@@ -43,6 +43,7 @@ local UNIT_EVENTS = {
     "UNIT_NAME_UPDATE", "UNIT_LEVEL", "UNIT_FACTION", "UNIT_FLAGS",
     "UNIT_CONNECTION", "UNIT_CLASSIFICATION_CHANGED",
     "UNIT_PORTRAIT_UPDATE", "UNIT_MODEL_CHANGED", "PLAYER_FLAGS_CHANGED",
+    "UNIT_HAPPINESS",
 }
 
 local BAR_KEYS = { "healthBar", "powerBar" }
@@ -84,6 +85,42 @@ local function buildRegions(f)
     f.portrait3D = CreateFrame("PlayerModel", nil, f)
     f.portrait2D = f:CreateTexture(nil, "ARTWORK")
     f.portrait2D:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+
+    if f.key == "pet" then
+        -- On its own frame so it draws above the bars and the 3D model.
+        local holder = CreateFrame("Frame", nil, f)
+        holder:SetFrameLevel(f:GetFrameLevel() + 10)
+        f.happiness = holder:CreateTexture(nil, "OVERLAY")
+        -- Classic art (the classic unit frame textures ship with Forever);
+        -- a plain coloured square when the file is missing.
+        f.happinessArt = f.happiness:SetTexture("Interface\\PetPaperDollFrame\\UI-PetHappiness") and true or false
+        f.happiness:Hide()
+    end
+end
+
+-- Texture coordinates of the three faces in UI-PetHappiness.
+local HAPPINESS_COORDS = {
+    { 0.375, 0.5625, 0, 0.359375 },   -- unhappy
+    { 0.1875, 0.375, 0, 0.359375 },   -- content
+    { 0, 0.1875, 0, 0.359375 },       -- happy
+}
+
+function UF.UpdateHappiness(f)
+    local icon = f.happiness
+    if not icon then return end
+    local db = f.db.happiness
+    local h = db and db.enabled and ns.PetHappiness(f.unit)
+    if not h then
+        icon:Hide()
+        return
+    end
+    if f.happinessArt then
+        icon:SetTexCoord(unpack(HAPPINESS_COORDS[h]))
+        icon:SetVertexColor(1, 1, 1)
+    else
+        icon:SetColorTexture(unpack(ns.colors.happiness[h]))
+    end
+    icon:Show()
 end
 
 -- ------------------------------------------------------------ layout --
@@ -183,6 +220,13 @@ function UF.Layout(f)
         t.left:SetPoint("RIGHT", t.right, "LEFT", -4, 0)
     end
 
+    if f.happiness then
+        local size = db.happiness and db.happiness.size or 14
+        f.happiness:ClearAllPoints()
+        f.happiness:SetSize(size, size)
+        f.happiness:SetPoint("CENTER", f, "TOPRIGHT", -size / 2, 0)
+    end
+
     if ns.CastBar then ns.CastBar.Layout(f) end
     UF.Update(f)
 end
@@ -213,7 +257,10 @@ function UF.UpdateHealth(f)
     end
 
     local ct, c = bdb.colorType, nil
-    if ct == "class" then
+    if ct == "happiness" then
+        local h = ns.PetHappiness(unit)
+        c = h and ns.colors.happiness[h] or ns.ReactionColor(unit)
+    elseif ct == "class" then
         c = isPlayer and ns.ClassColor(unit) or ns.ReactionColor(unit)
     elseif ct == "reaction" then
         c = ns.ReactionColor(unit)
@@ -271,6 +318,7 @@ function UF.Update(f)
     UF.UpdatePower(f)
     UF.UpdatePortrait(f)
     UF.UpdateTexts(f)
+    UF.UpdateHappiness(f)
 end
 
 -- Polled frames redraw bars and texts only: re-setting a 3D model five

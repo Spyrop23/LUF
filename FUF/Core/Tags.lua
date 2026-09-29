@@ -175,6 +175,20 @@ Tags.methods = {
         return EMPTY
     end,
 
+    -- pet (player's hunter pet only)
+    happiness = function(u)
+        local h = ns.PetHappiness(u)
+        if not h then return EMPTY end
+        local names = { "Unhappy", "Content", "Happy" }
+        return ns.Hex(ns.colors.happiness[h]) .. names[h] .. "|r"
+    end,
+    loyalty = function(u)
+        if u ~= "pet" or not (C_PetInfo and C_PetInfo.GetPetLoyalty) then return EMPTY end
+        local ok, name = pcall(C_PetInfo.GetPetLoyalty)
+        if not ok or not ns.CanRead(name) or not name then return EMPTY end
+        return "%s", name
+    end,
+
     -- experience of the player (the frame's unit does not matter)
     xp = function()
         local cur, max = UnitXP("player"), UnitXPMax("player")
@@ -230,6 +244,8 @@ Tags.help = {
     { "maxpp", "Maximum power" },
     { "missingpp", "Missing power" },
     { "perpp", "Power in percent" },
+    { "happiness", "Pet happiness (Happy / Content / Unhappy, coloured)" },
+    { "loyalty", "Pet loyalty level" },
     { "xp", "Experience/needed (player)" },
     { "percxp", "Experience in percent (player)" },
     { "classcolor", "Starts the class colour" },
