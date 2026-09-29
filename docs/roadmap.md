@@ -37,12 +37,19 @@ Portrait und Texten, Blizzard-Frames ausblenden, Config-Mode, `/fuf`.
   sind, eingehängt über die Settings-API
 - Profile kopieren/löschen, Auto-Profile nach Gruppengröße, Import/Export über `C_EncodingUtil`
 
+## Im Client bestätigt (29.09.2026, Beta 1.60.1)
+- `FUF.toc` in einem Ordner `FUF` lädt; ein Ordner `FUF-main` wird ignoriert.
+- `SetFormattedText` mit Secret-Werten, `AbbreviateNumbers` und `CurveConstants.ScaleTo100`:
+  „138/138 100%“ wird korrekt angezeigt.
+- Health-/Power-Fill, Klassen- und Powerfarben, `[levelcolor][level] [smartclass]`, 3D-Portrait.
+- Blizzard-PlayerFrame wird ausgeblendet, PetFrame bleibt (gewollt).
+- `/fuf unlock` zeigt alle Frames mit dem Spieler als Platzhalter.
+
 ## Bekannte Beta-Risiken
 - **SavedVariables:** Die Beta lädt accountweite SVs nach einem Kaltstart oft nicht und überschreibt
   sie dann mit Standards. Prüfen, ob `## SavedVariablesPerCharacter` oder `## SavedVariablesMachine`
   zuverlässiger ist *(TODO(beta))*.
-- Bestätigen, dass `CurveConstants.ScaleTo100` Prozentwerte liefert und `SetFormattedText("%.0f%%", …)`
-  mit Secrets funktioniert.
+- Noch zu testen: Frames im Kampf (keine Lua-Fehler), `/fuf lock`, Positionen nach Neustart.
 - `UnitRace` kann den Beta-Client einfrieren und wird deshalb nicht verwendet.
 
 ## Nicht machbar (Forever)
