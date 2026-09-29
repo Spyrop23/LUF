@@ -15,6 +15,11 @@ Portrait und Texten, Blizzard-Frames ausblenden, Config-Mode, `/fuf`.
 - Optionsmenü ohne Library (alle Frame-, Leisten-, Portrait-, Castbar- und Text-Einstellungen,
   Textur, Profile, Tag-Hilfe), Minimap-Button, Addon-Compartment, Eintrag unter Optionen → AddOns
 
+## Zwischenschritt 0.4.0 – Auren ✅
+- Buffs/Debuffs über `CustomAuraContainerTemplate` (Gruppen "buffs"/"debuffs", Filterstrings,
+  Initializer mit Größe, Icon, Cooldown, Stapelzahl, Restzeit, Dispel-Farbrahmen). Kein Aura-Wert
+  wird von FUF gelesen, deshalb funktioniert es auch im Kampf *(im Client zu bestätigen)*.
+
 ## Etappe 3 – Leisten und Raid
 - Bar-Slots wie Luna (Gruppen links/mitte/rechts, Order, vertikal, Invertieren über `SetReverseFill`)
 - XP-/Ruf-Bar, Empty Bar, Druiden-Manabar, Combo Points

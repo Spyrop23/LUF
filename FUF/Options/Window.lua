@@ -44,6 +44,10 @@ local PORTRAIT_TYPES = { { "3D", "3D model" }, { "2D", "2D picture" } }
 local SIDES = { { "LEFT", "Left" }, { "RIGHT", "Right" } }
 local CAST_POS = { { "BELOW", "Below the frame" }, { "ABOVE", "Above the frame" } }
 local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar" }
+local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
+    { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
+local BUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can cast" } }
+local DEBUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can dispel" } }
 
 -- ------------------------------------------------------------ pages --
 
@@ -138,6 +142,23 @@ local function unitPage(key)
             if key == "player" then
                 b:Check("Hide Blizzard cast bar", p("castBar.hideBlizzard"))
             end
+        end
+
+        if ns.Auras and ns.Auras.supported[key] then
+            b:Header("Buffs and debuffs")
+            b:Check("Show buffs", p("auras.buffs"))
+            b:Dropdown("Which buffs", BUFF_FILTERS, p("auras.buffFilter"))
+            b:Slider("Max. buffs", 1, 40, 1, p("auras.maxBuffs"))
+            b:Check("Show debuffs", p("auras.debuffs"))
+            b:Dropdown("Which debuffs", DEBUFF_FILTERS, p("auras.debuffFilter"))
+            b:Slider("Max. debuffs", 1, 40, 1, p("auras.maxDebuffs"))
+            b:Check("Colour debuff border by type (magic, poison ...)", p("auras.dispelColors"))
+            b:Dropdown("Position", AURA_POS, p("auras.position"))
+            b:Slider("Icon size", 8, 50, 1, p("auras.size"))
+            b:Slider("Space between icons", 0, 10, 1, p("auras.spacing"))
+            b:Slider("Icons per row (left/right)", 1, 20, 1, p("auras.perRow"))
+            b:Check("Remaining time under the icon", p("auras.duration"))
+            b:Check("Cooldown swipe on the icon", p("auras.swipe"))
         end
 
         for _, bar in ipairs(ns.UF.BAR_KEYS) do

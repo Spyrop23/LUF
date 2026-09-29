@@ -38,6 +38,14 @@ local function unitDefaults(o)
         powerBar  = { enabled = true, weight = 4.5, background = true, backgroundAlpha = 0.2 },
         portrait  = { enabled = true, type = "3D", side = "LEFT", width = 0.22 },
         castBar   = { enabled = false, height = 10, position = "BELOW", icon = true, hideBlizzard = true },
+        auras     = {
+            buffs = false, debuffs = false,
+            buffFilter = "all", debuffFilter = "all",
+            size = 18, spacing = 1, perRow = 8,
+            maxBuffs = 16, maxDebuffs = 16,
+            position = "BOTTOM",
+            duration = true, swipe = true, dispelColors = true,
+        },
         tags = {
             healthBar = { size = 10, left = "[name]", center = "", right = "[smarthealth]" },
             powerBar  = { size = 10, left = "[levelcolor][level][shortclassification] [classcolor][smartclass]", center = "", right = "[pp]/[maxpp]" },
@@ -70,16 +78,18 @@ ns.defaults = {
             y = -72, height = 30,
             healthBar = { colorType = "happiness" },
             happiness = { enabled = false, size = 14 },   -- the colour says enough
+            auras = { buffs = true, debuffs = true, size = 16 },
         }),
         pettarget = unitDefaults(small({ x = 260, y = -72, enabled = false })),
         target = unitDefaults({
             x = 260,
             castBar = { enabled = true },
+            auras = { buffs = true, debuffs = true },
             tags = { healthBar = { right = "[smarthealthp]" } },
         }),
         targettarget = unitDefaults(merge({ x = 510, width = 150 }, noPortrait)),
         targettargettarget = unitDefaults(merge({ x = 670, width = 150 }, noPortrait)),
-        party = unitDefaults({ y = -115, spacing = 20 }),
+        party = unitDefaults({ y = -140, spacing = 20, auras = { debuffs = true, position = "RIGHT", perRow = 4 } }),
         partypet = unitDefaults(small({
             x = 5, y = -20, height = 20,
             tags = { healthBar = { left = "", center = "[smarthealth]", right = "" } },

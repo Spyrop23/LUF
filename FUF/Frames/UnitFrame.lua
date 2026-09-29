@@ -228,6 +228,7 @@ function UF.Layout(f)
     end
 
     if ns.CastBar then ns.CastBar.Layout(f) end
+    if ns.Auras then ns.Auras.Layout(f) end
     UF.Update(f)
 end
 
@@ -334,6 +335,7 @@ end
 function UF.UnitChanged(f)
     UF.Update(f)
     if ns.CastBar then ns.CastBar.Refresh(f) end
+    if ns.Auras then ns.Auras.Refresh(f) end
 end
 
 -- Which parts an event touches; everything else redraws the whole frame.

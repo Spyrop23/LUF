@@ -85,6 +85,14 @@ function Widget:GenerateMenu()
     self.radios = radios
     for _, r in ipairs(radios) do r.isSel() end
 end
+function Widget:AddAuraGroup(key, filterString, opts)
+    assert(type(filterString) == "string" and filterString ~= "", "filter string")
+    self.groups = self.groups or {}
+    assert(not self.unitSet, "group added after SetUnit")
+    self.groups[key] = { filter = filterString, max = opts.maxFrameCount }
+    opts.initializeFrame(newWidget("AuraButton"))   -- the engine builds buttons at once
+end
+function Widget:SetUnit(u) self.unitSet = u end
 function CreateFrame(kind, name) return newWidget(kind, name) end
 UIParent = newWidget("Frame", "UIParent")
 Minimap = newWidget("Frame", "Minimap")
@@ -97,12 +105,20 @@ newWidget("Frame", "PetFrame")
 newWidget("Frame", "PartyFrame")
 newWidget("Frame", "PlayerCastingBarFrame")
 UISpecialFrames = {}
+AuraUtil = {
+    AuraFilters = { Helpful = "HELPFUL", Harmful = "HARMFUL", Player = "PLAYER", Raid = "RAID" },
+    CreateFilterString = function(...) return table.concat({ ... }, "|") end,
+}
+AnchorUtil = { FlowDirection = { Left = -1, Right = 1, Up = 1, Down = -1 } }
+AuraContainerSortMethod = { Default = 0 }
+AuraContainerSortDirection = { Normal = 0 }
 
 -- API --------------------------------------------------------------------
 STANDARD_TEXT_FONT = "Fonts\\FRIZQT__.TTF"
 Enum = {
     StatusBarTimerDirection = { ElapsedTime = 0, RemainingTime = 1 },
     StatusBarInterpolation = { Immediate = 0 },
+    CustomAuraButtonDispelTypeTextureStyle = { PreserveAsset = 3 },
 }
 CurveConstants = { ScaleTo100 = { curve = true } }
 C_SwingTimer = {}
@@ -227,6 +243,12 @@ local pfs = newWidget("FontString")
 ns.Tags.Render(pfs, "[happiness] [loyalty]", "pet")
 print("pet tags: " .. pfs.text)
 assert(pfs.text:find("Content") and pfs.text:find("Loyal"), "pet tags")
+
+-- auras: pet has a container with both groups, bound to its unit
+local pc = pet.auraContainer
+assert(pc and pc.unitSet == "pet" and pc.groups.buffs.filter == "HELPFUL" and pc.groups.debuffs.max == 16, "pet auras")
+assert(not ns.UF.frames.player.auraContainer, "player auras off by default")
+print("pet auras: buffs=" .. pc.groups.buffs.filter .. " debuffs=" .. pc.groups.debuffs.filter)
 
 -- tags with arguments
 local fs = newWidget("FontString")
