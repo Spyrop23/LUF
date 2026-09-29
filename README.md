@@ -29,7 +29,7 @@ tools/      Smoke-Test und Paket-Skript
 
 ## Bedienung
 
-- **Minimap-Button** (Mondsymbol): Linksklick öffnet das Menü, Rechtsklick entsperrt oder sperrt
+- **Minimap-Button** (Mondsymbol): Linksklick öffnet das Menü, Rechtsklick entsperrt (unlock) oder sperrt
   die Frames zum Verschieben, Ziehen verschiebt den Button.
 - Das Menü öffnet sich auch über das Addon-Menü am Minimap-Rand, über Optionen → AddOns → FUF und mit `/fuf`.
 

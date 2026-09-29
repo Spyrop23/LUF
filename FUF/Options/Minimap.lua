@@ -31,7 +31,10 @@ local function create()
     button:SetSize(31, 31)
     button:SetFrameStrata("MEDIUM")
     button:SetFrameLevel(8)
-    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    -- Left click through OnClick; the right button is handled in OnMouseUp,
+    -- which fires for every mouse-enabled frame (a right-click OnClick did
+    -- not arrive on the Forever minimap).
+    button:RegisterForClicks("LeftButtonUp")
     button:RegisterForDrag("LeftButton")
     button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 
@@ -52,11 +55,12 @@ local function create()
     border:SetPoint("TOPLEFT")
 
     button:SetScript("OnClick", function(_, mouse)
-        if mouse == "RightButton" then
-            ns:SetLocked(not ns.unlocked)
-        else
-            ns.Options:Toggle()
-        end
+        if mouse == "LeftButton" then ns.Options:Toggle() end
+    end)
+    button:SetScript("OnMouseUp", function(self, mouse)
+        if mouse ~= "RightButton" then return end
+        ns:SetLocked(ns.unlocked)   -- unlocked -> lock, locked -> unlock
+        if self:IsMouseOver() and self:GetScript("OnEnter") then self:GetScript("OnEnter")(self) end
     end)
     button:SetScript("OnDragStart", function(self) self:SetScript("OnUpdate", onDragUpdate) end)
     button:SetScript("OnDragStop", function(self) self:SetScript("OnUpdate", nil) end)
@@ -64,7 +68,7 @@ local function create()
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
         GameTooltip:SetText("FUF - Forever Unit Frames")
         GameTooltip:AddLine("Left click: options", 1, 1, 1)
-        GameTooltip:AddLine("Right click: " .. (ns.unlocked and "lock frames" or "move frames"), 1, 1, 1)
+        GameTooltip:AddLine("Right click: " .. (ns.unlocked and "lock" or "unlock"), 1, 1, 1)
         GameTooltip:AddLine("Drag: move this button", 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)

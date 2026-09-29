@@ -57,6 +57,7 @@ function Widget:GetTop() return 700 end
 function Widget:GetCenter() return 60, 690 end
 function Widget:GetEffectiveScale() return 1 end
 function Widget:GetFrameLevel() return 1 end
+function Widget:IsMouseOver() return false end
 function Widget:GetChildren() return end
 function Widget:SetFormattedText(fmt, ...)
     local args = { ... }
@@ -406,7 +407,11 @@ print("options: " .. #nav .. " pages, " .. used .. " controls used")
 dump()
 
 -- minimap button
-FUFMinimapButton.scripts.OnClick(FUFMinimapButton, "RightButton")
+local wasUnlocked = ns.unlocked
+FUFMinimapButton.scripts.OnMouseUp(FUFMinimapButton, "RightButton")
+assert(ns.unlocked ~= wasUnlocked, "right click toggles lock")
+FUFMinimapButton.scripts.OnMouseUp(FUFMinimapButton, "RightButton")
+assert(ns.unlocked == wasUnlocked, "right click toggles back")
 FUFMinimapButton.scripts.OnClick(FUFMinimapButton, "LeftButton")
 FUFMinimapButton.scripts.OnDragStart(FUFMinimapButton)
 tick()

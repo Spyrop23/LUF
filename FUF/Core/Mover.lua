@@ -158,7 +158,9 @@ function ns:SetLocked(locked)
     for _, f in pairs(UF.frames) do
         if locked then lockFrame(f) else ns.UnlockFrame(f) end
     end
-    if not locked then
+    if locked then
+        ns:Print("Frames locked.")
+    else
         ns:Print("Frames unlocked: drag them with the left mouse button. |cffffff00/fuf lock|r when done.")
     end
     if ns.Options then ns.Options:Refresh() end
