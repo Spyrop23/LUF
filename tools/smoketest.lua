@@ -143,6 +143,20 @@ function InCombatLockdown() return false end
 function hooksecurefunc() end
 function RegisterUnitWatch(f) f.watched = true; f.shown = UnitExists(f.unit) end
 function UnregisterUnitWatch(f) f.watched = false end
+local inRaid = false
+function RegisterStateDriver(f, state, rule)
+    assert(state == "visibility" and rule:find("%[group:raid%] hide"), "state driver rule")
+    f.driver = rule
+    f.shown = not inRaid and UnitExists(f.unit)
+end
+function UnregisterStateDriver(f) f.driver = nil end
+function GetRaidRosterInfo(i) return "Member" .. i, 0, ({ 1, 3, 3, 2, 1 })[i] or 8 end
+function UnitInRange(u) return secret(u ~= "party1"), secret(true) end
+function UnitIsUnit(a, b) return a == b end
+function GetPetExperience() return 150, 600 end
+function GetXPExhaustion() return 400 end
+function Widget:SetAlpha(a) self.alpha = a end
+function Widget:SetAlphaFromBoolean(b, t, f) self.alpha = reveal(b) and t or f end
 function GetRealmName() return "Forever" end
 local units = { player = true, target = true, targettarget = true, pet = true, party1 = true }
 function UnitExists(u) return units[u] or false end
@@ -268,6 +282,20 @@ local pc = pet.auraContainer
 assert(pc and pc.unitSet == "pet" and pc.groups.buffs.filter == "HELPFUL" and pc.groups.debuffs.max == 16, "pet auras")
 assert(not ns.UF.frames.player.auraContainer, "player auras off by default")
 print("pet auras: buffs=" .. pc.groups.buffs.filter .. " debuffs=" .. pc.groups.debuffs.filter)
+
+-- raid: 40 frames, sorted into subgroup columns
+assert(ns.UF.frames.raid40, "raid frames")
+local r2, r3, r4 = ns.UF.frames.raid2, ns.UF.frames.raid3, ns.UF.frames.raid4
+assert(r2.raidGroup == 3 and r2.raidSlot == 1 and r3.raidSlot == 2 and r4.raidGroup == 2, "raid arranged by subgroup")
+-- party hides in raid through a state driver
+assert(ns.UF.frames.party1.driver, "party uses the hide-in-raid driver")
+-- range: party1 is out of range (secret false) -> faded to 0.4
+tick()
+assert(ns.UF.frames.party1.alpha == 0.4, "party1 faded, got " .. tostring(ns.UF.frames.party1.alpha))
+assert(ns.UF.frames.pet.alpha == 1, "pet in range")
+-- pet XP bar
+assert(pet.xpBar.value == 150 and pet.xpBar.shown, "pet xp bar")
+print("raid/range/xp ok")
 
 -- tags with arguments
 local fs = newWidget("FontString")

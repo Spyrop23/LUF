@@ -34,6 +34,11 @@ local function dropOffsets(f)
     local us = UIParent:GetEffectiveScale()
     local x = f:GetLeft()
     local y = f:GetTop() - UIParent:GetTop() * us / s
+    if f.key == "raid" then
+        -- back to the position of the whole raid block
+        local g, m = f.raidGroup or 1, f.raidSlot or 1
+        return x - (g - 1) * (f.db.width + f.db.groupSpacing), y + (m - 1) * (f.db.height + f.db.spacing)
+    end
     if f.index and f.index > 1 then
         y = y + (f.index - 1) * (f.db.height + (f.db.spacing or 0))
     end
@@ -71,7 +76,7 @@ end
 
 -- Also called by UF.Apply while config mode is on.
 function ns.UnlockFrame(f)
-    UnregisterUnitWatch(f)
+    UF.Unwatch(f)
     if not f.db.enabled then
         f:Hide()
         return
@@ -87,6 +92,7 @@ function ns.UnlockFrame(f)
     f.moverLabel:SetText(label)
     f.moverLabel:Show()
     f:Show()
+    f:SetAlpha(1)
     UF.Update(f)
     if ns.CastBar then ns.CastBar.Preview(f, true) end
 end
@@ -102,13 +108,8 @@ local function lockFrame(f)
     end
     standIn(f, false)
     if ns.CastBar then ns.CastBar.Preview(f, false) end
-    UnregisterUnitWatch(f)
-    if f.db.enabled then
-        RegisterUnitWatch(f)
-        UF.UnitChanged(f)
-    else
-        f:Hide()
-    end
+    UF.Watch(f)
+    if f.db.enabled then UF.UnitChanged(f) end
 end
 
 function ns:SetLocked(locked)

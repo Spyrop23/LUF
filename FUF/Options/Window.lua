@@ -43,7 +43,7 @@ local COLOR_TYPES = {
 local PORTRAIT_TYPES = { { "3D", "3D model" }, { "2D", "2D picture" } }
 local SIDES = { { "LEFT", "Left" }, { "RIGHT", "Right" } }
 local CAST_POS = { { "BELOW", "Below the frame" }, { "ABOVE", "Above the frame" } }
-local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar" }
+local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", xpBar = "Experience bar" }
 local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
 local BUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can cast" } }
@@ -100,6 +100,16 @@ local function unitPage(key)
         b:Edit("Y position", gy, sy, 80, true)
         if key == "party" then
             b:Slider("Space between members", 0, 200, 1, p("spacing"))
+            b:Check("Hide party frames in a raid", p("hideInRaid"))
+        elseif key == "raid" then
+            b:Text("One column per raid group (1-8), members from top to bottom.")
+            b:Slider("Space between members", 0, 50, 1, p("spacing"))
+            b:Slider("Space between groups", 0, 50, 1, p("groupSpacing"))
+        end
+        if ns.Range and ns.Range.supported[key] then
+            b:Header("Range")
+            b:Check("Fade out of range", p("range.enabled"))
+            b:Slider("Alpha out of range", 0, 1, 0.05, p("range.alpha"))
         end
 
         b:Header("Health bar")
@@ -139,6 +149,13 @@ local function unitPage(key)
         b:Dropdown("Side", SIDES, p("portrait.side"))
         b:Slider("Width (part of the frame)", 0.05, 0.5, 0.01, p("portrait.width"))
 
+        if ns.UF.XP_SUPPORTED[key] then
+            b:Header("Experience bar")
+            b:Check("Enabled", p("xpBar.enabled"))
+            local gxw, sxw = p("xpBar.weight")
+            b:Slider("Height (weight)", 1, 10, 0.5, gxw, sxw, "%.1f")
+        end
+
         if ns.CastBar and ns.CastBar.supported[key] then
             b:Header("Cast bar")
             b:Check("Enabled", p("castBar.enabled"))
@@ -168,11 +185,13 @@ local function unitPage(key)
         end
 
         for _, bar in ipairs(ns.UF.BAR_KEYS) do
+          if bar ~= "xpBar" or ns.UF.XP_SUPPORTED[key] then
             b:Header("Texts on the " .. BAR_LABELS[bar]:lower())
             b:Slider("Font size", 5, 24, 1, p("tags." .. bar .. ".size"))
             b:Edit("Left", p("tags." .. bar .. ".left"))
             b:Edit("Center", p("tags." .. bar .. ".center"))
             b:Edit("Right", p("tags." .. bar .. ".right"))
+          end
         end
         b:Text("Texts use tags like [name] or [smarthealth]; see the Tags page.", 16)
     end
@@ -313,7 +332,7 @@ local function build()
         btn:SetScript("OnClick", function() showPage(page.id) end)
         navButtons[page.id] = btn
         y = y - 24
-        if page.id == "general" or page.id == "partypet" then y = y - 8 end
+        if page.id == "general" or page.id == "raid" then y = y - 8 end
     end
 
     -- page area

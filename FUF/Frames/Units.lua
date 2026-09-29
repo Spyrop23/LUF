@@ -3,12 +3,14 @@
 -- Which frames exist and in what order they are built. Party frames are
 -- four fixed SecureUnitButtons (party1..4) instead of a group header: the
 -- header's snippets need loadstring_untainted, which the Forever beta lacks.
+-- The raid works the same way: raid1..40, sorted into subgroup columns out
+-- of combat (UF.ArrangeRaid).
 local _, ns = ...
 
 -- Settings keys in menu order, with their labels.
 ns.unitKeys = {
     "player", "pet", "pettarget", "target", "targettarget", "targettargettarget",
-    "party", "partypet",
+    "party", "partypet", "raid",
 }
 
 ns.unitLabels = {
@@ -20,6 +22,7 @@ ns.unitLabels = {
     targettargettarget = "Target of Target of Target",
     party = "Party",
     partypet = "Party Pets",
+    raid = "Raid",
 }
 
 local function spawnAll()
@@ -38,10 +41,20 @@ local function spawnAll()
             UF.Create(petUnit, { key = "partypet", index = i, anchorFrame = f })
         end
     end
+    for i = 1, 40 do
+        local unit = "raid" .. i
+        if UF.frames[unit] then UF.Apply(UF.frames[unit]) else UF.Create(unit, { key = "raid", index = i }) end
+    end
+    UF.ArrangeRaid()
     for _, key in ipairs(ns.unitKeys) do
         ns:HideBlizzard(key)
     end
 end
+
+-- Who is in which subgroup changes with the roster; frames move out of combat.
+ns:RegisterEvent("GROUP_ROSTER_UPDATE", function()
+    if ns.UF.byKey.raid then ns:RunOutOfCombat(ns.UF.ArrangeRaid) end
+end)
 
 ns:OnLogin(function()
     ns:RunOutOfCombat(spawnAll)
@@ -60,6 +73,7 @@ ns:RegisterEvent("PLAYER_ENTERING_WORLD", function()
     C_Timer.After(2.5, function()
         ns:RunOutOfCombat(function()
             for _, f in pairs(ns.UF.frames) do ns.UF.Layout(f) end
+            ns.UF.ArrangeRaid()
         end)
     end)
 end)

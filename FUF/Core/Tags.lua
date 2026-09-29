@@ -211,6 +211,18 @@ Tags.methods = {
         local cur, max = UnitXP("player"), UnitXPMax("player")
         return "%s/%s", AbbreviateNumbers(cur), AbbreviateNumbers(max)
     end,
+    xppet = function()
+        if not GetPetExperience then return EMPTY end
+        local cur, max = GetPetExperience()
+        if not (readable(cur) and readable(max)) or not max or max == 0 then return EMPTY end
+        return "%s/%s", full(cur), full(max)
+    end,
+    percxppet = function()
+        if not GetPetExperience then return EMPTY end
+        local cur, max = GetPetExperience()
+        if not (readable(cur) and readable(max)) or not max or max == 0 then return EMPTY end
+        return "%.0f%%", cur / max * 100
+    end,
     percxp = function()
         local cur, max = UnitXP("player"), UnitXPMax("player")
         if not (readable(cur) and readable(max)) or max == 0 then return EMPTY end
@@ -271,6 +283,8 @@ Tags.help = {
     { "loyalty", "Pet loyalty level" },
     { "xp", "Experience/needed (player)" },
     { "percxp", "Experience in percent (player)" },
+    { "xppet", "Pet experience/needed" },
+    { "percxppet", "Pet experience in percent" },
     { "classcolor", "Starts the class colour" },
     { "reactcolor", "Starts the reaction colour" },
     { "levelcolor", "Starts the level difficulty colour" },

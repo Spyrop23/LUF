@@ -39,6 +39,8 @@ local function unitDefaults(o)
         portrait  = { enabled = true, type = "3D", side = "LEFT", width = 0.22 },
         castBar   = { enabled = false, height = 10, position = "BELOW", icon = true, hideBlizzard = true },
         healPrediction = { enabled = true, overflow = 1.05, alpha = 0.8, absorbs = true },
+        xpBar     = { enabled = false, weight = 2, background = true, backgroundAlpha = 0.2 },
+        range     = { enabled = true, alpha = 0.4 },
         auras     = {
             buffs = false, debuffs = false,
             buffFilter = "all", debuffFilter = "all",
@@ -50,6 +52,7 @@ local function unitDefaults(o)
         tags = {
             healthBar = { size = 10, left = "[name]", center = "", right = "[smarthealth]" },
             powerBar  = { size = 10, left = "[levelcolor][level][shortclassification] [classcolor][smartclass]", center = "", right = "[pp]/[maxpp]" },
+            xpBar     = { size = 8, left = "", center = "[xp] [percxp]", right = "" },
         },
     }
     return merge(d, o or {})
@@ -80,6 +83,8 @@ ns.defaults = {
             healthBar = { colorType = "happiness" },
             happiness = { enabled = false, size = 14 },   -- the colour says enough
             auras = { buffs = true, debuffs = true, size = 16 },
+            xpBar = { enabled = true },
+            tags = { xpBar = { center = "[xppet] [percxppet]" } },
         }),
         pettarget = unitDefaults(small({ x = 260, y = -72, enabled = false })),
         target = unitDefaults({
@@ -90,10 +95,20 @@ ns.defaults = {
         }),
         targettarget = unitDefaults(merge({ x = 510, width = 150 }, noPortrait)),
         targettargettarget = unitDefaults(merge({ x = 670, width = 150 }, noPortrait)),
-        party = unitDefaults({ y = -140, spacing = 20, auras = { debuffs = true, position = "RIGHT", perRow = 4 } }),
+        party = unitDefaults({ y = -140, spacing = 20, hideInRaid = true,
+            auras = { debuffs = true, position = "RIGHT", perRow = 4 } }),
         partypet = unitDefaults(small({
             x = 5, y = -20, height = 20,
             tags = { healthBar = { left = "", center = "[smarthealth]", right = "" } },
+        })),
+        raid = unitDefaults(small({
+            x = 10, y = -420, width = 60, height = 30, spacing = 2, groupSpacing = 4,
+            healthBar = { weight = 8 },
+            powerBar = { enabled = true, weight = 1.5 },
+            tags = {
+                healthBar = { size = 8, left = "", center = "[name]", right = "" },
+                powerBar  = { size = 7, left = "", center = "", right = "" },
+            },
         })),
     },
 }

@@ -42,10 +42,14 @@ tools/      Smoke-Test und Paket-Skript
 | `/fuf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/fuf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.5.0)
+## Stand (0.6.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
-  Gruppe (party1–4) und die Begleiter der Gruppenmitglieder, jeweils im Luna-Standardlayout.
+  Gruppe (party1–4), die Begleiter der Gruppenmitglieder und **Raid** (40 Frames, eine Spalte pro
+  Raidgruppe), jeweils im Luna-Standardlayout. Die Gruppe blendet sich im Raid auf Wunsch aus.
+- **Reichweite:** Gruppe, Raid und Begleiter werden außer Reichweite transparent (Standard 0.4).
+- **XP-Leiste** für Spieler (lila, erholter Teil blau) und Begleiter, mit Tags `[xp] [percxp]`
+  und `[xppet] [percxppet]`.
 - **Leisten:** Lebens- und Ressourcenbalken (Farbe nach Klasse, Reaktion, Gesundheit oder fest),
   3D/2D-Portrait, Zauberleiste für Spieler, Ziel und Gruppe, auch bei Gegnern.
 - **15 eigene Leisten-Texturen** ohne Streifen, dazu Blizzard/Raid/Flat.

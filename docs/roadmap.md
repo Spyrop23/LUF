@@ -29,12 +29,20 @@ Portrait und Texten, Blizzard-Frames ausblenden, Config-Mode, `/fuf`.
 - Drei StatusBars (eigene, fremde, Absorbs) jeweils an das Füllende der vorherigen geankert,
   in einem Clip-Frame so breit wie Leiste × Overflow *(im Client zu bestätigen)*.
 
-## Etappe 3 – Leisten und Raid
+## Etappe 3a – Raid, Reichweite, XP (0.6.0) ✅
+- raid1–40 als feste SecureUnitButtons, außerhalb des Kampfes nach Untergruppe (GetRaidRosterInfo)
+  in 8 Spalten sortiert; Ziehen verschiebt den ganzen Raid; Blizzards CompactRaidFrames ausblendbar
+- Gruppe im Raid ausblenden: `RegisterStateDriver(f, "visibility", "[group:raid] hide; [@partyN,exists] show; hide")`
+- Reichweite: `UnitInRange` (secret) -> `Frame:SetAlphaFromBoolean(inRange, 1, alpha)`, Poll 0,25 s
+  plus `UNIT_IN_RANGE_UPDATE`
+- XP-Leiste (Spieler mit Rested-Anteil, Begleiter über `GetPetExperience`) als dritte Leiste
+
+## Etappe 3b – Leisten wie Luna
 - Bar-Slots wie Luna (Gruppen links/mitte/rechts, Order, vertikal, Invertieren über `SetReverseFill`)
-- XP-/Ruf-Bar, Empty Bar, Druiden-Manabar, Combo Points
+- Ruf-Bar, Empty Bar, Druiden-Manabar, Combo Points
 - Tags: `[br]`, `[group]`, `[pvp]`, `[happiness]`, `[loyalty]`, `[threat]`, `[aggrocolor]`
 - pettargettarget, partytarget; focus, sofern `focus` in Forever zulässig ist *(TODO(beta))*
-- raid (8 Gruppen), raidpet, maintank/mainassist
+- raidpet, maintank/mainassist, Raid-Auren (Debuffs im Frame)
 - **Achtung:** `SecureGroupHeaderTemplate` funktioniert, aber in der Beta fehlt `loadstring_untainted`,
   deshalb werfen `initialConfigFunction` und `WrapScript` einen Fehler. Party läuft deshalb schon über
   feste Frames. Für den Raid gilt derselbe Plan: feste Frames raid1–40, oder ein Header ohne Snippet.

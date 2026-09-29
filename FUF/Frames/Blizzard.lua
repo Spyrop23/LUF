@@ -79,10 +79,14 @@ local SILENCER = {
     -- The player cast bar: moved to the hidden parent as a whole. Nothing
     -- on it is written or called, which would taint its secret cast values.
     playercast = function() silenceWhole(_G.PlayerCastingBarFrame) end,
+    raid = function()
+        silenceWhole(_G.CompactRaidFrameContainer)
+        silenceWhole(_G.CompactRaidFrameManager)
+    end,
 }
 
 -- Settings keys that have a Blizzard frame to hide.
-ns.blizzardFrames = { player = true, target = true, targettarget = true, pet = true, party = true }
+ns.blizzardFrames = { player = true, target = true, targettarget = true, pet = true, party = true, raid = true }
 
 local done = {}
 

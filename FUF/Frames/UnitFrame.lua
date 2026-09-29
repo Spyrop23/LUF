@@ -35,7 +35,13 @@ local GLOBAL_EVENTS = {
     pettarget = { "UNIT_PET" },
     party = { "GROUP_ROSTER_UPDATE" },
     partypet = { "GROUP_ROSTER_UPDATE", "UNIT_PET" },
+    raid = { "GROUP_ROSTER_UPDATE" },
 }
+
+-- Experience events (only for frames with an XP bar).
+local XP_EVENTS = { player = { "PLAYER_XP_UPDATE", "UPDATE_EXHAUSTION", "PLAYER_LEVEL_UP" },
+    pet = { "UNIT_PET_EXPERIENCE", "UNIT_PET" } }
+UF.XP_SUPPORTED = { player = true, pet = true }
 
 local UNIT_EVENTS = {
     "UNIT_HEALTH", "UNIT_MAXHEALTH",
@@ -46,7 +52,7 @@ local UNIT_EVENTS = {
     "UNIT_HAPPINESS", "UNIT_HEAL_PREDICTION", "UNIT_ABSORB_AMOUNT_CHANGED",
 }
 
-local BAR_KEYS = { "healthBar", "powerBar" }
+local BAR_KEYS = { "healthBar", "powerBar", "xpBar" }
 UF.BAR_KEYS = BAR_KEYS
 
 -- ------------------------------------------------------------ regions --
@@ -81,6 +87,8 @@ local function buildRegions(f)
 
     f.healthBar = createBar(f)
     f.powerBar = createBar(f)
+    f.xpBar = createBar(f)
+    f.xpBar.rested = f.xpBar:CreateTexture(nil, "ARTWORK")   -- rested part beyond the fill
     if ns.HealPrediction then ns.HealPrediction.Create(f) end
 
     f.portrait3D = CreateFrame("PlayerModel", nil, f)
@@ -131,7 +139,13 @@ end
 function UF.Position(f)
     local db = f.db
     f:ClearAllPoints()
-    if f.anchorFrame then
+    if f.key == "raid" then
+        -- column per raid subgroup, members top to bottom (see ArrangeRaid)
+        local g, m = f.raidGroup or math.ceil(f.index / 5), f.raidSlot or ((f.index - 1) % 5 + 1)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT",
+            db.x + (g - 1) * (db.width + db.groupSpacing),
+            db.y - (m - 1) * (db.height + db.spacing))
+    elseif f.anchorFrame then
         f:SetPoint("TOPLEFT", f.anchorFrame, "TOPRIGHT", db.x, db.y)
     else
         local y = db.y
@@ -185,7 +199,8 @@ function UF.Layout(f)
         local bar = f[key]
         bar:SetStatusBarTexture(texture)
         bar.bg:SetTexture(texture)
-        if bdb.enabled ~= false then
+        local allowed = key ~= "xpBar" or UF.XP_SUPPORTED[f.key]
+        if bdb and allowed and bdb.enabled ~= false then
             table.insert(shown, key)
             total = total + bdb.weight
         else
@@ -294,6 +309,45 @@ function UF.UpdatePower(f)
     applyColor(bar, ns.PowerColor(unit), f.db.powerBar.backgroundAlpha)
 end
 
+-- Experience: player XP with the rested part, or the hunter pet's XP.
+local XP_COLOR, RESTED_COLOR = { 0.58, 0.00, 0.55 }, { 0.00, 0.39, 0.88 }
+
+function UF.UpdateXP(f)
+    local bar = f.xpBar
+    if not bar:IsShown() then return end
+    local cur, max, rested = 0, 1, nil
+    if f.key == "pet" then
+        if GetPetExperience then cur, max = GetPetExperience() end
+    else
+        cur, max, rested = UnitXP("player"), UnitXPMax("player"), GetXPExhaustion and GetXPExhaustion()
+    end
+    cur, max = ns.Readable(cur, 0) or 0, ns.Readable(max, 1) or 1
+    if max <= 0 then max = 1 end
+    bar:SetMinMaxValues(0, max)
+    bar:SetValue(cur)
+    local c = XP_COLOR
+    bar:SetStatusBarColor(c[1], c[2], c[3])
+    bar.bg:SetVertexColor(c[1], c[2], c[3], f.db.xpBar.backgroundAlpha or 0.2)
+
+    -- rested XP as a lighter block right after the fill
+    rested = ns.Readable(rested, nil)
+    local r = bar.rested
+    if rested and rested > 0 and cur < max then
+        local width = bar:GetWidth()
+        local fillEnd = width * cur / max
+        local restedW = math.min(width - fillEnd, width * rested / max)
+        r:ClearAllPoints()
+        r:SetPoint("TOPLEFT", bar, "TOPLEFT", fillEnd, 0)
+        r:SetPoint("BOTTOMLEFT", bar, "BOTTOMLEFT", fillEnd, 0)
+        r:SetWidth(math.max(restedW, 0.01))
+        r:SetTexture(ns.Texture())
+        r:SetVertexColor(RESTED_COLOR[1], RESTED_COLOR[2], RESTED_COLOR[3], 0.6)
+        r:Show()
+    else
+        r:Hide()
+    end
+end
+
 function UF.UpdatePortrait(f)
     local p = f.portrait
     if not p then return end
@@ -311,7 +365,7 @@ function UF.UpdateTexts(f)
     local unit, tags = f.unit, f.db.tags
     for _, key in ipairs(BAR_KEYS) do
         local bar = f[key]
-        if bar:IsShown() then
+        if bar:IsShown() and tags[key] then
             local tdb = tags[key]
             for _, side in ipairs({ "left", "center", "right" }) do
                 ns.Tags.Render(bar.text[side], tdb[side] or "", unit)
@@ -325,6 +379,7 @@ function UF.Update(f)
     UF.UpdateHealth(f)
     UF.UpdatePower(f)
     UF.UpdatePortrait(f)
+    UF.UpdateXP(f)
     UF.UpdateTexts(f)
     UF.UpdateHappiness(f)
 end
@@ -397,6 +452,9 @@ local function wireEvents(f)
     for _, event in ipairs(GLOBAL_EVENTS[f.key] or {}) do
         pcall(glob.RegisterEvent, glob, event)
     end
+    for _, event in ipairs(XP_EVENTS[f.key] or {}) do
+        pcall(glob.RegisterEvent, glob, event)
+    end
     glob:SetScript("OnEvent", onGlobalEvent)
     if POLLED[f.unit] then glob:SetScript("OnUpdate", onPoll) end
     f.globalEvents = glob
@@ -435,6 +493,28 @@ function UF.Create(unit, opts)
     return f
 end
 
+-- Show/hide with the unit. Party frames (and their pets) may hide in a raid;
+-- that needs a state driver instead of the plain unit watch.
+function UF.Watch(f)
+    UnregisterUnitWatch(f)
+    if UnregisterStateDriver then UnregisterStateDriver(f, "visibility") end
+    if not f.db.enabled then
+        f:Hide()
+        return
+    end
+    local party = ns.db.units.party
+    if (f.key == "party" or f.key == "partypet") and party.hideInRaid and RegisterStateDriver then
+        RegisterStateDriver(f, "visibility", "[group:raid] hide; [@" .. f.unit .. ",exists] show; hide")
+    else
+        RegisterUnitWatch(f)
+    end
+end
+
+function UF.Unwatch(f)
+    UnregisterUnitWatch(f)
+    if UnregisterStateDriver then UnregisterStateDriver(f, "visibility") end
+end
+
 -- Re-reads the profile (after a change or a profile switch).
 -- Protected: out of combat only.
 function UF.Apply(f)
@@ -444,12 +524,7 @@ function UF.Apply(f)
         ns.UnlockFrame(f)
         return
     end
-    UnregisterUnitWatch(f)
-    if f.db.enabled then
-        RegisterUnitWatch(f)
-    else
-        f:Hide()
-    end
+    UF.Watch(f)
 end
 
 -- ------------------------------------------------------ applying edits --
@@ -464,6 +539,7 @@ local function flush()
         for key in pairs(pending) do
             for _, f in ipairs(UF.byKey[key] or {}) do UF.Apply(f) end
             -- party pets hang on party frames: follow their size/position
+            -- (and their visibility rule: hide in raid)
             if key == "party" then
                 for _, f in ipairs(UF.byKey.partypet or {}) do UF.Apply(f) end
             end
@@ -486,5 +562,29 @@ function ns:ApplyAll()
     if not scheduled then
         scheduled = true
         C_Timer.After(0, flush)
+    end
+end
+
+-- ------------------------------------------------------------ raid --
+
+-- Raid frames keep their unit (raidN); out of combat they are moved into the
+-- column of the member's subgroup, as Luna's group headers would do.
+function UF.ArrangeRaid()
+    local frames = UF.byKey.raid
+    if not frames then return end
+    local count = {}
+    for i = 1, 40 do
+        local f = UF.frames["raid" .. i]
+        if f then
+            local group
+            if GetRaidRosterInfo then
+                local ok, _, _, subgroup = pcall(GetRaidRosterInfo, i)
+                if ok and ns.CanRead(subgroup) and type(subgroup) == "number" then group = subgroup end
+            end
+            group = group or math.ceil(i / 5)
+            count[group] = (count[group] or 0) + 1
+            f.raidGroup, f.raidSlot = group, math.min(count[group], 5)
+            UF.Position(f)
+        end
     end
 end
