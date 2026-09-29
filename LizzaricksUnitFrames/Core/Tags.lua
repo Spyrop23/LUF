@@ -195,6 +195,15 @@ Tags.methods = {
         if readable(g) and not g then return EMPTY end
         return "%s", g
     end,
+    -- red in combat, green while resting (player), nothing otherwise
+    statuscolor = function(u)
+        local c = UnitAffectingCombat(u)
+        if (readable(c) and c) or (u == "player" and (InCombatLockdown() or ns.inCombat)) then
+            return "|cffff2020"
+        end
+        if u == "player" and IsResting and IsResting() then return "|cff33dd33" end
+        return EMPTY
+    end,
     combatcolor = function(u)
         local c = UnitAffectingCombat(u)
         if readable(c) and c then return "|cffff0000" end
@@ -299,6 +308,7 @@ Tags.help = {
     { "reactcolor", "Starts the reaction colour" },
     { "levelcolor", "Starts the level difficulty colour" },
     { "combatcolor", "Starts red while in combat" },
+    { "statuscolor", "Starts red in combat, green while resting (player)" },
     { "color:rrggbb", "Starts your own colour, e.g. [color:ff8000]" },
     { "nocolor", "Ends a colour" },
 }

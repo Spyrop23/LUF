@@ -197,7 +197,7 @@ function UnitIsConnected() return true end
 function UnitIsGhost() return false end
 function UnitIsDead(u) return u == "targettarget" end
 function UnitIsAFK(u) return u == "party1" end
-function UnitAffectingCombat() return secret(true) end
+function UnitAffectingCombat(u) if u == "player" then return false end return secret(true) end
 function GetGuildInfo(u) return u == "player" and "Forever Guild" or nil end
 function UnitXP() return 300 end
 function UnitXPMax() return 1200 end
@@ -371,6 +371,8 @@ ns.Tags.Render(fs, "[name] [resting]", "player")
 assert(fs.text == "Thrall (Resting)", "resting tag: " .. fs.text)
 ns.Tags.Render(fs, "[resting]", "target")
 assert(fs.text == "", "resting only for the player")
+ns.Tags.Render(fs, "[statuscolor][name]", "player")
+assert(fs.text == "|cff33dd33Thrall", "statuscolor resting: " .. fs.text)
 
 -- casts (target: all secret)
 targetCasting = true
