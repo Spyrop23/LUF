@@ -221,7 +221,7 @@ assert(ns.UF.frames.party1.shown and not ns.UF.frames.party2.shown, "party visib
 assert(ns.UF.frames.pet.shown, "pet shown")
 local pet = ns.UF.frames.pet
 assert(pet.healthBar.color[1] == 0.93 and pet.healthBar.color[3] == 0, "pet coloured by happiness (content = yellow)")
-assert(pet.happiness.shown, "happiness icon shown")
+assert(not pet.happiness.shown, "happiness icon off by default")
 fire("UNIT_HAPPINESS", "pet")
 local pfs = newWidget("FontString")
 ns.Tags.Render(pfs, "[happiness] [loyalty]", "pet")

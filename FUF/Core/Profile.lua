@@ -69,7 +69,7 @@ ns.defaults = {
         pet = unitDefaults({
             y = -72, height = 30,
             healthBar = { colorType = "happiness" },
-            happiness = { enabled = true, size = 14 },
+            happiness = { enabled = false, size = 14 },   -- the colour says enough
         }),
         pettarget = unitDefaults(small({ x = 260, y = -72, enabled = false })),
         target = unitDefaults({
@@ -146,6 +146,11 @@ function ns:SetProfile(name)
     if not self.db.migrated031 then
         self.db.migrated031 = true
         if self.db.texture == "Blizzard" then self.db.texture = "Smooth" end
+    end
+    -- 0.3.3: the happiness face is off by default (the bar colour shows it)
+    if not self.db.migrated033 then
+        self.db.migrated033 = true
+        self.db.units.pet.happiness.enabled = false
     end
     if self.OnProfileChanged then self:OnProfileChanged() end
 end
