@@ -44,6 +44,7 @@ local PORTRAIT_TYPES = { { "3D", "3D model" }, { "2D", "2D picture" } }
 local SIDES = { { "LEFT", "Left" }, { "RIGHT", "Right" } }
 local CAST_POS = { { "BELOW", "Below the frame" }, { "ABOVE", "Above the frame" } }
 local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", xpBar = "Experience bar" }
+local RAID_DIRECTIONS = { { "DOWN", "Below each other (columns)" }, { "RIGHT", "Next to each other (rows)" } }
 local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
 local BUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can cast" } }
@@ -102,9 +103,16 @@ local function unitPage(key)
             b:Slider("Space between members", 0, 200, 1, p("spacing"))
             b:Check("Hide party frames in a raid", p("hideInRaid"))
         elseif key == "raid" then
-            b:Text("One column per raid group (1-8), members from top to bottom.")
+            b:Header("Raid groups")
+            b:Dropdown("Members of a group", RAID_DIRECTIONS, p("groupDirection"))
+            b:Slider("Groups per row", 1, 8, 1, p("groupsPerRow"))
             b:Slider("Space between members", 0, 50, 1, p("spacing"))
             b:Slider("Space between groups", 0, 50, 1, p("groupSpacing"))
+            b:Check("Move each group on its own", p("separateGroups"))
+            b:Button("Groups back into the grid", function()
+                ns.db.units.raid.groupPos = {}
+                ns:ApplyKey("raid")
+            end, 220)
         end
         if ns.Range and ns.Range.supported[key] then
             b:Header("Range")
@@ -180,6 +188,7 @@ local function unitPage(key)
             b:Slider("Buff icon size", 8, 50, 1, p("auras.size"))
             b:Slider("Debuff icon size", 8, 60, 1, p("auras.debuffSize"))
             b:Slider("Space between icons", 0, 10, 1, p("auras.spacing"))
+            b:Slider("Space between buffs and debuffs", 0, 30, 1, p("auras.groupGap"))
             b:Slider("Icons per row (left/right)", 1, 20, 1, p("auras.perRow"))
             b:Check("Remaining time under the icon", p("auras.duration"))
             b:Check("Cooldown swipe on the icon", p("auras.swipe"))

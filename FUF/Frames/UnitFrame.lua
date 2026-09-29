@@ -140,11 +140,9 @@ function UF.Position(f)
     local db = f.db
     f:ClearAllPoints()
     if f.key == "raid" then
-        -- column per raid subgroup, members top to bottom (see ArrangeRaid)
-        local g, m = f.raidGroup or math.ceil(f.index / 5), f.raidSlot or ((f.index - 1) % 5 + 1)
-        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT",
-            db.x + (g - 1) * (db.width + db.groupSpacing),
-            db.y - (m - 1) * (db.height + db.spacing))
+        local gx, gy = UF.RaidGroupOrigin(f.raidGroup or math.ceil(f.index / 5))
+        local mx, my = UF.RaidMemberOffset(f.raidSlot or ((f.index - 1) % 5 + 1))
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", gx + mx, gy + my)
     elseif f.anchorFrame then
         f:SetPoint("TOPLEFT", f.anchorFrame, "TOPRIGHT", db.x, db.y)
     else
@@ -154,6 +152,47 @@ function UF.Position(f)
         end
         f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", db.x, y)
     end
+end
+
+-- Raid geometry. A group is a block of five members, either a column
+-- (direction DOWN, as in Luna) or a row (RIGHT). Blocks sit in a grid with
+-- `groupsPerRow` blocks per row, or each at its own saved spot when groups
+-- are moved separately.
+function UF.RaidMemberOffset(slot)
+    local db = ns.db.units.raid
+    if db.groupDirection == "RIGHT" then
+        return (slot - 1) * (db.width + db.spacing), 0
+    end
+    return 0, -(slot - 1) * (db.height + db.spacing)
+end
+
+function UF.RaidGridOrigin(g)
+    local db = ns.db.units.raid
+    local perRow = math.max(1, db.groupsPerRow or 8)
+    local col, row = (g - 1) % perRow, math.floor((g - 1) / perRow)
+    local blockW, blockH
+    if db.groupDirection == "RIGHT" then
+        blockW, blockH = 5 * db.width + 4 * db.spacing, db.height
+    else
+        blockW, blockH = db.width, 5 * db.height + 4 * db.spacing
+    end
+    return db.x + col * (blockW + db.groupSpacing), db.y - row * (blockH + db.groupSpacing)
+end
+
+function UF.RaidGroupOrigin(g)
+    local db = ns.db.units.raid
+    if db.separateGroups then
+        db.groupPos = db.groupPos or {}
+        local pos = db.groupPos[g]
+        if not pos then
+            -- first time: start where the grid had the group
+            local x, y = UF.RaidGridOrigin(g)
+            pos = { x = x, y = y }
+            db.groupPos[g] = pos
+        end
+        return pos.x, pos.y
+    end
+    return UF.RaidGridOrigin(g)
 end
 
 -- Applies size, position, portrait and bar geometry from the profile.

@@ -206,6 +206,7 @@ local function buildContainer(f, db)
                 elementHeight = (debuffs and db.debuffSize or db.size) + (db.duration and 8 or 0),
                 elementSpacing = db.spacing, lineSpacing = db.spacing,
                 forceNewLine = debuffs,   -- debuffs start on their own row
+                groupLineSpacing = debuffs and (db.groupGap or 4) or nil,   -- gap above them
             },
         }
     end
@@ -220,7 +221,7 @@ end
 -- means a new container.
 local function signature(db)
     return table.concat({
-        tostring(db.buffs), tostring(db.debuffs), db.size, db.debuffSize, db.spacing, db.maxBuffs, db.maxDebuffs,
+        tostring(db.buffs), tostring(db.debuffs), db.size, db.debuffSize, db.spacing, db.groupGap or 4, db.maxBuffs, db.maxDebuffs,
         db.buffFilter, db.debuffFilter, tostring(db.duration), tostring(db.swipe), tostring(db.dispelColors),
     }, ":")
 end

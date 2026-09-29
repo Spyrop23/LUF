@@ -158,6 +158,7 @@ function UnitIsUnit(a, b) return a == b end
 function GetPetExperience() return 150, 600 end
 function GetXPExhaustion() return 400 end
 function Widget:SetAlpha(a) self.alpha = a end
+function Widget:SetPoint(point, rel, relPoint, x, y) self.point = { point, rel, relPoint, x, y } end
 function Widget:SetAlphaFromBoolean(b, t, f) self.alpha = reveal(b) and t or f end
 function GetRealmName() return "Forever" end
 local units = { player = true, target = true, targettarget = true, pet = true, party1 = true }
@@ -295,6 +296,38 @@ for i = 1, 5 do units["raid" .. i] = true end
 ns.UF.ArrangeRaid()
 local r2, r3, r4 = ns.UF.frames.raid2, ns.UF.frames.raid3, ns.UF.frames.raid4
 assert(r2.raidGroup == 3 and r2.raidSlot == 1 and r3.raidSlot == 2 and r4.raidGroup == 2, "raid arranged by subgroup")
+-- raid grid: 4 groups per row, columns; group 2 = raid6-10
+local rdb = ns.db.units.raid
+rdb.groupsPerRow = 4
+ns.UF.ArrangeRaid()
+local p9 = ns.UF.frames.raid9.point
+assert(p9[4] == 10 + 1 * (60 + 4) and p9[5] == -420 - 3 * (30 + 2), "raid grid position " .. p9[4] .. "," .. p9[5])
+local p26 = ns.UF.frames.raid26.point   -- group 6 -> second row
+assert(p26[4] == 10 + 1 * (60 + 4) and p26[5] == -420 - (5 * 30 + 4 * 2 + 4), "raid second row")
+rdb.groupDirection = "RIGHT"
+ns.UF.ArrangeRaid()
+assert(ns.UF.frames.raid9.point[4] == 10 + 1 * (5 * 60 + 4 * 2 + 4) + 3 * (60 + 2), "raid rows")
+rdb.groupDirection, rdb.groupsPerRow = "DOWN", 8
+-- separate groups: group positions are stored per group
+rdb.separateGroups = true
+ns.UF.ArrangeRaid()
+assert(rdb.groupPos[3], "group position saved")
+rdb.separateGroups, rdb.groupPos = false, {}
+ns.UF.ArrangeRaid()
+-- dragging a party frame hangs the others on it
+SlashCmdList.FUF("unlock")
+local p1, p3 = ns.UF.frames.party1, ns.UF.frames.party3
+p1.scripts.OnDragStart(p1)
+assert(p3.point[2] == p1, "party members follow while dragging")
+p1.scripts.OnDragStop(p1)
+assert(p3.point[2] == UIParent, "party back on UIParent after drop")
+local r6 = ns.UF.frames.raid6
+assert(r6.moverLabel.text == "Grp 2" and ns.UF.frames.raid7.moverLabel.text == "", "group labels")
+r6.scripts.OnDragStart(r6)
+assert(ns.UF.frames.raid40.point[2] == r6, "raid follows while dragging")
+r6.scripts.OnDragStop(r6)
+SlashCmdList.FUF("lock")
+
 -- party hides in raid through a state driver
 assert(ns.UF.frames.party1.driver, "party uses the hide-in-raid driver")
 -- range: party1 is out of range (secret false) -> faded to 0.4

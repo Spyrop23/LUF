@@ -35,9 +35,12 @@ local function dropOffsets(f)
     local x = f:GetLeft()
     local y = f:GetTop() - UIParent:GetTop() * us / s
     if f.key == "raid" then
-        -- back to the position of the whole raid block
-        local g, m = f.raidGroup or 1, f.raidSlot or 1
-        return x - (g - 1) * (f.db.width + f.db.groupSpacing), y + (m - 1) * (f.db.height + f.db.spacing)
+        -- back from this member to its group's origin, then to the raid's
+        local mx, my = UF.RaidMemberOffset(f.raidSlot or 1)
+        x, y = x - mx, y - my
+        if f.db.separateGroups then return x, y end
+        local gx, gy = UF.RaidGridOrigin(f.raidGroup or 1)
+        return x - (gx - f.db.x), y - (gy - f.db.y)
     end
     if f.index and f.index > 1 then
         y = y + (f.index - 1) * (f.db.height + (f.db.spacing or 0))
@@ -45,8 +48,30 @@ local function dropOffsets(f)
     return x, y
 end
 
+-- Frames that move together with f: the whole party, the whole raid, or
+-- f's raid group when groups are moved separately.
+local function siblings(f)
+    local list = {}
+    if f.key ~= "party" and f.key ~= "raid" then return list end
+    for _, s in ipairs(UF.byKey[f.key] or {}) do
+        if s ~= f and s:IsShown() then
+            if f.key ~= "raid" or not f.db.separateGroups or s.raidGroup == f.raidGroup then
+                table.insert(list, s)
+            end
+        end
+    end
+    return list
+end
+
 local function onDragStart(f)
     if InCombatLockdown() then return end
+    -- Hang the others on the dragged frame, keeping their distance, so the
+    -- whole block moves while dragging. Layout puts them back on UIParent.
+    for _, s in ipairs(siblings(f)) do
+        local dx, dy = s:GetLeft() - f:GetLeft(), s:GetTop() - f:GetTop()
+        s:ClearAllPoints()
+        s:SetPoint("TOPLEFT", f, "TOPLEFT", dx, dy)
+    end
     f:StartMoving()
 end
 
@@ -56,7 +81,13 @@ local function onDragStop(f)
     pcall(f.SetUserPlaced, f, false)
     if InCombatLockdown() then return end
     local x, y = dropOffsets(f)
-    f.db.x, f.db.y = math.floor(x + 0.5), math.floor(y + 0.5)
+    x, y = math.floor(x + 0.5), math.floor(y + 0.5)
+    if f.key == "raid" and f.db.separateGroups then
+        f.db.groupPos = f.db.groupPos or {}
+        f.db.groupPos[f.raidGroup or 1] = { x = x, y = y }
+    else
+        f.db.x, f.db.y = x, y
+    end
     ns:ApplyKey(f.key)
     if ns.Options then ns.Options:Refresh() end
 end
@@ -88,9 +119,14 @@ function ns.UnlockFrame(f)
     f:SetScript("OnDragStop", onDragStop)
     overlay(f):Show()
     local label = ns.unitLabels[f.key] or f.key
-    if f.index then label = label .. " " .. f.index end
-    f.moverLabel:SetText(label)
-    f.moverLabel:Show()
+    if f.key == "raid" then
+        -- one label per group, on its first member
+        label = (f.raidSlot == 1) and ("Grp " .. (f.raidGroup or 1)) or nil
+    elseif f.index then
+        label = label .. " " .. f.index
+    end
+    f.moverLabel:SetText(label or "")
+    f.moverLabel:SetShown(label ~= nil)
     f:Show()
     f:SetAlpha(1)
     UF.Update(f)
