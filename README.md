@@ -54,7 +54,7 @@ tools/      Smoke-Test und Paket-Skript
   Raid-Raster einstellbar: Mitglieder untereinander oder nebeneinander, Gruppen pro Reihe, oder jede
   Gruppe einzeln verschiebbar. Beim Ziehen bewegt sich die ganze Gruppe bzw. der ganze Raid mit.
 - **Status-Symbol** am Spieler wie bei Luna: gekreuzte Schwerter im Kampf, animiertes „Zzz“ beim
-  Ausruhen (Größe und Position einstellbar). Dazu die Tags `[combat]` und `[combatcolor]`.
+  Ausruhen (Größe und Position einstellbar). Dazu die Tags `[combat]`, `[combatcolor]` und `[resting]`.
 - **Reichweite:** Gruppe, Gruppen-Begleiter und Raid werden außer Reichweite transparent (Standard 0.4).
 - **XP-Leiste** für Spieler (lila, erholter Teil blau) und Begleiter, mit Tags `[xp] [percxp]`
   und `[xppet] [percxppet]`.

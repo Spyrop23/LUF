@@ -79,7 +79,10 @@ function ST.Update(f)
 end
 
 local function updateAll()
-    for f in pairs(frames) do ST.Update(f) end
+    for f in pairs(frames) do
+        ST.Update(f)
+        if f:IsVisible() then ns.UF.UpdateTexts(f) end   -- for the [resting] tag
+    end
 end
 
 -- REGEN_DISABLED arrives just before the lockdown starts, so remember it.

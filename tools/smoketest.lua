@@ -367,6 +367,10 @@ print("tags: " .. fs.text)
 assert(fs.text:find("^Thr "), "shortname")
 ns.Tags.Render(fs, "[smarthealth] [ssmarthealth] [shp]", "player")
 print("number tags: " .. fs.text)
+ns.Tags.Render(fs, "[name] [resting]", "player")
+assert(fs.text == "Thrall (Resting)", "resting tag: " .. fs.text)
+ns.Tags.Render(fs, "[resting]", "target")
+assert(fs.text == "", "resting only for the player")
 
 -- casts (target: all secret)
 targetCasting = true

@@ -172,6 +172,15 @@ Tags.methods = {
         if readable(c) and c then return "(Combat)" end
         return EMPTY
     end,
+    -- the player only: inns and capitals (IsResting is plain, not secret)
+    resting = function(u)
+        if u ~= "player" then
+            local ok, same = pcall(UnitIsUnit, u, "player")
+            if not (ok and readable(same) and same) then return EMPTY end
+        end
+        if IsResting and IsResting() then return "(Resting)" end
+        return EMPTY
+    end,
     smartlevel = function(u)
         local c = classification(u)
         if c == "worldboss" then return "Boss" end
@@ -263,6 +272,7 @@ Tags.help = {
     { "guild", "Guild name" },
     { "status", "Dead / Ghost / Offline" },
     { "combat", "(Combat) while in combat" },
+    { "resting", "(Resting) in an inn or a capital (player only)" },
     { "hp", "Current health (1,234)" },
     { "maxhp", "Maximum health" },
     { "shp", "Current health, short (1.2K)" },
