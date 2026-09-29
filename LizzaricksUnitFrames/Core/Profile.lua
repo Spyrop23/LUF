@@ -77,7 +77,10 @@ ns.defaults = {
     texture = "Smooth",
     backgroundAlpha = 0.8,
     units = {
-        player = unitDefaults({ castBar = { enabled = true } }),
+        player = unitDefaults({
+            castBar = { enabled = true },
+            status = { enabled = true, size = 16, point = "BOTTOMLEFT" },   -- Luna's default
+        }),
         pet = unitDefaults({
             y = -72, height = 30,
             healthBar = { colorType = "happiness" },

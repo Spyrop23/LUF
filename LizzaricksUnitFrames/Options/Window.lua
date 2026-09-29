@@ -169,6 +169,14 @@ local function unitPage(key)
         b:Dropdown("Side", SIDES, p("portrait.side"))
         b:Slider("Width (part of the frame)", 0.05, 0.5, 0.01, p("portrait.width"))
 
+        if ns.Status and ns.Status.supported[key] then
+            b:Header("Status icon")
+            b:Text("Crossed swords in combat, Zzz while resting.")
+            b:Check("Show status icon", p("status.enabled"))
+            b:Slider("Size", 8, 40, 1, p("status.size"))
+            b:Dropdown("Position on the frame", ns.Status.POINTS, p("status.point"))
+        end
+
         if ns.UF.XP_SUPPORTED[key] then
             b:Header("Experience bar")
             b:Check("Enabled", p("xpBar.enabled"))

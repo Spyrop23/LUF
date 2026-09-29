@@ -46,13 +46,15 @@ tools/      Smoke-Test und Paket-Skript
 | `/lzuf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/lzuf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.8.0)
+## Stand (0.9.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4), die Begleiter der Gruppenmitglieder und **Raid** (40 Frames, eine Spalte pro
   Raidgruppe), jeweils im Luna-Standardlayout. Die Gruppe blendet sich im Raid auf Wunsch aus.
   Raid-Raster einstellbar: Mitglieder untereinander oder nebeneinander, Gruppen pro Reihe, oder jede
   Gruppe einzeln verschiebbar. Beim Ziehen bewegt sich die ganze Gruppe bzw. der ganze Raid mit.
+- **Status-Symbol** am Spieler wie bei Luna: gekreuzte Schwerter im Kampf, animiertes „Zzz“ beim
+  Ausruhen (Größe und Position einstellbar). Dazu die Tags `[combat]` und `[combatcolor]`.
 - **Reichweite:** Gruppe, Gruppen-Begleiter und Raid werden außer Reichweite transparent (Standard 0.4).
 - **XP-Leiste** für Spieler (lila, erholter Teil blau) und Begleiter, mit Tags `[xp] [percxp]`
   und `[xppet] [percxppet]`.

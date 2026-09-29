@@ -154,6 +154,16 @@ function UnregisterStateDriver(f) f.driver = nil end
 function GetRaidRosterInfo(i) return "Member" .. i, 0, ({ 1, 3, 3, 2, 1 })[i] or 1 end
 local raidMode = false
 function IsInRaid() return raidMode end
+function IsResting() return true end
+function Widget:SetAtlas(a) self.atlas = a end
+function Widget:CreateAnimationGroup()
+    local g = newWidget("AnimationGroup")
+    function g:CreateAnimation() return newWidget("Animation") end
+    function g:Play() self.playing = true end
+    function g:Stop() self.playing = false end
+    function g:IsPlaying() return self.playing end
+    return g
+end
 function ReloadUI() reloaded = true end
 function UnitInRange(u) return secret(u ~= "party1"), secret(true) end
 function UnitIsUnit(a, b) return a == b end
@@ -339,6 +349,16 @@ assert(ns.UF.frames.pet.alpha ~= 0.4, "own pet never fades")
 -- pet XP bar
 assert(pet.xpBar.value == 150 and pet.xpBar.shown, "pet xp bar")
 print("raid/range/xp ok")
+
+-- status icon: resting -> Zzz, combat -> swords
+local st = ns.UF.frames.player.status
+fire("PLAYER_UPDATE_RESTING")
+assert(st.rest.shown and not st.combat.shown and st.anim.playing, "resting icon")
+fire("PLAYER_REGEN_DISABLED")
+assert(st.combat.shown and not st.rest.shown, "combat icon")
+fire("PLAYER_REGEN_ENABLED")
+assert(st.rest.shown and not st.combat.shown, "back to resting")
+print("status icon ok")
 
 -- tags with arguments
 local fs = newWidget("FontString")

@@ -285,6 +285,7 @@ function UF.Layout(f)
     if ns.HealPrediction then ns.HealPrediction.Layout(f, db.width - left - right) end
     if ns.CastBar then ns.CastBar.Layout(f) end
     if ns.Auras then ns.Auras.Layout(f) end
+    if ns.Status then ns.Status.Layout(f) end
     UF.Update(f)
 end
 
@@ -522,6 +523,7 @@ function UF.Create(unit, opts)
 
     buildRegions(f)
     if ns.CastBar then ns.CastBar.Create(f) end
+    if ns.Status then ns.Status.Create(f) end
     wireEvents(f)
     f:HookScript("OnShow", UF.UnitChanged)
 
