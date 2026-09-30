@@ -165,6 +165,7 @@ function UnitFactionGroup() return "Horde" end
 function UnitHasIncomingResurrection(u) return secret(false) end
 function UnitGroupRolesAssigned(u) return u == "party1" and "HEALER" or "NONE" end
 function UnitIsGroupAssistant(u) return secret(u == "player") end
+function GetPartyAssignment(role, u) return secret(role == "MAINTANK" and u == "party1") end
 C_PartyInfo = { GetLootMethod = function() return 2, 0, nil end }
 function UnitThreatSituation(u) return u == "party1" and 3 or 0 end
 function GetThreatStatusColor(s) return 1, 0, 0 end
@@ -582,6 +583,8 @@ assert(plf.indicators.icons.pvp.shown and plf.indicators.icons.pvp.atlas:find("H
 assert(p1f.indicators.icons.role.shown and p1f.indicators.icons.role.atlas == "roleicon-tiny-healer", "healer role icon")
 assert(not plf.indicators.icons.role.shown, "no role, no icon")
 assert(plf.indicators.icons.assistant.alpha == 1 and p1f.indicators.icons.assistant.alpha == 0, "raid assistant icon")
+assert(p1f.indicators.icons.mainTank.alpha == 1 and p1f.indicators.icons.mainAssist.alpha == 0, "main tank icon")
+assert(plf.indicators.icons.mainTank.alpha == 0, "player is no main tank")
 SlashCmdList.LIZUF("unlock")
 assert(p1f.indicators.icons.raidTarget.cell == 8, "config mode shows one mark, not the sheet")
 local markOf = GetRaidTargetIndex

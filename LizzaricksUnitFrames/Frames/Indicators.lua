@@ -29,6 +29,8 @@ IN.KINDS = {
     { "masterLooter", "Master looter" },
     { "leader", "Leader" },
     { "assistant", "Raid assistant" },
+    { "mainTank", "Main tank" },
+    { "mainAssist", "Main assist" },
     { "pvp", "Player vs. Player" },
     { "resurrect", "Resurrections" },
     { "role", "Role (tank, healer, damage)" },
@@ -80,6 +82,8 @@ function IN.Create(f)
     if not icons.assistant:SetTexture(ASSISTANT) then
         icons.assistant:SetAtlas("friends-icon-raidAssist")
     end
+    icons.mainTank:SetAtlas("RaidFrame-Icon-MainTank")
+    icons.mainAssist:SetAtlas("RaidFrame-Icon-MainAssist")
     icons.resurrect:SetAtlas("RaidFrame-Icon-Rez")
     -- pictures for the config-mode preview until real data sets them
     icons.role:SetAtlas(ROLE_ATLAS.TANK)
@@ -160,6 +164,27 @@ end
 -- Raid assistants (the leader has its own icon). The yes/no may be secret.
 function UPDATE.assistant(tex, unit)
     showIf(tex, call(UnitIsGroupAssistant, unit))
+end
+
+-- Main tank / main assist (raid roles set by the leader). GetPartyAssignment
+-- answers yes/no (possibly secret); without it the roster's role is used.
+local function hasRaidRole(unit, role)
+    if GetPartyAssignment then
+        local ok, v = pcall(GetPartyAssignment, role, unit)
+        if ok and type(v) ~= "nil" then return v end
+    end
+    local index = call(UnitInRaid, unit)
+    if not (ns.CanRead(index) and type(index) == "number") or not GetRaidRosterInfo then return false end
+    local ok, r = pcall(function() return (select(10, GetRaidRosterInfo(index))) end)
+    return ok and ns.CanRead(r) and r == role or false
+end
+
+function UPDATE.mainTank(tex, unit)
+    showIf(tex, hasRaidRole(unit, "MAINTANK"))
+end
+
+function UPDATE.mainAssist(tex, unit)
+    showIf(tex, hasRaidRole(unit, "MAINASSIST"))
 end
 
 function UPDATE.masterLooter(tex, unit)

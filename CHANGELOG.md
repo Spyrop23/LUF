@@ -30,6 +30,8 @@ target. Switch them off per frame on the Borders, Indicators and Combat text tab
   the elite/rare/boss dragon on the left or right side of the frame (on for the target).
 - Role indicator: tank, healer or damage icon of group members (as set in the group menu).
 - Raid assistant indicator: the assistant icon on raid assistants (where the leader's crown sits).
+- Main tank and main assist indicators: Blizzard's shield and sword icons on members with that
+  raid role.
 - Highlight, as in Luna (new Highlight tab): the frame lights up on mouseover, when it shows your
   target, and/or tinted by debuff type (ones you can dispel, or all; works in combat). Strength
   adjustable. Off by default.
