@@ -11,6 +11,11 @@
   buff. Shown as a coloured square or with the spell icon, optional cooldown swipe, size and
   offset per square. Works in combat through the game's aura system; spells are matched by ID
   (names of spells from your spellbook are converted automatically).
+- Filters page, as in Luna: named filter lists shared by all characters. Create, rename,
+  delete, export and import lists; search auras by name or spell ID (the rank is shown after
+  the name, e.g. "Demon Armor  Rank 1  ID: 706") and add them with one click; hover a result
+  for its tooltip. Each frame's Auras tab can use a list to hide those buffs/debuffs or to
+  show only them, and every square can take its spells from a list.
 - Every slider now has an input box: type the value and press Enter (kept within the slider's
   range; "0,35" and "0.35" both work).
 

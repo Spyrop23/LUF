@@ -17,6 +17,7 @@ Core\Secret.lua
 Core\Media.lua
 Core\Profile.lua
 Core\Tags.lua
+Core\Filters.lua
 
 Frames\UnitFrame.lua
 Frames\CastBar.lua

@@ -92,7 +92,7 @@ function Widget:AddAuraGroup(key, filterString, opts)
     assert(type(filterString) == "string" and filterString ~= "", "filter string")
     self.groups = self.groups or {}
     assert(not self.unitSet, "group added after SetUnit")
-    self.groups[key] = { filter = filterString, max = opts.maxFrameCount }
+    self.groups[key] = { filter = filterString, max = opts.maxFrameCount, cf = opts.candidateFilters }
     opts.initializeFrame(newWidget("AuraButton"))   -- the engine builds buttons at once
 end
 function Widget:SetUnit(u) self.unitSet = u end
@@ -143,7 +143,14 @@ Settings = {
     RegisterCanvasLayoutCategory = function() return {} end,
     RegisterAddOnCategory = function() end,
 }
-C_Spell = { GetSpellInfo = function(n) if n == "Demon Armor" then return { spellID = 11735 } end end }
+local SPELLS = { [706] = { "Demon Armor", "Rank 1" }, [11735] = { "Demon Armor", "" }, [1454] = { "Life Tap", "Rank 1" } }
+C_Spell = {
+    GetSpellInfo = function(n) if n == "Demon Armor" then return { spellID = 11735 } end end,
+    GetSpellName = function(id) return SPELLS[id] and SPELLS[id][1] end,
+    GetSpellSubtext = function(id) return SPELLS[id] and SPELLS[id][2] or "" end,
+    GetSpellTexture = function(id) return SPELLS[id] and 136185 end,
+    RequestLoadSpellData = function(id) SPELLS[id][2] = SPELLS[id][2] == "" and "Rank 5" or SPELLS[id][2] end,
+}
 function UnitThreatSituation(u) return u == "party1" and 3 or 0 end
 function GetThreatStatusColor(s) return 1, 0, 0 end
 function UnitCanAttack() return true end
@@ -378,6 +385,45 @@ ns.Squares.Update(ns.UF.frames.party1)
 assert(ns.UF.frames.party1.squares.center.tex.shown, "aggro square on party1")
 print("squares ok")
 
+-- filter lists: search by name (ranks after the name) and by ID, add,
+-- remove, export/import, and the aura group / square wiring
+local FL = ns.Filters
+FL.MAX_ID = 30000
+assert(FL.Create("Warlock"))
+FL.Search("demon armor")
+for _ = 1, 5 do tick() end
+assert(FL.search.done and #FL.search.results == 2 and FL.search.results[1] == 706, "name search")
+local items = FL.SearchItems()
+assert(items[1].text:find("Demon Armor") and items[1].text:find("Rank 1") and items[1].text:find("ID: 706"), items[1].text)
+FL.Search("1454")
+assert(FL.search.done and FL.search.results[1] == 1454, "ID search")
+FL.Add("Warlock", 706); FL.Add("Warlock", 1454)
+assert(FL.Describe(11735):find("Rank 5"), "rank loaded later")
+local exported = FL.Export("Warlock")
+assert(exported == "LUF1:Warlock:706,1454", exported)
+FL.Remove("Warlock", 1454)
+assert(#FL.Items("Warlock") == 1, "remove")
+local imported = FL.Import(exported)
+assert(imported == "Warlock (2)" and FL.Get(imported)[1454], "import")
+assert(not FL.Import("garbage"), "bad import rejected")
+local tadb = ns.db.units.target.auras
+tadb.buffList, tadb.buffListMode = "Warlock", "include"
+tadb.debuffList, tadb.debuffListMode = "Warlock (2)", "exclude"
+pdb.topright.enabled, pdb.topright.type, pdb.topright.list = true, "buff", "Warlock"
+ns:ApplyKey("target"); ns:ApplyKey("player")
+local tc = ns.UF.frames.target.auraContainer
+assert(tc.groups.buffs.cf.includeSpellIDs[706] and tc.groups.debuffs.cf.excludeSpellIDs[1454], "aura group filter lists")
+assert(ns.UF.frames.player.squareContainer.slots.topright.ids[706], "square takes spells from a list")
+FL.Add("Warlock", 172)
+assert(ns.UF.frames.target.auraContainer ~= tc, "list change rebuilds the container")
+FL.Rename("Warlock", "Lock")
+assert(tadb.buffList == "Lock" and pdb.topright.list == "Lock", "rename follows references")
+FL.Delete("Lock")
+assert(tadb.buffList == "" and pdb.topright.list == "", "delete clears references")
+FL.selected = "Warlock (2)"
+FL.Search("")
+print("filters ok")
+
 -- status icon: resting -> Zzz, combat -> swords
 local st = ns.UF.frames.player.status
 fire("PLAYER_UPDATE_RESTING")
@@ -478,6 +524,23 @@ assert(tabsSeen >= 60, "tabs clicked: " .. tabsSeen)
 for _, w in ipairs(frames) do
     if w.check or w.slider or w.dropdown or w.edit then use(w) end
 end
+-- filters page: search, add from the result list, remove from the list
+FL.Search("Life")
+for _ = 1, 5 do tick() end
+local lists = {}
+for _, w in ipairs(frames) do if w.rows then table.insert(lists, w) end end
+assert(#lists == 2, "two spell lists on the filters page")
+lists[1]:Refresh()
+assert(lists[1].rows[1].shown and lists[1].rows[1].item.id == 1454, "search result row")
+lists[1].rows[1].button.scripts.OnClick(lists[1].rows[1].button)
+assert(FL.Get(FL.selected)[1454], "added from the result row")
+lists[2]:Refresh()
+local before = #FL.Items(FL.selected)
+lists[2].rows[1].button.scripts.OnClick(lists[2].rows[1].button)
+assert(#FL.Items(FL.selected) == before - 1, "removed from the list row")
+lists[1].next.scripts.OnClick(lists[1].next)
+lists[1].prev.scripts.OnClick(lists[1].prev)
+print("filters page ok")
 assert(ns:IsBlizzardHidden("playercast"), "player cast bar was hidden")
 print("options: " .. #nav .. " pages, " .. tabsSeen .. " tabs, " .. used .. " controls used")
 dump()

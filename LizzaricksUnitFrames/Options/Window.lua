@@ -60,6 +60,14 @@ local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" }
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
 local BUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can cast" } }
 local DEBUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can dispel" } }
+local LIST_MODES = { { "exclude", "Hide the auras in the list" }, { "include", "Show only the auras in the list" } }
+
+-- Filter lists for a dropdown, "None" first.
+local function filterListOptions()
+    local list = { { "", "None" } }
+    for _, n in ipairs(ns.Filters.Names()) do table.insert(list, { n, n }) end
+    return list
+end
 
 -- ------------------------------------------------------------ pages --
 
@@ -209,6 +217,14 @@ local function unitTabs(key)
             b:Slider("Max. debuffs", 1, 40, 1, p("auras.maxDebuffs"))
             b:Slider("Debuff icon size", 8, 60, 1, p("auras.debuffSize"))
             b:Check("Colour debuff border by type (magic, poison ...)", p("auras.dispelColors"))
+            b:Header("Filter lists")
+            b:Text("Lists are made on the Filters page. WoW: Forever only checks spell IDs of buffs on " ..
+                "friendly units and debuffs on hostile ones. \"Hide\" leaves auras it cannot check " ..
+                "visible; \"show only\" hides them (e.g. every debuff on your party).", 44)
+            b:Dropdown("Buff filter list", filterListOptions, p("auras.buffList"))
+            b:Dropdown("Buff list mode", LIST_MODES, p("auras.buffListMode"))
+            b:Dropdown("Debuff filter list", filterListOptions, p("auras.debuffList"))
+            b:Dropdown("Debuff list mode", LIST_MODES, p("auras.debuffListMode"))
             b:Header("Layout")
             b:Dropdown("Position", AURA_POS, p("auras.position"))
             b:Slider("Space between icons", 0, 10, 1, p("auras.spacing"))
@@ -264,6 +280,7 @@ local function unitTabs(key)
                     end
                     ss(v)
                 end)
+                b:Dropdown("Spells from filter list", filterListOptions, p(base .. "list"))
                 b:Check("Show the spell icon instead of a colour", p(base .. "texture"))
                 b:Check("Timer (cooldown swipe)", p(base .. "timer"))
                 b:Slider("X offset", -50, 50, 1, p(base .. "x"))
@@ -291,6 +308,92 @@ end
 for _, key in ipairs(ns.unitKeys) do
     table.insert(pages, { id = key, label = ns.unitLabels[key], tabs = unitTabs(key) })
 end
+
+-- Luna's filter lists: make lists, find auras by name or ID (with rank),
+-- export and import them.
+local newListName, renameTo, importText, searchText = "", "", "", ""
+local deleteArmed = false
+addPage("filters", "Filters", function(b)
+    local FL = ns.Filters
+    local function selected()
+        if not FL.Get(FL.selected) then FL.selected = FL.Names()[1] end
+        return FL.selected
+    end
+    local function report(ok, err)
+        if not ok and err then ns:Print("%s", err) end
+        O:Refresh()
+    end
+    FL.onChange = function() O:Refresh() end
+
+    b:Header("Filter lists")
+    b:Text("Lists of auras for the Auras and Squares tabs of each frame. Shared by all characters.", 16)
+    b:Dropdown("Filter list", function()
+        local list = {}
+        for _, n in ipairs(FL.Names()) do table.insert(list, { n, n }) end
+        return list
+    end, selected, function(v) FL.selected = v; O:Refresh() end)
+    b:Edit("New filter list", function() return newListName end, function(v) newListName = v end, 200)
+    b:Button("Create", function()
+        local name, err = FL.Create(newListName)
+        if name then newListName = "" end
+        report(name, err)
+    end)
+    b:Edit("Rename to", function() return renameTo end, function(v) renameTo = v end, 200)
+    b:Button("Rename", function()
+        local name, err = FL.Rename(selected(), renameTo)
+        if name then renameTo = "" end
+        report(name, err)
+    end)
+    local del
+    del = b:Button("Delete list", function()
+        if not selected() then return end
+        if not deleteArmed then
+            deleteArmed = true
+            del:SetText("Click again to delete")
+            C_Timer.After(3, function() deleteArmed = false; del:SetText("Delete list") end)
+            return
+        end
+        deleteArmed = false
+        del:SetText("Delete list")
+        FL.Delete(selected())
+        O:Refresh()
+    end, 180)
+
+    b:Header("Add aura")
+    b:Edit("Search name or ID", function() return searchText end, function(v)
+        local changedQuery = v ~= searchText
+        searchText = v
+        if changedQuery or not FL.search then FL.Search(v) end
+    end, 200)
+    b:Text(function()
+        local s = FL.SearchStatus()
+        if not selected() then s = s .. "  |cffff5555Create a list first.|r" end
+        return s
+    end, 16)
+    b:List(10, FL.SearchItems, "Add", function(item)
+        if not selected() then ns:Print("Create a filter list first.") return end
+        FL.Add(selected(), item.id)
+    end)
+
+    b:Header("Auras in filter")
+    b:Text(function() return selected() and ("List: |cffffd100" .. selected() .. "|r") or "No list yet." end, 16)
+    b:List(10, function() return FL.Items(selected()) end, "Remove", function(item)
+        FL.Remove(selected(), item.id)
+    end)
+
+    b:Header("Export / Import")
+    local exp = b:Edit("Export (copy this)", function() return FL.Export(selected()) end, function() end, 360)
+    exp.edit:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
+    b:Edit("Import string", function() return importText end, function(v) importText = v end, 360)
+    b:Button("Import", function()
+        local name, err = FL.Import(importText)
+        if name then
+            importText = ""
+            ns:Print("Imported filter list \"%s\".", name)
+        end
+        report(name, err)
+    end)
+end)
 
 addPage("tags", "Tags", function(b)
     b:Header("Tags")

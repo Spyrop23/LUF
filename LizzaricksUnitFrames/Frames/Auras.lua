@@ -198,7 +198,11 @@ local function buildContainer(f, db)
     local sortMethod = _G.AuraContainerSortMethod and _G.AuraContainerSortMethod.Default
     local sortDirection = _G.AuraContainerSortDirection and _G.AuraContainerSortDirection.Normal
     local function group(debuffs)
+        local FL = ns.Filters
+        local candidate = FL and (debuffs and FL.CandidateFilters(db.debuffList, db.debuffListMode)
+            or not debuffs and FL.CandidateFilters(db.buffList, db.buffListMode)) or nil
         return {
+            candidateFilters = candidate,
             maxFrameCount = debuffs and (db.debuffs and db.maxDebuffs or 0) or (db.buffs and db.maxBuffs or 0),
             sortMethod = sortMethod,
             sortDirection = sortDirection,
@@ -225,6 +229,9 @@ local function signature(db)
     return table.concat({
         tostring(db.buffs), tostring(db.debuffs), db.size, db.debuffSize, db.spacing, db.groupGap or 4, db.maxBuffs, db.maxDebuffs,
         db.buffFilter, db.debuffFilter, tostring(db.duration), tostring(db.swipe), tostring(db.dispelColors),
+        db.buffListMode or "", db.debuffListMode or "",
+        ns.Filters and ns.Filters.Get(db.buffList) and ns.Filters.Signature(db.buffList) or "",
+        ns.Filters and ns.Filters.Get(db.debuffList) and ns.Filters.Signature(db.debuffList) or "",
     }, ":")
 end
 

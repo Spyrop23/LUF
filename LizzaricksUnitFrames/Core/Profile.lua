@@ -6,6 +6,7 @@
 --     profiles = { [name] = <settings> },
 --     chars    = { [player GUID] = profileName },
 --     minimap  = { angle = 220, hide = false },   -- account-wide, not per profile
+--     filterLists = { [name] = { [spellID] = true } },   -- account-wide
 -- }
 --
 -- ns.db is the active profile. Missing keys are filled from ns.defaults
@@ -31,10 +32,10 @@ end
 local function squareDefaults()
     local s = {}
     for _, p in ipairs({ "topleft", "top", "topright", "bottomleft", "bottom", "bottomright" }) do
-        s[p] = { enabled = false, type = "aggro", size = 10, x = 0, y = 0, spells = "", texture = false, timer = false }
+        s[p] = { enabled = false, type = "aggro", size = 10, x = 0, y = 0, spells = "", list = "", texture = false, timer = false }
     end
-    s.leftcenter = { enabled = false, type = "aggro", size = 15, x = -1, y = 0, spells = "", texture = false, timer = false }
-    s.center = { enabled = false, type = "aggro", size = 15, x = 0, y = 0, spells = "", texture = false, timer = false }
+    s.leftcenter = { enabled = false, type = "aggro", size = 15, x = -1, y = 0, spells = "", list = "", texture = false, timer = false }
+    s.center = { enabled = false, type = "aggro", size = 15, x = 0, y = 0, spells = "", list = "", texture = false, timer = false }
     s.rightcenter = { enabled = false, type = "aggro", size = 15, x = 1, y = 0, spells = "", texture = false, timer = false }
     return s
 end
@@ -57,6 +58,7 @@ local function unitDefaults(o)
         auras     = {
             buffs = false, debuffs = false,
             buffFilter = "all", debuffFilter = "all",
+            buffList = "", buffListMode = "exclude", debuffList = "", debuffListMode = "exclude",
             size = 18, debuffSize = 22, spacing = 2, groupGap = 4, perRow = 8,
             maxBuffs = 16, maxDebuffs = 16,
             position = "BOTTOM",
@@ -164,6 +166,7 @@ function ns:InitDB()
     LizzaricksUFDB.profiles = LizzaricksUFDB.profiles or {}
     LizzaricksUFDB.chars = LizzaricksUFDB.chars or {}
     LizzaricksUFDB.minimap = LizzaricksUFDB.minimap or { angle = 220, hide = false }
+    LizzaricksUFDB.filterLists = LizzaricksUFDB.filterLists or {}   -- account-wide
     local name = LizzaricksUFDB.chars[charKey()] or "Default"
     LizzaricksUFDB.chars[charKey()] = name
     self:SetProfile(name)

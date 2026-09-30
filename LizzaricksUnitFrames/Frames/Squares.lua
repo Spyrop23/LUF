@@ -158,7 +158,8 @@ local function signature(f)
     for _, pos in ipairs(SQ.POSITIONS) do
         local d = f.db.squares[pos[1]]
         if d.enabled and AURA_TYPES[d.type] then
-            table.insert(parts, table.concat({ pos[1], d.type, d.spells or "", tostring(d.texture), tostring(d.timer) }, ":"))
+            local list = ns.Filters and ns.Filters.Get(d.list) and ns.Filters.Signature(d.list) or ""
+            table.insert(parts, table.concat({ pos[1], d.type, d.spells or "", list, tostring(d.texture), tostring(d.timer) }, ":"))
         end
     end
     return table.concat(parts, "|")
@@ -177,7 +178,9 @@ local function buildContainer(f)
         if d.enabled and AURA_TYPES[d.type] then
             local candidate
             if SQ.LIST_TYPES[d.type] then
-                candidate = { includeSpellIDs = (SQ.ParseSpells(d.spells)) }
+                local ids = SQ.ParseSpells(d.spells)
+                for id in pairs(ns.Filters and ns.Filters.Get(d.list) or {}) do ids[id] = true end
+                candidate = { includeSpellIDs = ids }
             end
             local okSlot = pcall(c.AddAuraSlot, c, key, filterFor(d.type), {
                 initializeFrame = initializer(f.squares[key], d, d.type),

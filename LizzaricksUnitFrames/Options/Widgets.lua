@@ -63,6 +63,7 @@ function Builder:Header(text)
     return self:Add(f, 28)
 end
 
+-- text: a string, or a function returning one (re-read on Refresh).
 function Builder:Text(text, height)
     local f = CreateFrame("Frame", nil, self.parent)
     f:SetSize(self.width - 16, height or 16)
@@ -70,8 +71,89 @@ function Builder:Text(text, height)
     fs:SetAllPoints()
     fs:SetJustifyH("LEFT")
     fs:SetJustifyV("TOP")
-    fs:SetText(text)
+    f.fontString = fs
+    if type(text) == "function" then
+        function f:Refresh() fs:SetText(text()) end
+        f:Refresh()
+    else
+        fs:SetText(text)
+    end
     return self:Add(f, (height or 16) + 4)
+end
+
+-- A page of spell rows (icon, text, one button each) with paging.
+-- items(): { { id =, icon =, text = }, ... }; onAction(item) for the button.
+function Builder:List(count, items, action, onAction)
+    local ROW_H = 22
+    local width = self.width - 16
+    local f = CreateFrame("Frame", nil, self.parent)
+    f:SetSize(width, count * ROW_H + 26)
+    local page = 1
+    f.rows = {}
+    for i = 1, count do
+        local r = CreateFrame("Frame", nil, f)
+        r:SetSize(width, ROW_H - 2)
+        r:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -(i - 1) * ROW_H)
+        local bg = r:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(1, 1, 1, i % 2 == 0 and 0.04 or 0.02)
+        r.icon = r:CreateTexture(nil, "ARTWORK")
+        r.icon:SetSize(18, 18)
+        r.icon:SetPoint("LEFT", 2, 0)
+        r.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        r.text = label(r, "")
+        r.text:SetPoint("LEFT", r.icon, "RIGHT", 6, 0)
+        r.text:SetWidth(width - 120)
+        r.button = CreateFrame("Button", nil, r, "UIPanelButtonTemplate")
+        r.button:SetSize(80, 18)
+        r.button:SetPoint("RIGHT", -2, 0)
+        r.button:SetText(action)
+        r.button:SetScript("OnClick", function() if r.item then onAction(r.item) end end)
+        -- hovering a row shows the spell's tooltip
+        r:EnableMouse(true)
+        r:SetScript("OnEnter", function()
+            if not r.item then return end
+            GameTooltip:SetOwner(r, "ANCHOR_RIGHT")
+            if not pcall(GameTooltip.SetSpellByID, GameTooltip, r.item.id) then
+                GameTooltip:SetText(r.item.text)
+            end
+            GameTooltip:Show()
+        end)
+        r:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        f.rows[i] = r
+    end
+    local prev = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+    prev:SetSize(60, 20)
+    prev:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -count * ROW_H - 2)
+    prev:SetText("<")
+    local next = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+    next:SetSize(60, 20)
+    next:SetPoint("LEFT", prev, "RIGHT", 4, 0)
+    next:SetText(">")
+    local info = label(f, "")
+    info:SetPoint("LEFT", next, "RIGHT", 10, 0)
+    f.prev, f.next = prev, next
+    function f:Refresh()
+        local list = items()
+        local pages = math.max(1, math.ceil(#list / count))
+        page = math.max(1, math.min(page, pages))
+        for i, r in ipairs(f.rows) do
+            local item = list[(page - 1) * count + i]
+            r.item = item
+            r:SetShown(item ~= nil)
+            if item then
+                r.icon:SetTexture(item.icon)
+                r.text:SetText(item.text)
+            end
+        end
+        info:SetText(#list == 0 and "|cff888888(empty)|r" or string.format("Page %d / %d   (%d)", page, pages, #list))
+        prev:SetEnabled(page > 1)
+        next:SetEnabled(page < pages)
+    end
+    prev:SetScript("OnClick", function() page = page - 1; f:Refresh() end)
+    next:SetScript("OnClick", function() page = page + 1; f:Refresh() end)
+    f:Refresh()
+    return self:Add(f, count * ROW_H + 30)
 end
 
 function Builder:Check(text, get, set)
