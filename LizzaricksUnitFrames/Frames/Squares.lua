@@ -237,7 +237,7 @@ local function buildGroup(f, key, d)
     if DIR then try(c, "SetFlowLayoutGrowthDirection", DIR[g[2]], DIR[g[3]]) end
     try(c, "SetFlowLayoutAnchorPoint", g[1])
     try(c, "SetFlowLayoutMaximumLineSize", g[4] and d.size or d.count * (d.size + spacing))
-    try(c, "SetUnit", f.realUnit or f.unit)
+    ns.UF.BindAuraContainer(c, f)
     return c
 end
 
@@ -260,7 +260,7 @@ local function buildContainer(f)
         end
     end
     if not any then c:Hide(); return nil end
-    try(c, "SetUnit", f.realUnit or f.unit)   -- only now, after every slot exists
+    ns.UF.BindAuraContainer(c, f)   -- only now, after every slot exists
     return c
 end
 
@@ -365,8 +365,12 @@ end
 
 -- The unit behind the frame changed.
 function SQ.Refresh(f)
+    ns.UF.BindAuraContainer(f.squareContainer, f)
     try(f.squareContainer, "UpdateAllAuras")
-    for _, c in pairs(f.squareGroups or {}) do try(c, "UpdateAllAuras") end
+    for _, c in pairs(f.squareGroups or {}) do
+        ns.UF.BindAuraContainer(c, f)
+        try(c, "UpdateAllAuras")
+    end
     SQ.Update(f)
 end
 

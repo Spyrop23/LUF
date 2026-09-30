@@ -436,6 +436,14 @@ local function updateBarsAndTexts(f)
     UF.UpdateTexts(f)
 end
 
+-- Points an aura container at the unit the frame shows right now: in
+-- config mode that is the stand-in (the player), so squares, aura rows and
+-- borders preview real auras there too.
+function UF.BindAuraContainer(c, f)
+    if not c or c.boundUnit == f.unit then return end
+    if pcall(c.SetUnit, c, f.unit) then c.boundUnit = f.unit end
+end
+
 -- The unit behind the frame changed (new target, roster change, shown).
 function UF.UnitChanged(f)
     UF.Update(f)

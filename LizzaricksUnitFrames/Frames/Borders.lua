@@ -125,7 +125,7 @@ local function buildContainer(f, db)
         c:Hide()
         return nil
     end
-    try(c, "SetUnit", f.realUnit or f.unit)
+    ns.UF.BindAuraContainer(c, f)
     return c
 end
 
@@ -148,6 +148,7 @@ function BO.Layout(f)
         f.borderContainer = buildContainer(f, db)
         f.borderSignature = sig
     end
+    ns.UF.BindAuraContainer(f.borderContainer, f)
     BO.Update(f)
 end
 
@@ -179,6 +180,7 @@ end
 
 -- The unit behind the frame changed.
 function BO.Refresh(f)
+    ns.UF.BindAuraContainer(f.borderContainer, f)
     try(f.borderContainer, "UpdateAllAuras")
     BO.Update(f)
 end

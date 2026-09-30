@@ -254,8 +254,10 @@ function AU.Layout(f)
         f.auraSignature = signature(db)
         if not f.auraContainer then return end
         -- only now, after every group exists
-        try(f.auraContainer, "SetUnit", f.realUnit or f.unit)
+        ns.UF.BindAuraContainer(f.auraContainer, f)
     end
+
+    ns.UF.BindAuraContainer(f.auraContainer, f)   -- config mode swaps the unit
 
     local cast = f.db.castBar
     local castOn = ns.CastBar and ns.CastBar.supported[f.key] and cast and cast.enabled
@@ -267,5 +269,6 @@ end
 
 -- The unit behind the frame changed (new target, roster change).
 function AU.Refresh(f)
+    ns.UF.BindAuraContainer(f.auraContainer, f)
     try(f.auraContainer, "UpdateAllAuras")
 end

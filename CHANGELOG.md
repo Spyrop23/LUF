@@ -30,6 +30,8 @@
 - Squares can show several auras: "Number of icons" (1-8) and the direction further icons grow
   (right, left, down, up), for every aura type except "missing". In config mode an icon square
   previews the spell's icon instead of a coloured square.
+- Config mode: stand-in party/raid frames now show your own auras in their squares, aura rows
+  and debuff border, so you can see how they will look.
 - Hovering a frame shows the unit's tooltip.
 - Download zip now carries the version in its name (LizzaricksUnitFrames-0.9.2.zip); the folder
   inside stays LizzaricksUnitFrames.

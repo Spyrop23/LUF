@@ -499,9 +499,12 @@ ns:ApplyKey("party")
 SlashCmdList.LIZUF("unlock")
 ns.Squares.Update(p1f)
 assert(p1f.squares.topleft.tex.texture == 136185, "config preview shows the spell icon")
+local p3f = ns.UF.frames.party3
+assert(p3f.unit == "player" and p3f.squareContainer.unitSet == "player", "stand-in frame's squares show the player's auras")
 SlashCmdList.LIZUF("lock")
 ns.Squares.Update(p1f)
 assert(p1f.squares.topleft.tex.texture ~= 136185, "back to the plain square after locking")
+assert(p3f.unit == "party3" and p3f.squareContainer.unitSet == "party3", "squares back on the real unit")
 tl.enabled = false
 print("indicators ok")
 
