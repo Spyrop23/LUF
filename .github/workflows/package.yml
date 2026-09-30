@@ -18,8 +18,9 @@ jobs:
           sudo apt-get install -y lua5.1 >/dev/null
           for f in $(find LizzaricksUnitFrames -name '*.lua'); do luac5.1 -p -o /dev/null "$f"; done
           lua5.1 tools/smoketest.lua
-      - name: Build LizzaricksUnitFrames.zip
-        run: sh tools/package.sh
+      - name: Build LizzaricksUnitFrames-<version>.zip
+        id: pkg
+        run: echo "zip=$(sh tools/package.sh)" >> "$GITHUB_OUTPUT"
       # A release is only made on request: Actions -> package -> "Run workflow".
       # Pushes to main just check and build. The zip unzips straight into
       # Interface/AddOns with the right folder name.
@@ -29,6 +30,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest dist/LizzaricksUnitFrames.zip --title "Lizzarick's Unit Frames (latest)" \
-            --notes "Newest build of main ($GITHUB_SHA). Unzip LizzaricksUnitFrames.zip into World of Warcraft/_classic_beta_/Interface/AddOns." \
+          gh release create latest "${{ steps.pkg.outputs.zip }}" --title "Lizzarick's Unit Frames (latest)" \
+            --notes "Newest build of main ($GITHUB_SHA). Unzip the zip into World of Warcraft/_classic_beta_/Interface/AddOns." \
             --target "$GITHUB_SHA" --latest

@@ -14,7 +14,7 @@ Hinweis: Bis 0.7.1 hieß das Addon „FUF – Forever Unit Frames“ (Ordner `FU
 `AddOns/FUF` löschen; die Einstellungen von damals werden nicht übernommen.
 
 
-**Am einfachsten:** Unter **Releases → Lizzarick's Unit Frames (latest)** die Datei `LizzaricksUnitFrames.zip` laden und direkt nach
+**Am einfachsten:** Unter **Releases → Lizzarick's Unit Frames (latest)** die Datei `LizzaricksUnitFrames-<Version>.zip` laden und direkt nach
 `World of Warcraft/_classic_beta_/Interface/AddOns/` entpacken. Sie wird bei jedem Push neu gebaut.
 
 **Oder über „Code → Download ZIP“:** Im Zip liegt ein Ordner `FUF-main`. Aus ihm nur den inneren
