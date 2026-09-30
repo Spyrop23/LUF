@@ -395,6 +395,13 @@ assert(sc and sc.slots.topleft.ids[11735] and sc.slots.topleft.ids[12345] and sc
 assert(sc.slots.bottom and ns.UF.frames.player.squares.bottom.tex.shown, "missing buff shows red under the slot")
 ns.Squares.Update(ns.UF.frames.party1)
 assert(ns.UF.frames.party1.squares.center.tex.shown, "aggro square on party1")
+pdb.top.enabled, pdb.top.type = true, "castable"
+pdb.center.enabled, pdb.center.type = true, "mybuffs"
+ns:ApplyKey("player")
+sc = ns.UF.frames.player.squareContainer
+assert(sc.slots.top.filter == "HELPFUL|RAID" and not sc.slots.top.ids, "castable square: any buff I can cast")
+assert(sc.slots.center.filter == "HELPFUL|PLAYER" and not sc.slots.center.ids, "my buffs square")
+pdb.top.enabled, pdb.center.enabled = false, false
 print("squares ok")
 
 -- filter lists: search by name (ranks after the name) and by ID, add,
@@ -467,6 +474,9 @@ assert(plf.indicators.icons.leader.alpha == 0, "player not leader")
 assert(plf.indicators.icons.masterLooter.alpha == 1, "player is master looter")
 ns.db.units.player.indicators.pvp.enabled = true; ns:ApplyKey("player")
 assert(plf.indicators.icons.pvp.shown and plf.indicators.icons.pvp.atlas:find("Horde"), "pvp icon")
+SlashCmdList.LIZUF("unlock")
+assert(p1f.indicators.icons.raidTarget.cell == 8, "config mode shows one mark, not the sheet")
+SlashCmdList.LIZUF("lock")
 print("indicators ok")
 
 -- status icon: resting -> Zzz, combat -> swords

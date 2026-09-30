@@ -23,6 +23,10 @@
 - Indicators, as in Luna (Indicators tab on every frame): raid target icon, class, master looter,
   leader, PvP flag and incoming resurrection, each with on/off, size, point and X/Y offset; plus
   the elite/rare/boss dragon on the left or right side of the frame (on for the target).
+- Indicator icons go up to 80 px; in config mode the raid target icon shows one mark (skull)
+  instead of the whole sheet.
+- Squares: the list types are now called "(from filter)", and two new types need no list:
+  "My buffs (any)" (any buff you cast) and "Castable buffs" (any buff you are able to cast).
 - Hovering a frame shows the unit's tooltip.
 - Download zip now carries the version in its name (LizzaricksUnitFrames-0.9.2.zip); the folder
   inside stays LizzaricksUnitFrames.

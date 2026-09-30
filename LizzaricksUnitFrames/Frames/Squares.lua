@@ -6,7 +6,9 @@
 --   aggro      the unit has threat (Blizzard's threat colours; readable)
 --   aggrotot   the unit is your target's target and the target is hostile
 --   buff / debuff / ownbuff / owndebuff
---              an aura from a list of spells is on the unit
+--              an aura from a list of spells (or a filter list) is on the unit
+--   mybuffs    any buff you cast is on the unit
+--   castable   any buff you are able to cast is on the unit
 --   dispel     a debuff you can dispel, coloured by its type
 --   missing    a buff from the list is MISSING (red)
 --
@@ -32,19 +34,22 @@ SQ.POSITIONS = {
 SQ.TYPES = {
     { "aggro", "Aggro" },
     { "aggrotot", "Aggro (target's target)" },
-    { "buff", "Buff (from list)" },
-    { "ownbuff", "My buff (from list)" },
-    { "debuff", "Debuff (from list)" },
-    { "owndebuff", "My debuff (from list)" },
+    { "buff", "Buff (from filter)" },
+    { "ownbuff", "My buff (from filter)" },
+    { "mybuffs", "My buffs (any)" },
+    { "castable", "Castable buffs (any I can cast)" },
+    { "debuff", "Debuff (from filter)" },
+    { "owndebuff", "My debuff (from filter)" },
     { "dispel", "Dispellable debuff" },
-    { "missing", "Missing buff (from list)" },
+    { "missing", "Missing buff (from filter)" },
 }
 
-local AURA_TYPES = { buff = true, ownbuff = true, debuff = true, owndebuff = true, dispel = true, missing = true }
+local AURA_TYPES = { buff = true, ownbuff = true, mybuffs = true, castable = true, debuff = true, owndebuff = true, dispel = true, missing = true }
 SQ.LIST_TYPES = { buff = true, ownbuff = true, debuff = true, owndebuff = true, missing = true }
 
 local COLORS = {
     buff = { 0.20, 0.90, 0.20 }, ownbuff = { 0.30, 0.75, 1.00 },
+    mybuffs = { 0.30, 0.75, 1.00 }, castable = { 1.00, 0.85, 0.20 },
     debuff = { 0.80, 0.20, 0.90 }, owndebuff = { 1.00, 0.60, 0.10 },
     dispel = { 1, 1, 1 }, missing = { 0.95, 0.10, 0.10 },
     aggrotot = { 1.00, 0.35, 0.00 },
@@ -62,7 +67,8 @@ local PLAYER, RAID = F.Player or "PLAYER", F.Raid or "RAID"
 local function filterFor(kind)
     local join = AuraUtil and AuraUtil.CreateFilterString or function(...) return table.concat({ ... }, "|") end
     if kind == "buff" or kind == "missing" then return join(HELPFUL) end
-    if kind == "ownbuff" then return join(HELPFUL, PLAYER) end
+    if kind == "ownbuff" or kind == "mybuffs" then return join(HELPFUL, PLAYER) end
+    if kind == "castable" then return join(HELPFUL, RAID) end
     if kind == "debuff" then return join(HARMFUL) end
     if kind == "owndebuff" then return join(HARMFUL, PLAYER) end
     if kind == "dispel" then return join(HARMFUL, RAID) end

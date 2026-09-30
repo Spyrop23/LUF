@@ -117,14 +117,18 @@ end
 
 local UPDATE = {}
 
+-- One mark out of the 4x4 sheet; the index may be secret.
+local function setRaidCell(tex, index)
+    if try(tex, "SetSpriteSheetCell", index, 4, 4) then return true end
+    if not (ns.CanRead(index) and type(index) == "number") then return false end
+    local i = index - 1
+    tex:SetTexCoord((i % 4) / 4, (i % 4 + 1) / 4, math.floor(i / 4) / 4, (math.floor(i / 4) + 1) / 4)
+    return true
+end
+
 function UPDATE.raidTarget(tex, unit)
     local index = call(GetRaidTargetIndex, unit)
-    if type(index) == "nil" then tex:Hide() return end
-    if not try(tex, "SetSpriteSheetCell", index, 4, 4) then
-        if not (ns.CanRead(index) and type(index) == "number") then tex:Hide() return end
-        local i = index - 1
-        tex:SetTexCoord((i % 4) / 4, (i % 4 + 1) / 4, math.floor(i / 4) / 4, (math.floor(i / 4) + 1) / 4)
-    end
+    if type(index) == "nil" or not setRaidCell(tex, index) then tex:Hide() return end
     tex:Show()
 end
 
@@ -195,7 +199,9 @@ function IN.Update(f)
         if not (d.enabled and exists) then
             tex:Hide()
         elseif ns.unlocked then
-            -- config mode: show where the icons go
+            -- config mode: show where the icons go (the raid mark as a skull,
+            -- not the whole sheet of marks)
+            if k[1] == "raidTarget" then setRaidCell(tex, 8) end
             tex:SetAlpha(1)
             tex:Show()
         else
