@@ -1,7 +1,7 @@
 -- LizzaricksUnitFrames / Frames / Indicators
 --
 -- Luna's small icons on a unit frame: raid target mark, class, group
--- leader, master looter, PvP flag, incoming resurrection, group role and
+-- leader, raid assistant, master looter, PvP flag, incoming resurrection, group role and
 -- the elite dragon. Each has on/off, size, anchor point and offset; the elite dragon
 -- sits on one side of the frame.
 --
@@ -28,6 +28,7 @@ IN.KINDS = {
     { "class", "Class" },
     { "masterLooter", "Master looter" },
     { "leader", "Leader" },
+    { "assistant", "Raid assistant" },
     { "pvp", "Player vs. Player" },
     { "resurrect", "Resurrections" },
     { "role", "Role (tank, healer, damage)" },
@@ -35,6 +36,7 @@ IN.KINDS = {
 
 local RAID_ICONS = "Interface\\TargetingFrame\\UI-RaidTargetingIcons"
 local MASTER_LOOTER = "Interface\\GroupFrame\\UI-Group-MasterLooter"
+local ASSISTANT = "Interface\\GroupFrame\\UI-Group-AssistantIcon"
 local CLASS_ATLAS = "UI-HUD-UnitFrame-Player-Portrait-ClassIcon-"
 local ROLE_ATLAS = { TANK = "roleicon-tiny-tank", HEALER = "roleicon-tiny-healer", DAMAGER = "roleicon-tiny-dps" }
 
@@ -74,6 +76,9 @@ function IN.Create(f)
     icons.leader:SetAtlas("UI-HUD-UnitFrame-Player-Group-LeaderIcon")
     if not icons.masterLooter:SetTexture(MASTER_LOOTER) then
         icons.masterLooter:SetAtlas("Coin-Gold")
+    end
+    if not icons.assistant:SetTexture(ASSISTANT) then
+        icons.assistant:SetAtlas("friends-icon-raidAssist")
     end
     icons.resurrect:SetAtlas("RaidFrame-Icon-Rez")
     -- pictures for the config-mode preview until real data sets them
@@ -150,6 +155,11 @@ end
 
 function UPDATE.leader(tex, unit)
     showIf(tex, call(UnitIsGroupLeader, unit))
+end
+
+-- Raid assistants (the leader has its own icon). The yes/no may be secret.
+function UPDATE.assistant(tex, unit)
+    showIf(tex, call(UnitIsGroupAssistant, unit))
 end
 
 function UPDATE.masterLooter(tex, unit)

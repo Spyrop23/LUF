@@ -163,6 +163,7 @@ function UnitIsPVPFreeForAll() return false end
 function UnitFactionGroup() return "Horde" end
 function UnitHasIncomingResurrection(u) return secret(false) end
 function UnitGroupRolesAssigned(u) return u == "party1" and "HEALER" or "NONE" end
+function UnitIsGroupAssistant(u) return secret(u == "player") end
 C_PartyInfo = { GetLootMethod = function() return 2, 0, nil end }
 function UnitThreatSituation(u) return u == "party1" and 3 or 0 end
 function GetThreatStatusColor(s) return 1, 0, 0 end
@@ -568,6 +569,7 @@ ns.db.units.player.indicators.pvp.enabled = true; ns:ApplyKey("player")
 assert(plf.indicators.icons.pvp.shown and plf.indicators.icons.pvp.atlas:find("Horde"), "pvp icon")
 assert(p1f.indicators.icons.role.shown and p1f.indicators.icons.role.atlas == "roleicon-tiny-healer", "healer role icon")
 assert(not plf.indicators.icons.role.shown, "no role, no icon")
+assert(plf.indicators.icons.assistant.alpha == 1 and p1f.indicators.icons.assistant.alpha == 0, "raid assistant icon")
 SlashCmdList.LIZUF("unlock")
 assert(p1f.indicators.icons.raidTarget.cell == 8, "config mode shows one mark, not the sheet")
 local markOf = GetRaidTargetIndex

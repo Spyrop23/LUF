@@ -64,6 +64,7 @@ local function unitDefaults(o)
             class        = { enabled = false, size = 16, point = "BOTTOMRIGHT", x = -1, y = 1 },
             masterLooter = { enabled = true, size = 12, point = "TOPRIGHT", x = -16, y = -1 },
             leader       = { enabled = true, size = 14, point = "TOPRIGHT", x = -4, y = -1 },
+            assistant    = { enabled = true, size = 14, point = "TOPRIGHT", x = -4, y = -1 },   -- where the leader's crown would be
             pvp          = { enabled = false, size = 24, point = "RIGHT", x = 0, y = 0 },
             resurrect    = { enabled = true, size = 20, point = "CENTER", x = 0, y = 0 },
             role         = { enabled = true, size = 14, point = "TOPLEFT", x = 4, y = -1 },

@@ -29,6 +29,7 @@ target. Switch them off per frame on the Borders, Indicators and Combat text tab
   leader, PvP flag and incoming resurrection, each with on/off, size, point and X/Y offset; plus
   the elite/rare/boss dragon on the left or right side of the frame (on for the target).
 - Role indicator: tank, healer or damage icon of group members (as set in the group menu).
+- Raid assistant indicator: the assistant icon on raid assistants (where the leader's crown sits).
 - Highlight, as in Luna (new Highlight tab): the frame lights up on mouseover, when it shows your
   target, and/or tinted by debuff type (ones you can dispel, or all; works in combat). Strength
   adjustable. Off by default.
