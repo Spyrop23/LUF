@@ -412,6 +412,15 @@ local function use(w)
         w.check.scripts.OnClick(w.check)
     elseif w.slider then
         w.slider:SetValue(((w.slider.min or 0) + (w.slider.max or 1)) / 2)
+        -- typed value: out of range gets clamped to max
+        w.valueBox:SetText("99999")
+        w.valueBox.scripts.OnEnterPressed(w.valueBox)
+        assert(w.slider.value == w.slider.max, "typed value clamped")
+        if (w.slider.max or 0) <= 1 then
+            w.valueBox:SetText("0,35")
+            w.valueBox.scripts.OnEnterPressed(w.valueBox)
+            assert(math.abs(w.slider.value - 0.35) < 0.001, "decimal typed: " .. tostring(w.slider.value))
+        end
     elseif w.dropdown then
         w.dropdown:GenerateMenu()
         local r = w.dropdown.radios[1]

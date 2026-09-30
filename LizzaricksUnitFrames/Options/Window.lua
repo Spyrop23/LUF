@@ -245,7 +245,7 @@ local function unitTabs(key)
         end)
     end
 
-    tab("texts", "Texts", function(b)
+    tab("tags", "Tags", function(b)
         for _, bar in ipairs(ns.UF.BAR_KEYS) do
             if bar ~= "xpBar" or ns.UF.XP_SUPPORTED[key] then
                 b:Header(BAR_LABELS[bar])

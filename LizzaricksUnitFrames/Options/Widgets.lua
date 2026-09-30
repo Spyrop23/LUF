@@ -103,11 +103,35 @@ function Builder:Slider(text, min, max, step, get, set, fmt)
     s:SetMinMaxValues(min, max)
     s:SetValueStep(step)
     s:SetObeyStepOnDrag(true)
-    local value = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    value:SetPoint("LEFT", s, "RIGHT", 10, 0)
+    -- The value can also be typed in (Enter applies it; it is kept inside
+    -- min..max and snapped to the step).
+    local value = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
+    value:SetAutoFocus(false)
+    value:SetSize(52, 20)
+    value:SetPoint("LEFT", s, "RIGHT", 16, 0)
+    value:SetJustifyH("CENTER")
+    local function show(v)
+        if not value:HasFocus() then value:SetText(string.format(fmt, v)) end
+    end
+    local function commit(box)
+        -- extra parentheses: gsub also returns a count, which tonumber would
+        -- take as the number base
+        local v = tonumber(((box:GetText() or ""):gsub(",", "."))) -- "0,35" works too
+        if v then
+            v = math.max(min, math.min(max, v))
+            v = min + math.floor((v - min) / step + 0.5) * step
+            s:SetValue(v)
+        end
+        box:ClearFocus()
+        show(s:GetValue())
+    end
+    value:SetScript("OnEnterPressed", commit)
+    value:SetScript("OnEditFocusLost", function(box) show(s:GetValue()) end)
+    value:SetScript("OnEscapePressed", function(box) box:ClearFocus(); show(s:GetValue()) end)
+    f.valueBox = value
     local refreshing = false
     s:SetScript("OnValueChanged", function(_, v)
-        value:SetFormattedText(fmt, v)
+        show(v)
         if not refreshing then set(v) end
     end)
     s:EnableMouseWheel(true)
@@ -119,7 +143,7 @@ function Builder:Slider(text, min, max, step, get, set, fmt)
         refreshing = true
         local v = tonumber(get()) or min
         s:SetValue(v)
-        value:SetFormattedText(fmt, v)
+        show(v)
         refreshing = false
     end
     f:Refresh()
