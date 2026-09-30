@@ -32,10 +32,10 @@ end
 local function squareDefaults()
     local s = {}
     for _, p in ipairs({ "topleft", "top", "topright", "bottomleft", "bottom", "bottomright" }) do
-        s[p] = { enabled = false, type = "aggro", size = 10, x = 0, y = 0, spells = "", list = "", texture = false, timer = false }
+        s[p] = { enabled = false, type = "aggro", size = 10, x = 0, y = 0, spells = "", list = "", texture = false, timer = false, count = 1, grow = "RIGHT" }
     end
-    s.leftcenter = { enabled = false, type = "aggro", size = 15, x = -1, y = 0, spells = "", list = "", texture = false, timer = false }
-    s.center = { enabled = false, type = "aggro", size = 15, x = 0, y = 0, spells = "", list = "", texture = false, timer = false }
+    s.leftcenter = { enabled = false, type = "aggro", size = 15, x = -1, y = 0, spells = "", list = "", texture = false, timer = false, count = 1, grow = "RIGHT" }
+    s.center = { enabled = false, type = "aggro", size = 15, x = 0, y = 0, spells = "", list = "", texture = false, timer = false, count = 1, grow = "RIGHT" }
     s.rightcenter = { enabled = false, type = "aggro", size = 15, x = 1, y = 0, spells = "", texture = false, timer = false }
     return s
 end

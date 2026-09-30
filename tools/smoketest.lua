@@ -402,6 +402,17 @@ sc = ns.UF.frames.player.squareContainer
 assert(sc.slots.top.filter == "HELPFUL|RAID" and not sc.slots.top.ids, "castable square: any buff I can cast")
 assert(sc.slots.center.filter == "HELPFUL|PLAYER" and not sc.slots.center.ids, "my buffs square")
 pdb.top.enabled, pdb.center.enabled = false, false
+-- several icons in one square: its own aura group, not duplicate slots
+pdb.bottomright.enabled, pdb.bottomright.type, pdb.bottomright.count, pdb.bottomright.grow = true, "mybuffs", 3, "LEFT"
+ns:ApplyKey("player")
+local grp = ns.UF.frames.player.squareGroups.bottomright
+assert(grp and grp.groups.square.max == 3 and grp.groups.square.filter == "HELPFUL|PLAYER" and grp.unitSet == "player", "multi-icon square")
+assert(not ns.UF.frames.player.squareContainer.slots.bottomright, "no single slot for a multi-icon square")
+pdb.bottomright.count = 1
+ns:ApplyKey("player")
+assert(not ns.UF.frames.player.squareGroups.bottomright and ns.UF.frames.player.squareContainer.slots.bottomright, "back to one slot")
+pdb.bottomright.enabled = false
+ns:ApplyKey("player")
 print("squares ok")
 
 -- filter lists: search by name (ranks after the name) and by ID, add,

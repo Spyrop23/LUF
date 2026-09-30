@@ -129,11 +129,17 @@ local function newHolder(f)
     return h
 end
 
--- The engine's slot button, styled once and pinned to our holder frame.
+-- The engine's button, styled once. A slot button is pinned to our holder
+-- frame; a group button (several icons) only gets its size, the group
+-- lays it out.
 local function initializer(holder, db, kind)
     return function(button)
-        button:ClearAllPoints()
-        button:SetAllPoints(holder)
+        if holder then
+            button:ClearAllPoints()
+            button:SetAllPoints(holder)
+        else
+            button:SetSize(db.size, db.size)
+        end
         local border = button:CreateTexture(nil, "BACKGROUND")
         border:SetAllPoints(button)
         border:SetColorTexture(0, 0, 0, 1)
@@ -181,10 +187,58 @@ local function signature(f)
         local d = f.db.squares[pos[1]]
         if d.enabled and AURA_TYPES[d.type] then
             local list = ns.Filters and ns.Filters.Get(d.list) and ns.Filters.Signature(d.list) or ""
-            table.insert(parts, table.concat({ pos[1], d.type, d.spells or "", list, tostring(d.texture), tostring(d.timer) }, ":"))
+            table.insert(parts, table.concat({ pos[1], d.type, d.spells or "", list, tostring(d.texture), tostring(d.timer),
+                d.count or 1, d.grow or "RIGHT", d.size }, ":"))
         end
     end
     return table.concat(parts, "|")
+end
+
+-- A square with several icons: its own container with one aura group.
+local function isMulti(d)
+    return (d.count or 1) > 1 and AURA_TYPES[d.type] and d.type ~= "missing"
+end
+
+local function candidateFor(d)
+    if not SQ.LIST_TYPES[d.type] then return nil end
+    local ids = SQ.ParseSpells(d.spells)
+    for id in pairs(ns.Filters and ns.Filters.Get(d.list) or {}) do ids[id] = true end
+    return { includeSpellIDs = ids }
+end
+
+local DIR = AnchorUtil and AnchorUtil.FlowDirection
+-- grow -> container corner (= holder corner), horizontal, vertical, one line?
+local GROW = {
+    RIGHT = { "TOPLEFT", "Right", "Down", false },
+    LEFT  = { "TOPRIGHT", "Left", "Down", false },
+    DOWN  = { "TOPLEFT", "Right", "Down", true },
+    UP    = { "BOTTOMLEFT", "Right", "Up", true },
+}
+SQ.GROW = { { "RIGHT", "Right" }, { "LEFT", "Left" }, { "DOWN", "Down" }, { "UP", "Up" } }
+
+local function buildGroup(f, key, d)
+    local ok, c = pcall(CreateFrame, "AuraContainer", nil, f, "CustomAuraContainerTemplate")
+    if not ok or not c then return nil end
+    c:SetFrameLevel(f:GetFrameLevel() + 16)
+    local g = GROW[d.grow] or GROW.RIGHT
+    local spacing = 1
+    c:SetPoint(g[1], f.squares[key], g[1])
+    c:SetSize(1, 1)
+    local okGroup = pcall(c.AddAuraGroup, c, "square", filterFor(d.type), {
+        maxFrameCount = d.count,
+        sortMethod = _G.AuraContainerSortMethod and _G.AuraContainerSortMethod.Default,
+        sortDirection = _G.AuraContainerSortDirection and _G.AuraContainerSortDirection.Normal,
+        initializeFrame = initializer(nil, d, d.type),
+        candidateFilters = candidateFor(d),
+        layout = { elementWidth = d.size, elementHeight = d.size, elementSpacing = spacing, lineSpacing = spacing },
+    })
+    if not okGroup then c:Hide() return nil end
+    try(c, "SetFlowLayoutPadding", 0, 0, 0, 0)
+    if DIR then try(c, "SetFlowLayoutGrowthDirection", DIR[g[2]], DIR[g[3]]) end
+    try(c, "SetFlowLayoutAnchorPoint", g[1])
+    try(c, "SetFlowLayoutMaximumLineSize", g[4] and d.size or d.count * (d.size + spacing))
+    try(c, "SetUnit", f.realUnit or f.unit)
+    return c
 end
 
 local function buildContainer(f)
@@ -197,16 +251,10 @@ local function buildContainer(f)
     for _, pos in ipairs(SQ.POSITIONS) do
         local key = pos[1]
         local d = f.db.squares[key]
-        if d.enabled and AURA_TYPES[d.type] then
-            local candidate
-            if SQ.LIST_TYPES[d.type] then
-                local ids = SQ.ParseSpells(d.spells)
-                for id in pairs(ns.Filters and ns.Filters.Get(d.list) or {}) do ids[id] = true end
-                candidate = { includeSpellIDs = ids }
-            end
+        if d.enabled and AURA_TYPES[d.type] and not isMulti(d) then
             local okSlot = pcall(c.AddAuraSlot, c, key, filterFor(d.type), {
                 initializeFrame = initializer(f.squares[key], d, d.type),
-                candidateFilters = candidate,
+                candidateFilters = candidateFor(d),
             })
             any = any or okSlot
         end
@@ -244,14 +292,25 @@ function SQ.Layout(f)
     end
 
     local sig = signature(f)
-    if f.squareContainer and f.squareSignature ~= sig then
-        try(f.squareContainer, "SetUnit", "none")
-        f.squareContainer:Hide()
-        f.squareContainer = nil
-    end
-    if sig ~= "" and not f.squareContainer and ns.Auras and ns.Auras.CanBuild() then
-        f.squareContainer = buildContainer(f)
-        f.squareSignature = sig
+    if f.squareSignature ~= sig then
+        -- retire the old containers: no unit, hidden (they cannot be destroyed)
+        for _, c in pairs(f.squareGroups or {}) do
+            try(c, "SetUnit", "none")
+            c:Hide()
+        end
+        if f.squareContainer then
+            try(f.squareContainer, "SetUnit", "none")
+            f.squareContainer:Hide()
+        end
+        f.squareContainer, f.squareGroups, f.squareSignature = nil, {}, nil
+        if sig ~= "" and ns.Auras and ns.Auras.CanBuild() then
+            f.squareContainer = buildContainer(f)
+            for _, pos in ipairs(SQ.POSITIONS) do
+                local d = all[pos[1]]
+                if d.enabled and isMulti(d) then f.squareGroups[pos[1]] = buildGroup(f, pos[1], d) end
+            end
+            f.squareSignature = sig
+        end
     end
     SQ.Update(f)
 end
@@ -307,6 +366,7 @@ end
 -- The unit behind the frame changed.
 function SQ.Refresh(f)
     try(f.squareContainer, "UpdateAllAuras")
+    for _, c in pairs(f.squareGroups or {}) do try(c, "UpdateAllAuras") end
     SQ.Update(f)
 end
 
