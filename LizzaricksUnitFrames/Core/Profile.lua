@@ -173,6 +173,7 @@ ns.defaults = {
         raid = unitDefaults(small({
             x = 10, y = -420, width = 60, height = 30, spacing = 2, groupSpacing = 4,
             groupDirection = "DOWN", groupsPerRow = 8, separateGroups = false,
+            showInParty = false, hidePartyFrames = true,   -- Luna: raid frames in a party
             healthBar = { weight = 8 },
             powerBar = { enabled = true, weight = 1.5 },
             tags = {

@@ -609,9 +609,16 @@ function UF.Watch(f)
         f:Hide()
         return
     end
-    local party = ns.db.units.party
-    if (f.key == "party" or f.key == "partypet" or f.key == "partytarget") and party.hideInRaid and RegisterStateDriver then
-        RegisterStateDriver(f, "visibility", "[group:raid] hide; [@" .. f.unit .. ",exists] show; hide")
+    local party, raid = ns.db.units.party, ns.db.units.raid
+    local isParty = f.key == "party" or f.key == "partypet" or f.key == "partytarget"
+    -- party frames step aside while the raid frames show the party
+    local hideParty = isParty and raid.enabled and raid.showInParty and raid.hidePartyFrames
+    if isParty and (party.hideInRaid or hideParty) and RegisterStateDriver then
+        local exists = "[@" .. f.unit .. ",exists] show; hide"
+        local rule = party.hideInRaid and "[group:raid] hide; "
+            or ("[group:raid,@" .. f.unit .. ",exists] show; [group:raid] hide; ")
+        if hideParty then rule = rule .. "[group:party] hide; " end
+        RegisterStateDriver(f, "visibility", rule .. exists)
     else
         RegisterUnitWatch(f)
     end
@@ -651,6 +658,14 @@ local function flush()
                 for _, f in ipairs(UF.byKey.partypet or {}) do UF.Apply(f) end
                 for _, f in ipairs(UF.byKey.partytarget or {}) do UF.Apply(f) end
             end
+            -- raid frames in a party: re-bind them, and the party frames
+            -- may hide now
+            if key == "raid" then
+                UF.ArrangeRaid()
+                for _, k in ipairs({ "party", "partypet", "partytarget" }) do
+                    for _, f in ipairs(UF.byKey[k] or {}) do UF.Apply(f) end
+                end
+            end
             -- main tank / assist targets hang on their frames
             if UF.byKey[key .. "target"] and (key == "maintank" or key == "mainassist") then
                 for _, f in ipairs(UF.byKey[key .. "target"]) do UF.Apply(f) end
@@ -688,10 +703,18 @@ function UF.ArrangeRaid()
     -- answers GetRaidRosterInfo (subgroup 1 for everybody), which piled all
     -- 40 frames into the first column.
     local inRaid = IsInRaid and IsInRaid()
+    -- Luna's "raid frames in a party": outside a raid the first raid group
+    -- shows you and party1-4; in a raid every frame shows its raidN again.
+    local db = ns.db.units.raid
+    local inParty = not inRaid and IsInGroup and IsInGroup()
+    local partyMode = db.showInParty and inParty
     local count = {}
     for i = 1, 40 do
         local f = UF.frames["raid" .. i]
         if f then
+            local unit = "raid" .. i
+            if partyMode and i <= 5 then unit = (i == 1) and "player" or ("party" .. (i - 1)) end
+            UF.SetUnit(f, unit)
             local group
             if inRaid and GetRaidRosterInfo and UnitExists("raid" .. i) then
                 local ok, _, _, subgroup = pcall(GetRaidRosterInfo, i)

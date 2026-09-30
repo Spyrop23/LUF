@@ -191,6 +191,7 @@ function UnregisterStateDriver(f) f.driver = nil end
 function GetRaidRosterInfo(i) return "Member" .. i, 0, ({ 1, 3, 3, 2, 1 })[i] or 1 end
 local raidMode = false
 function IsInRaid() return raidMode end
+function IsInGroup() return true end   -- party1 exists
 function IsResting() return true end
 function Widget:SetAtlas(a) self.atlas = a end
 function Widget:CreateAnimationGroup()
@@ -546,6 +547,23 @@ ns.AssignRaidRoles()
 assert(mt1.unit == "none", "roles cleared outside a raid")
 GetRaidRosterInfo = rosterInfo
 print("main tank ok")
+
+-- raid frames in a party: group 1 shows you and party1-4, party frames step aside
+local rdb2 = ns.db.units.raid
+rdb2.showInParty = true
+ns:ApplyKey("raid")
+local r1, r2, r6 = ns.UF.frames.raid1, ns.UF.frames.raid2, ns.UF.frames.raid6
+assert(r1.unit == "player" and r2.unit == "party1" and r6.unit == "raid6", "raid frames bound to the party")
+assert(r1.raidGroup == 1 and r2.raidSlot == 2, "party in raid group 1")
+assert(ns.UF.frames.party1.driver:find("%[group:party%] hide"), "party frames hide while raid frames show the party")
+raidMode = true
+ns.UF.ArrangeRaid()
+assert(r1.unit == "raid1" and r2.unit == "raid2", "back to raid units in a raid")
+raidMode = false
+rdb2.showInParty = false
+ns:ApplyKey("raid")
+assert(r1.unit == "raid1" and not ns.UF.frames.party1.driver:find("group:party"), "option off")
+print("raid in party ok")
 
 -- focus: our frame replaces Blizzard's, with auras and a cast bar
 units.focus = true

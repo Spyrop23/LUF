@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+- Raid frames in a party, as in Luna: Raid → General → "Use the raid frames in a party too". In a
+  party the first raid group shows you and party 1-4 (with everything set up for the raid:
+  squares, borders, range ...); in a raid the frames switch back. "Hide the party frames then"
+  (on by default) hides the party frames meanwhile. Off by default.
+
 ## 0.10.1
 - The chat command is now `/luf` (e.g. `/luf unlock`). The old `/lzuf` and `/lizuf` still work.
 
