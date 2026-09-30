@@ -764,5 +764,10 @@ SlashCmdList.LIZUF("profile Raid")
 SlashCmdList.LIZUF("profile")
 SlashCmdList.LIZUF("reset")
 SlashCmdList.LIZUF("pet")
+C_UnitAuras = { GetAuraDataByIndex = function(unit, i, filter)
+    if i == 1 then return { spellId = 19740, name = "Blessing of Might" } end
+    if i == 2 and filter == "HELPFUL" then return { spellId = 1459, name = "Arcane Intellect" } end
+end }
+SlashCmdList.LIZUF("buffs")
 assert(ns.Texture():find("LizzaricksUnitFrames\\Media\\Smooth"), "default texture")
 print("OK")
