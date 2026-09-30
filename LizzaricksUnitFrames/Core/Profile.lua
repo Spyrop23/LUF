@@ -27,6 +27,18 @@ local function merge(dst, src)
     return dst
 end
 
+-- Luna's nine squares, all off: corners 10 px, edges and centre 15 px.
+local function squareDefaults()
+    local s = {}
+    for _, p in ipairs({ "topleft", "top", "topright", "bottomleft", "bottom", "bottomright" }) do
+        s[p] = { enabled = false, type = "aggro", size = 10, x = 0, y = 0, spells = "", texture = false, timer = false }
+    end
+    s.leftcenter = { enabled = false, type = "aggro", size = 15, x = -1, y = 0, spells = "", texture = false, timer = false }
+    s.center = { enabled = false, type = "aggro", size = 15, x = 0, y = 0, spells = "", texture = false, timer = false }
+    s.rightcenter = { enabled = false, type = "aggro", size = 15, x = 1, y = 0, spells = "", texture = false, timer = false }
+    return s
+end
+
 local function unitDefaults(o)
     local d = {
         enabled = true,
@@ -41,6 +53,7 @@ local function unitDefaults(o)
         healPrediction = { enabled = true, overflow = 1.05, alpha = 0.8, absorbs = true },
         xpBar     = { enabled = false, weight = 2, background = true, backgroundAlpha = 0.2 },
         range     = { enabled = true, alpha = 0.4 },
+        squares   = squareDefaults(),
         auras     = {
             buffs = false, debuffs = false,
             buffFilter = "all", debuffFilter = "all",

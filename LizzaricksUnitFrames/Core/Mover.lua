@@ -131,6 +131,7 @@ function ns.UnlockFrame(f)
     f:SetAlpha(1)
     UF.Update(f)
     if ns.CastBar then ns.CastBar.Preview(f, true) end
+    if ns.Squares then ns.Squares.Update(f) end
 end
 
 local function lockFrame(f)

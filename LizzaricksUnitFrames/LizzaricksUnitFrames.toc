@@ -24,6 +24,7 @@ Frames\Auras.lua
 Frames\HealPrediction.lua
 Frames\Range.lua
 Frames\Status.lua
+Frames\Squares.lua
 Frames\Blizzard.lua
 Frames\Units.lua
 

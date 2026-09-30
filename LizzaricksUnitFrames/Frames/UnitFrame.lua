@@ -286,6 +286,7 @@ function UF.Layout(f)
     if ns.CastBar then ns.CastBar.Layout(f) end
     if ns.Auras then ns.Auras.Layout(f) end
     if ns.Status then ns.Status.Layout(f) end
+    if ns.Squares then ns.Squares.Layout(f) end
     UF.Update(f)
 end
 
@@ -438,6 +439,7 @@ function UF.UnitChanged(f)
     UF.Update(f)
     if ns.CastBar then ns.CastBar.Refresh(f) end
     if ns.Auras then ns.Auras.Refresh(f) end
+    if ns.Squares then ns.Squares.Refresh(f) end
 end
 
 -- Which parts an event touches; everything else redraws the whole frame.
@@ -524,6 +526,7 @@ function UF.Create(unit, opts)
     buildRegions(f)
     if ns.CastBar then ns.CastBar.Create(f) end
     if ns.Status then ns.Status.Create(f) end
+    if ns.Squares then ns.Squares.Create(f) end
     wireEvents(f)
     f:HookScript("OnShow", UF.UnitChanged)
 

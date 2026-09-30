@@ -96,6 +96,15 @@ function Widget:AddAuraGroup(key, filterString, opts)
     opts.initializeFrame(newWidget("AuraButton"))   -- the engine builds buttons at once
 end
 function Widget:SetUnit(u) self.unitSet = u end
+function Widget:AddAuraSlot(key, filterString, opts)
+    assert(type(filterString) == "string" and filterString ~= "", "slot filter")
+    assert(not self.unitSet, "slot added after SetUnit")
+    self.slots = self.slots or {}
+    local b = newWidget("AuraButton")
+    opts.initializeFrame(b)
+    self.slots[key] = { filter = filterString, ids = opts.candidateFilters and opts.candidateFilters.includeSpellIDs, button = b }
+    return b
+end
 function CreateFrame(kind, name) return newWidget(kind, name) end
 UIParent = newWidget("Frame", "UIParent")
 Minimap = newWidget("Frame", "Minimap")
@@ -134,6 +143,10 @@ Settings = {
     RegisterCanvasLayoutCategory = function() return {} end,
     RegisterAddOnCategory = function() end,
 }
+C_Spell = { GetSpellInfo = function(n) if n == "Demon Armor" then return { spellID = 11735 } end end }
+function UnitThreatSituation(u) return u == "party1" and 3 or 0 end
+function GetThreatStatusColor(s) return 1, 0, 0 end
+function UnitCanAttack() return true end
 C_PetInfo = {
     GetPetHappiness = function() return 2, 100, 0 end,
     GetPetLoyalty = function() return "Loyal" end,
@@ -350,6 +363,20 @@ assert(ns.UF.frames.pet.alpha ~= 0.4, "own pet never fades")
 -- pet XP bar
 assert(pet.xpBar.value == 150 and pet.xpBar.shown, "pet xp bar")
 print("raid/range/xp ok")
+
+-- squares: aggro on party1, a spell-list buff slot on the player
+local pdb = ns.db.units.player.squares
+pdb.topleft.enabled, pdb.topleft.type, pdb.topleft.spells = true, "buff", "Demon Armor; 12345"
+pdb.bottom.enabled, pdb.bottom.type = true, "missing"
+pdb.bottom.spells = "Demon Armor"
+ns.db.units.party.squares.center.enabled = true
+ns:ApplyKey("player"); ns:ApplyKey("party")
+local sc = ns.UF.frames.player.squareContainer
+assert(sc and sc.slots.topleft.ids[11735] and sc.slots.topleft.ids[12345] and sc.unitSet == "player", "square slot by spell ID")
+assert(sc.slots.bottom and ns.UF.frames.player.squares.bottom.tex.shown, "missing buff shows red under the slot")
+ns.Squares.Update(ns.UF.frames.party1)
+assert(ns.UF.frames.party1.squares.center.tex.shown, "aggro square on party1")
+print("squares ok")
 
 -- status icon: resting -> Zzz, combat -> swords
 local st = ns.UF.frames.player.status

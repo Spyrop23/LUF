@@ -245,6 +245,33 @@ local function unitTabs(key)
         end)
     end
 
+    if ns.Squares and ns.Squares.supported[key] then
+        tab("squares", "Squares", function(b)
+            b:Text("Nine small indicators on the frame. Aura squares match by spell: type spell IDs or " ..
+                "names of spells from your spellbook, separated by ; (e.g. Demon Armor; 10938). " ..
+                "WoW: Forever only matches buffs on friendly units and debuffs on hostile ones.", 44)
+            for _, pos in ipairs(ns.Squares.POSITIONS) do
+                local base = "squares." .. pos[1] .. "."
+                b:Header(pos[2])
+                b:Check("Enabled", p(base .. "enabled"))
+                b:Dropdown("Type", ns.Squares.TYPES, p(base .. "type"))
+                b:Slider("Size", 4, 40, 1, p(base .. "size"))
+                local gs, ss = p(base .. "spells")
+                b:Edit("Spells (for list types)", gs, function(v)
+                    local _, unknown = ns.Squares.ParseSpells(v)
+                    if #unknown > 0 then
+                        ns:Print("Unknown spell (use its ID): %s", table.concat(unknown, ", "))
+                    end
+                    ss(v)
+                end)
+                b:Check("Show the spell icon instead of a colour", p(base .. "texture"))
+                b:Check("Timer (cooldown swipe)", p(base .. "timer"))
+                b:Slider("X offset", -50, 50, 1, p(base .. "x"))
+                b:Slider("Y offset", -50, 50, 1, p(base .. "y"))
+            end
+        end)
+    end
+
     tab("tags", "Tags", function(b)
         for _, bar in ipairs(ns.UF.BAR_KEYS) do
             if bar ~= "xpBar" or ns.UF.XP_SUPPORTED[key] then

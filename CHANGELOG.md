@@ -5,6 +5,12 @@
   Health bar, Power bar, Cast bar, XP bar, Portrait, Incoming heals, Auras, Range, Indicators and
   Tags (only the ones that apply to that frame). The selected tab is kept when you switch between
   frames.
+- Squares, as in Luna: nine indicator squares per frame (corners, edges, centre) on player, pet,
+  target, party, party pets and raid. Types: aggro, aggro (target's target), buff, my buff,
+  debuff, my debuff (each from a spell list), dispellable debuff (coloured by type) and missing
+  buff. Shown as a coloured square or with the spell icon, optional cooldown swipe, size and
+  offset per square. Works in combat through the game's aura system; spells are matched by ID
+  (names of spells from your spellbook are converted automatically).
 - Every slider now has an input box: type the value and press Enter (kept within the slider's
   range; "0,35" and "0.35" both work).
 

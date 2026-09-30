@@ -94,6 +94,8 @@ local function compactFormatter()
     return f
 end
 
+AU.CanBuild = function() return canBuild() end
+
 -- ------------------------------------------------------------ buttons --
 
 local function initializer(db, debuffs)
