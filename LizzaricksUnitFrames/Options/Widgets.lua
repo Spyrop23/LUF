@@ -289,6 +289,42 @@ function Builder:Edit(text, get, set, width, numeric)
     return self:Add(f)
 end
 
+-- A colour swatch; a click opens Blizzard's colour picker. get() returns
+-- { r, g, b }, set(r, g, b) stores it (also live while picking and on cancel).
+function Builder:Color(text, get, set)
+    local f = CreateFrame("Frame", nil, self.parent)
+    f:SetSize(self.width - 16, ROW)
+    local fs = label(f, text)
+    fs:SetPoint("LEFT")
+    fs:SetWidth(LABEL_W)
+    local swatch = CreateFrame("Button", nil, f)
+    swatch:SetSize(40, 18)
+    swatch:SetPoint("LEFT", f, "LEFT", LABEL_W + 14, 0)
+    local edge = swatch:CreateTexture(nil, "BACKGROUND")
+    edge:SetAllPoints()
+    edge:SetColorTexture(0, 0, 0, 1)
+    local fill = swatch:CreateTexture(nil, "ARTWORK")
+    fill:SetPoint("TOPLEFT", 1, -1)
+    fill:SetPoint("BOTTOMRIGHT", -1, 1)
+    fill:SetColorTexture(1, 1, 1, 1)
+    swatch:SetScript("OnClick", function()
+        if not (ColorPickerFrame and ColorPickerFrame.SetupColorPickerAndShow) then return end
+        local c = get()
+        ColorPickerFrame:SetupColorPickerAndShow({
+            r = c[1], g = c[2], b = c[3],
+            swatchFunc = function() set(ColorPickerFrame:GetColorRGB()); f:Refresh() end,
+            cancelFunc = function() set(ColorPickerFrame:GetPreviousValues()); f:Refresh() end,
+        })
+    end)
+    f.swatch = swatch
+    function f:Refresh()
+        local c = get()
+        fill:SetVertexColor(c[1], c[2], c[3], 1)
+    end
+    f:Refresh()
+    return self:Add(f)
+end
+
 function Builder:Button(text, fn, width)
     local b = CreateFrame("Button", nil, self.parent, "UIPanelButtonTemplate")
     b:SetSize(width or 180, 22)

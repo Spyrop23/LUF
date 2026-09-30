@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.10.0
+**Heads-up for existing users:** this update turns on a few new things by default on every
+frame: a white border on mouseover, a debuff border for debuffs you can dispel, and the raid
+target, leader, master looter, resurrection and role icons. Switch them off per frame on the
+Borders and Indicators tabs.
+
 - Options window reorganised with tabs, as in Luna: every unit page now has tabs for General,
   Health bar, Power bar, Cast bar, XP bar, Portrait, Incoming heals, Auras, Range, Indicators and
   Tags (only the ones that apply to that frame). The selected tab is kept when you switch between
@@ -23,6 +28,14 @@
 - Indicators, as in Luna (Indicators tab on every frame): raid target icon, class, master looter,
   leader, PvP flag and incoming resurrection, each with on/off, size, point and X/Y offset; plus
   the elite/rare/boss dragon on the left or right side of the frame (on for the target).
+- Role indicator: tank, healer or damage icon of group members (as set in the group menu).
+- Highlight, as in Luna (new Highlight tab): the frame lights up on mouseover, when it shows your
+  target, and/or tinted by debuff type (ones you can dispel, or all; works in combat). Strength
+  adjustable. Off by default.
+- Colors page, as in Luna: class, power, reaction, pet happiness, static health, cast bar,
+  channel, tapped and offline colours, each with a colour picker; per profile, with a reset.
+- Hide Blizzard page, as in Luna: every "Hide Blizzard frame" setting (and the cast bar) in one
+  place.
 - Indicator icons go up to 80 px; in config mode the raid target icon shows one mark (skull)
   instead of the whole sheet.
 - Squares: the list types are now called "(from filter)", and two new types need no list:
@@ -33,7 +46,7 @@
   and debuff border, so you can see how they will look. Aura squares show no placeholder there
   any more (only aggro squares keep their coloured preview).
 - Hovering a frame shows the unit's tooltip.
-- Download zip now carries the version in its name (LizzaricksUnitFrames-0.9.2.zip); the folder
+- Download zip now carries the version in its name (LizzaricksUnitFrames-0.10.0.zip); the folder
   inside stays LizzaricksUnitFrames.
 - Every slider now has an input box: type the value and press Enter (kept within the slider's
   range; "0,35" and "0.35" both work).

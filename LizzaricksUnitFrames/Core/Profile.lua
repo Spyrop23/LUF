@@ -56,6 +56,7 @@ local function unitDefaults(o)
         range     = { enabled = true, alpha = 0.4 },
         squares   = squareDefaults(),
         borders   = { mouseover = true, aggro = false, debuff = "own", size = 2, onTop = false },   -- Luna's defaults
+        highlight = { mouseover = false, target = false, debuff = "off", alpha = 0.25 },
         indicators = {
             raidTarget   = { enabled = true, size = 20, point = "TOP", x = 0, y = 0 },
             class        = { enabled = false, size = 16, point = "BOTTOMRIGHT", x = -1, y = 1 },
@@ -63,6 +64,7 @@ local function unitDefaults(o)
             leader       = { enabled = true, size = 14, point = "TOPRIGHT", x = -4, y = -1 },
             pvp          = { enabled = false, size = 24, point = "RIGHT", x = 0, y = 0 },
             resurrect    = { enabled = true, size = 20, point = "CENTER", x = 0, y = 0 },
+            role         = { enabled = true, size = 14, point = "TOPLEFT", x = 4, y = -1 },
             elite        = { enabled = false, side = "RIGHT", scale = 1.6 },
         },
         auras     = {
@@ -216,6 +218,8 @@ function ns:SetProfile(name)
         self.db.migrated033 = true
         self.db.units.pet.happiness.enabled = false
     end
+    self.db.colors = self.db.colors or {}   -- Colors page overrides
+    ns.ApplyColors()
     if self.OnProfileChanged then self:OnProfileChanged() end
 end
 

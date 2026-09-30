@@ -14,14 +14,15 @@ Hinweis: Bis 0.7.1 hieß das Addon „FUF – Forever Unit Frames“ (Ordner `FU
 `AddOns/FUF` löschen; die Einstellungen von damals werden nicht übernommen.
 
 
-**Am einfachsten:** Unter **Releases → Lizzarick's Unit Frames (latest)** die Datei `LizzaricksUnitFrames-<Version>.zip` laden und direkt nach
-`World of Warcraft/_classic_beta_/Interface/AddOns/` entpacken. Sie wird bei jedem Push neu gebaut.
+**Am einfachsten:** über CurseForge, oder unter **Releases → Lizzarick's Unit Frames (latest)** die
+Datei `LizzaricksUnitFrames-<Version>.zip` laden und direkt nach
+`World of Warcraft/_classic_beta_/Interface/AddOns/` entpacken.
 
-**Oder über „Code → Download ZIP“:** Im Zip liegt ein Ordner `FUF-main`. Aus ihm nur den inneren
+**Oder über „Code → Download ZIP“:** Im Zip liegt ein Ordner `LUF-main`. Aus ihm nur den inneren
 Ordner **`LizzaricksUnitFrames`** nach `…/Interface/AddOns/` kopieren.
 
 Richtig ist es, wenn die Datei hier liegt: `…/Interface/AddOns/LizzaricksUnitFrames/LizzaricksUnitFrames.toc`.
-Einen Ordner, der anders heißt als `LizzaricksUnitFrames` (zum Beispiel `FUF-main`), zeigt WoW nicht an.
+Einen Ordner, der anders heißt als `LizzaricksUnitFrames` (zum Beispiel `LUF-main`), zeigt WoW nicht an.
 
 ## Repo-Aufbau
 
@@ -46,7 +47,7 @@ tools/      Smoke-Test und Paket-Skript
 | `/lzuf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/lzuf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.9.0)
+## Stand (0.10.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4), die Begleiter der Gruppenmitglieder und **Raid** (40 Frames, eine Spalte pro
@@ -71,10 +72,22 @@ tools/      Smoke-Test und Paket-Skript
   Heal-Prediction-Rechner.
 - **Begleiter-Zufriedenheit** wie bei Luna: Lebensleiste rot/gelb/grün, Tags
   `[happiness]` und `[loyalty]`.
+- **Filterlisten** wie bei Luna (Seite „Filters“): Listen von Auren, für alle Charaktere. Suche
+  nach Name oder Spell-ID, der Rang steht hinter dem Namen; Listen anlegen, umbenennen, löschen,
+  exportieren und importieren. Pro Frame blendet eine Liste Buffs/Debuffs aus oder zeigt nur diese.
+- **Squares** wie bei Luna: neun Indikatoren pro Frame (Ecken, Kanten, Mitte). Aggro, Buff/Debuff
+  aus Liste oder Filter, eigene Buffs, wirkbare Buffs, bannbarer Debuff (Farbe nach Typ) und
+  fehlender Buff. Als Farbfeld oder mit Spell-Icon, bis zu 8 Icons pro Square, mit Timer.
+- **Rahmen** (Borders) wie bei Luna: beim Überfahren, bei Aggro und bei Debuffs (eigene bannbare
+  oder alle), gefärbt nach Typ, auch im Kampf.
+- **Indikatoren** wie bei Luna: Raid-Zeichen, Klasse, Plündermeister, Anführer, PvP, eingehende
+  Wiederbelebung, Rolle (Tank/Heiler/Schaden) und der Elite-Drache, jeweils mit Größe und Position.
+- **Tooltip** der Einheit beim Überfahren eines Frames.
 - **Tags:** 30 Luna-Tags auf drei Textfeldern pro Leiste, siehe Tag-Seite im Menü.
-- **Menü:** pro Frame an/aus, Breite, Höhe, Skalierung, Position, Gruppenabstand, Leisten-Farben,
-  -Höhen und -Hintergrund, Portrait, Zauberleiste, Texte und Schriftgröße. Dazu Textur,
-  Hintergrund, Profile (anlegen, wechseln, kopieren, löschen, zurücksetzen) und die Tag-Hilfe.
+- **Menü** mit Reitern wie bei Luna: pro Frame Allgemein, Leisten, Zauberleiste, XP, Portrait,
+  Heilung, Auren, Reichweite, Rahmen, Indikatoren, Squares und Tags. Jeder Regler hat ein
+  Eingabefeld. Dazu Textur, Hintergrund, Filter, Profile (anlegen, wechseln, kopieren, löschen,
+  zurücksetzen) und die Tag-Hilfe.
 - **Blizzard-Frames** werden auf Wunsch ausgeblendet, auch Blizzards Zauberleiste.
 
 Etappen und offene Punkte: [docs/roadmap.md](docs/roadmap.md).

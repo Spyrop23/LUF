@@ -1,8 +1,8 @@
 -- LizzaricksUnitFrames / Frames / Indicators
 --
 -- Luna's small icons on a unit frame: raid target mark, class, group
--- leader, master looter, PvP flag, incoming resurrection and the elite
--- dragon. Each has on/off, size, anchor point and offset; the elite dragon
+-- leader, master looter, PvP flag, incoming resurrection, group role and
+-- the elite dragon. Each has on/off, size, anchor point and offset; the elite dragon
 -- sits on one side of the frame.
 --
 -- Secrets: the raid mark index is secret, so it goes straight into the
@@ -30,10 +30,13 @@ IN.KINDS = {
     { "leader", "Leader" },
     { "pvp", "Player vs. Player" },
     { "resurrect", "Resurrections" },
+    { "role", "Role (tank, healer, damage)" },
 }
 
 local RAID_ICONS = "Interface\\TargetingFrame\\UI-RaidTargetingIcons"
 local MASTER_LOOTER = "Interface\\GroupFrame\\UI-Group-MasterLooter"
+local CLASS_ATLAS = "UI-HUD-UnitFrame-Player-Portrait-ClassIcon-"
+local ROLE_ATLAS = { TANK = "roleicon-tiny-tank", HEALER = "roleicon-tiny-healer", DAMAGER = "roleicon-tiny-dps" }
 
 local function try(obj, method, ...)
     local f = obj and obj[method]
@@ -73,6 +76,10 @@ function IN.Create(f)
         icons.masterLooter:SetAtlas("Coin-Gold")
     end
     icons.resurrect:SetAtlas("RaidFrame-Icon-Rez")
+    -- pictures for the config-mode preview until real data sets them
+    icons.role:SetAtlas(ROLE_ATLAS.TANK)
+    icons.pvp:SetAtlas("UI-HUD-UnitFrame-Player-PVP-FFAIcon")
+    icons.class:SetAtlas(CLASS_ATLAS .. "Warrior")
     icons.elite = holder:CreateTexture(nil, "ARTWORK")
     icons.elite:Hide()
     f.indicators = { holder = holder, icons = icons }
@@ -104,8 +111,6 @@ function IN.Layout(f)
 end
 
 -- ------------------------------------------------------------ update --
-
-local CLASS_ATLAS = "UI-HUD-UnitFrame-Player-Portrait-ClassIcon-"
 
 local function masterLooterUnit()
     if not (C_PartyInfo and C_PartyInfo.GetLootMethod) then return nil end
@@ -168,6 +173,14 @@ function UPDATE.pvp(tex, unit)
     end
 end
 
+function UPDATE.role(tex, unit)
+    local role = call(UnitGroupRolesAssigned, unit)
+    local atlas = ns.CanRead(role) and ROLE_ATLAS[role]
+    if not atlas then tex:Hide() return end
+    tex:SetAtlas(atlas)
+    tex:Show()
+end
+
 function UPDATE.resurrect(tex, unit)
     showIf(tex, call(UnitHasIncomingResurrection, unit))
 end
@@ -228,7 +241,7 @@ end
 
 for _, event in ipairs({ "RAID_TARGET_UPDATE", "GROUP_ROSTER_UPDATE", "PARTY_LEADER_CHANGED",
     "PARTY_LOOT_METHOD_CHANGED", "UNIT_FACTION", "PLAYER_FLAGS_CHANGED", "INCOMING_RESURRECT_CHANGED",
-    "UNIT_CLASSIFICATION_CHANGED" }) do
+    "UNIT_CLASSIFICATION_CHANGED", "PLAYER_ROLES_ASSIGNED" }) do
     ns:RegisterEvent(event, updateAll)
 end
 

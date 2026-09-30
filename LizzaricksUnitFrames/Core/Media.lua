@@ -85,6 +85,59 @@ ns.colors = {
     },
 }
 
+-- Luna's Colors page: a profile may override any colour above
+-- (ns.db.colors["class.WARRIOR"] = { r, g, b }). The tables are changed in
+-- place, so code holding a reference sees the new values.
+local function copy(t)
+    local c = {}
+    for k, v in pairs(t) do c[k] = type(v) == "table" and copy(v) or v end
+    return c
+end
+local defaultColors = copy(ns.colors)
+
+-- "class.WARRIOR" -> the colour table in `root` (nil if there is none).
+local function colorAt(root, path)
+    local t = root
+    for part in path:gmatch("[^%.]+") do
+        if type(t) ~= "table" then return nil end
+        t = t[tonumber(part) or part]
+    end
+    return type(t) == "table" and type(t[1]) == "number" and t or nil
+end
+
+function ns.DefaultColor(path) return colorAt(defaultColors, path) end
+function ns.Color(path) return colorAt(ns.colors, path) end
+
+function ns.ApplyColors()
+    local over = ns.db and ns.db.colors or {}
+    local function walk(dst, def, prefix)
+        for k, v in pairs(def) do
+            local path = prefix .. k
+            if type(v[1]) == "number" then
+                local o = over[path]
+                local src = type(o) == "table" and o or v
+                dst[k][1], dst[k][2], dst[k][3] = src[1], src[2], src[3]
+            else
+                walk(dst[k], v, path .. ".")
+            end
+        end
+    end
+    walk(ns.colors, defaultColors, "")
+end
+
+function ns.SetColor(path, r, g, b)
+    ns.db.colors = ns.db.colors or {}
+    ns.db.colors[path] = { r, g, b }
+    ns.ApplyColors()
+    ns:ApplyAll()
+end
+
+function ns.ResetColors()
+    ns.db.colors = {}
+    ns.ApplyColors()
+    ns:ApplyAll()
+end
+
 -- The player's pet happiness (1 unhappy, 2 content, 3 happy), or nil when
 -- the unit is not the player's pet or the pet has none (non-hunter pets).
 function ns.PetHappiness(unit)

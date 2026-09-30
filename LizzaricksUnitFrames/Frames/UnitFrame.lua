@@ -288,6 +288,7 @@ function UF.Layout(f)
     if ns.Status then ns.Status.Layout(f) end
     if ns.Squares then ns.Squares.Layout(f) end
     if ns.Borders then ns.Borders.Layout(f) end
+    if ns.Highlight then ns.Highlight.Layout(f) end
     if ns.Indicators then ns.Indicators.Layout(f) end
     UF.Update(f)
 end
@@ -451,6 +452,7 @@ function UF.UnitChanged(f)
     if ns.Auras then ns.Auras.Refresh(f) end
     if ns.Squares then ns.Squares.Refresh(f) end
     if ns.Borders then ns.Borders.Refresh(f) end
+    if ns.Highlight then ns.Highlight.Refresh(f) end
     if ns.Indicators then ns.Indicators.Refresh(f) end
 end
 
@@ -540,6 +542,7 @@ function UF.Create(unit, opts)
     if ns.Status then ns.Status.Create(f) end
     if ns.Squares then ns.Squares.Create(f) end
     if ns.Borders then ns.Borders.Create(f) end
+    if ns.Highlight then ns.Highlight.Create(f) end
     if ns.Indicators then ns.Indicators.Create(f) end
     wireEvents(f)
     f:HookScript("OnShow", UF.UnitChanged)

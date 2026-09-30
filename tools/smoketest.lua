@@ -162,6 +162,7 @@ function UnitIsPVP(u) return u == "player" end
 function UnitIsPVPFreeForAll() return false end
 function UnitFactionGroup() return "Horde" end
 function UnitHasIncomingResurrection(u) return secret(false) end
+function UnitGroupRolesAssigned(u) return u == "party1" and "HEALER" or "NONE" end
 C_PartyInfo = { GetLootMethod = function() return 2, 0, nil end }
 function UnitThreatSituation(u) return u == "party1" and 3 or 0 end
 function GetThreatStatusColor(s) return 1, 0, 0 end
@@ -473,6 +474,34 @@ ns.db.units.player.borders.debuff = "off"; ns:ApplyKey("player")
 assert(not plf.borderContainer, "debuff border off")
 print("borders ok")
 
+-- highlight: mouseover, target (secret-safe), debuff tint as an aura slot
+local hdb = ns.db.units.player.highlight
+hdb.mouseover, hdb.debuff = true, "own"
+ns:ApplyKey("player")
+plf.scripts.OnEnter(plf)
+assert(plf.highlight.shown and plf.highlight.tex.alpha == hdb.alpha, "mouseover highlight")
+plf.scripts.OnLeave(plf)
+assert(not plf.highlight.shown, "highlight off after leaving")
+assert(plf.highlightContainer.slots.highlight.filter == "HARMFUL|RAID", "debuff highlight slot")
+local thdb = ns.db.units.target.highlight
+thdb.target = true
+ns:ApplyKey("target")
+local tfr = ns.UF.frames.target
+assert(tfr.highlight.shown and tfr.highlight.tex.alpha == thdb.alpha, "target frame highlighted as target")
+hdb.mouseover, hdb.debuff, thdb.target = false, "off", false
+ns:ApplyKey("player"); ns:ApplyKey("target")
+print("highlight ok")
+
+-- colors page: an override changes the class colour in place, reset restores it
+ns.SetColor("class.WARRIOR", 1, 0, 0)
+assert(ns.colors.class.WARRIOR[1] == 1 and ns.colors.class.WARRIOR[2] == 0, "class colour override")
+assert(plf.healthBar.color[1] == 1 and plf.healthBar.color[2] == 0, "player bar uses the new colour")
+ns.SetColor("reaction.4", 0, 0, 1)
+assert(ns.colors.reaction[4][3] == 1, "reaction colour override")
+ns.ResetColors()
+assert(ns.colors.class.WARRIOR[1] == 0.78 and ns.colors.reaction[4][1] == 0.9, "colours reset")
+print("colors ok")
+
 -- indicators: raid mark (secret index), leader (secret bool), master looter, pvp, elite
 local tgf = ns.UF.frames.target
 ns.Indicators.Update(tgf)
@@ -485,6 +514,8 @@ assert(plf.indicators.icons.leader.alpha == 0, "player not leader")
 assert(plf.indicators.icons.masterLooter.alpha == 1, "player is master looter")
 ns.db.units.player.indicators.pvp.enabled = true; ns:ApplyKey("player")
 assert(plf.indicators.icons.pvp.shown and plf.indicators.icons.pvp.atlas:find("Horde"), "pvp icon")
+assert(p1f.indicators.icons.role.shown and p1f.indicators.icons.role.atlas == "roleicon-tiny-healer", "healer role icon")
+assert(not plf.indicators.icons.role.shown, "no role, no icon")
 SlashCmdList.LIZUF("unlock")
 assert(p1f.indicators.icons.raidTarget.cell == 8, "config mode shows one mark, not the sheet")
 local markOf = GetRaidTargetIndex
@@ -607,6 +638,23 @@ assert(tabsSeen >= 60, "tabs clicked: " .. tabsSeen)
 for _, w in ipairs(frames) do
     if w.check or w.slider or w.dropdown or w.edit then use(w) end
 end
+-- colors page: a swatch opens the colour picker, picking stores the colour
+local picked
+ColorPickerFrame = {
+    SetupColorPickerAndShow = function(_, info) picked = info end,
+    GetColorRGB = function() return 0.1, 0.2, 0.3 end,
+    GetPreviousValues = function() return 0.78, 0.61, 0.43 end,
+}
+local swatches = {}
+for _, w in ipairs(frames) do if w.swatch then table.insert(swatches, w) end end
+assert(#swatches == 29, "colour swatches: " .. #swatches)
+swatches[1].swatch.scripts.OnClick(swatches[1].swatch)
+picked.swatchFunc()
+assert(ns.colors.class.WARRIOR[1] == 0.1 and ns.db.colors["class.WARRIOR"], "colour picked")
+picked.cancelFunc()
+assert(ns.colors.class.WARRIOR[1] == 0.78, "cancel restores the colour")
+ns.ResetColors()
+
 -- filters page: search, add from the result list, remove from the list
 FL.Search("Life")
 for _ = 1, 5 do tick() end

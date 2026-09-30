@@ -256,6 +256,17 @@ local function unitTabs(key)
         b:Check("Always on top (above auras, squares and icons)", p("borders.onTop"))
     end)
 
+    tab("highlight", "Highlight", function(b)
+        b:Header("Highlight")
+        b:Text("The whole frame lights up.", 16)
+        b:Check("On mouseover", p("highlight.mouseover"))
+        b:Check("On target (the frame shows your target)", p("highlight.target"))
+        if ns.Highlight.debuffSupported[key] then
+            b:Dropdown("On debuff (tinted by type)", ns.Highlight.DEBUFF_MODES, p("highlight.debuff"))
+        end
+        b:Slider("Strength", 0.05, 0.8, 0.05, p("highlight.alpha"))
+    end)
+
     do
         tab("indicators", "Indicators", function(b)
             for _, k in ipairs(ns.Indicators.KINDS) do
@@ -429,6 +440,56 @@ addPage("filters", "Filters", function(b)
         end
         report(name, err)
     end)
+end)
+
+-- Luna's Colors page: every colour of the frames, per profile.
+local CLASS_ORDER = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }
+local CLASS_NAMES = { WARRIOR = "Warrior", PALADIN = "Paladin", HUNTER = "Hunter", ROGUE = "Rogue", PRIEST = "Priest",
+    SHAMAN = "Shaman", MAGE = "Mage", WARLOCK = "Warlock", DRUID = "Druid" }
+local REACTIONS = { "Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Revered", "Exalted" }
+addPage("colors", "Colors", function(b)
+    local function color(text, path)
+        b:Color(text, function() return ns.Color(path) end, function(r, g, bl) ns.SetColor(path, r, g, bl) end)
+    end
+    b:Header("Classes")
+    for _, c in ipairs(CLASS_ORDER) do color(CLASS_NAMES[c], "class." .. c) end
+    b:Header("Power")
+    color("Mana", "power.MANA")
+    color("Rage", "power.RAGE")
+    color("Energy", "power.ENERGY")
+    color("Focus (pets)", "power.FOCUS")
+    b:Header("Reaction")
+    for i, name in ipairs(REACTIONS) do color(name, "reaction." .. i) end
+    b:Header("Pet happiness")
+    color("Unhappy", "happiness.1")
+    color("Content", "happiness.2")
+    color("Happy", "happiness.3")
+    b:Header("Other")
+    color("Static health", "static")
+    color("Cast bar", "cast")
+    color("Channelled cast", "channel")
+    color("Tapped", "tapped")
+    color("Offline", "offline")
+    b:Button("Reset all colours", function() ns.ResetColors(); O:Refresh() end)
+end)
+
+-- Luna's "Hide Blizzard" page: every Blizzard frame in one place (the same
+-- settings as on each frame's General tab).
+local BLIZZARD_ORDER = { "player", "pet", "target", "targettarget", "party", "raid" }
+addPage("blizzard", "Hide Blizzard", function(b)
+    b:Header("Hide Blizzard frames")
+    b:Text("Blizzard's frames are hidden while ours replace them. A hidden frame comes back after " ..
+        "a reload of the interface.", 30)
+    for _, key in ipairs(BLIZZARD_ORDER) do
+        if ns.blizzardFrames[key] then
+            local label = ns.unitLabels[key]
+            local g, s = unitPath(key, "hideBlizzard")
+            b:Check(label, blizzardToggle(g, s, key, "Blizzard's " .. label:lower() .. " frame"))
+        end
+    end
+    local g, s = unitPath("player", "castBar.hideBlizzard")
+    b:Check("Cast bar (while our player cast bar is on)",
+        blizzardToggle(g, s, "playercast", "Blizzard's cast bar"))
 end)
 
 addPage("tags", "Tags", function(b)
