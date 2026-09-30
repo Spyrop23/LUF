@@ -80,6 +80,7 @@ function CT.Create(f)
     ev:SetScript("OnEvent", function(_, _, _, event, flag, amount)
         CT.Show(f, event, flag, amount)
     end)
+    f.combatTextEvents = ev   -- UF.SetUnit re-registers it
 end
 
 -- Where the text sits (protected context: called from UF.Layout).

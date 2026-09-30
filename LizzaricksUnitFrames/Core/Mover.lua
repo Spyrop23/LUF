@@ -52,7 +52,7 @@ end
 -- f's raid group when groups are moved separately.
 local function siblings(f)
     local list = {}
-    if f.key ~= "party" and f.key ~= "raid" then return list end
+    if f.key ~= "party" and f.key ~= "raid" and f.key ~= "maintank" and f.key ~= "mainassist" then return list end
     for _, s in ipairs(UF.byKey[f.key] or {}) do
         if s ~= f and s:IsShown() then
             if f.key ~= "raid" or not f.db.separateGroups or s.raidGroup == f.raidGroup then

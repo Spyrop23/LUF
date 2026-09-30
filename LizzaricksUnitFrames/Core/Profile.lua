@@ -138,6 +138,23 @@ ns.defaults = {
             x = 5, y = -20, height = 20,
             tags = { healthBar = { left = "", center = "[smarthealth]", right = "" } },
         })),
+        -- Luna's main tank / main assist frames (raid roles), with their targets
+        maintank = unitDefaults(small({
+            x = 450, y = -200, width = 120, height = 30, spacing = 4,
+            tags = { healthBar = { left = "[name]", center = "", right = "[perhp]" } },
+        })),
+        maintanktarget = unitDefaults(small({
+            x = 4, y = 0, width = 100, height = 30,
+            tags = { healthBar = { left = "[name]", center = "", right = "[perhp]" } },
+        })),
+        mainassist = unitDefaults(small({
+            x = 450, y = -350, width = 120, height = 30, spacing = 4,
+            tags = { healthBar = { left = "[name]", center = "", right = "[perhp]" } },
+        })),
+        mainassisttarget = unitDefaults(small({
+            x = 4, y = 0, width = 100, height = 30,
+            tags = { healthBar = { left = "[name]", center = "", right = "[perhp]" } },
+        })),
         -- a party member's target: upper half next to the member, the pet below
         partytarget = unitDefaults(small({
             enabled = false, x = 5, y = 0, height = 20,

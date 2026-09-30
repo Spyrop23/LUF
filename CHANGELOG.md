@@ -39,6 +39,9 @@ target. Switch them off per frame on the Borders, Indicators and Combat text tab
   player, pet and target, font size adjustable.
 - Empty bar, as in Luna (new tab): a bar without a value, only for texts, with its own weight,
   background colour and tags. Off by default.
+- Main Tank and Main Assist frames, as in Luna, each with a target frame next to it: up to four
+  main tanks and two main assists, taken from the raid roles (set by the raid leader); they
+  follow role changes out of combat. Placed and styled like every other frame.
 - Party Targets, as in Luna: the target of each party member, next to the member's frame (upper
   half; the party pet sits below). Off by default: Party Targets → General → Enabled.
 - Hide Blizzard page, as in Luna: every "Hide Blizzard frame" setting (and the cast bar) in one

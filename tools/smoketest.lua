@@ -525,6 +525,25 @@ units.party1target = nil
 ns:ApplyKey("partytarget")
 print("party target ok")
 
+-- main tank / assist: frames follow the raid roles (10th value of the roster)
+local mt1, mtt1, ma1 = ns.UF.frames.maintank1, ns.UF.frames.maintanktarget1, ns.UF.frames.mainassist1
+assert(mt1 and mt1.unit == "none" and not mt1.shown, "no main tank outside a raid")
+local rosterInfo = GetRaidRosterInfo
+GetRaidRosterInfo = function(i)
+    local role = (i == 3 and "MAINTANK") or (i == 5 and "MAINASSIST") or nil
+    return "Member" .. i, 0, 1, 60, "Warrior", "WARRIOR", "", true, false, role
+end
+raidMode = true
+ns.AssignRaidRoles()
+assert(mt1.unit == "raid3" and mtt1.unit == "raid3target" and ma1.unit == "raid5", "roles assigned")
+assert(ns.UF.frames.maintank2.unit == "none", "only one main tank")
+assert(mtt1.globalEvents.scripts.OnUpdate and mtt1.anchorFrame == mt1, "main tank target polled, next to its tank")
+raidMode = false
+ns.AssignRaidRoles()
+assert(mt1.unit == "none", "roles cleared outside a raid")
+GetRaidRosterInfo = rosterInfo
+print("main tank ok")
+
 -- colors page: an override changes the class colour in place, reset restores it
 ns.SetColor("class.WARRIOR", 1, 0, 0)
 assert(ns.colors.class.WARRIOR[1] == 1 and ns.colors.class.WARRIOR[2] == 0, "class colour override")

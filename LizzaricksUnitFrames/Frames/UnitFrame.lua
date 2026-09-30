@@ -26,6 +26,8 @@ local POLL_EVERY = 0.2
 -- same for its "fake units").
 local POLLED = { targettarget = true, targettargettarget = true, pettarget = true,
     party1target = true, party2target = true, party3target = true, party4target = true }
+-- Settings keys whose units change with the raid roster (raidNtarget ...).
+local POLLED_KEYS = { maintanktarget = true, mainassisttarget = true }
 
 -- Global events that change which unit a frame shows, by settings key.
 local GLOBAL_EVENTS = {
@@ -37,6 +39,10 @@ local GLOBAL_EVENTS = {
     party = { "GROUP_ROSTER_UPDATE" },
     partypet = { "GROUP_ROSTER_UPDATE", "UNIT_PET" },
     partytarget = { "GROUP_ROSTER_UPDATE", "UNIT_TARGET" },
+    maintank = { "GROUP_ROSTER_UPDATE" },
+    mainassist = { "GROUP_ROSTER_UPDATE" },
+    maintanktarget = { "GROUP_ROSTER_UPDATE", "UNIT_TARGET" },
+    mainassisttarget = { "GROUP_ROSTER_UPDATE", "UNIT_TARGET" },
     raid = { "GROUP_ROSTER_UPDATE" },
 }
 
@@ -523,8 +529,28 @@ local function wireEvents(f)
         pcall(glob.RegisterEvent, glob, event)
     end
     glob:SetScript("OnEvent", onGlobalEvent)
-    if POLLED[f.unit] then glob:SetScript("OnUpdate", onPoll) end
+    if POLLED[f.unit] or POLLED_KEYS[f.key] then glob:SetScript("OnUpdate", onPoll) end
     f.globalEvents = glob
+end
+
+-- Points a frame at another unit (main tank frames follow the raid roles).
+-- Protected: out of combat only. In config mode the stand-in stays and the
+-- new unit takes over on lock.
+function UF.SetUnit(f, unit)
+    local current = f.realUnit or f.unit
+    if current == unit then return end
+    f:SetAttribute("unit", unit)
+    if f.realUnit then f.realUnit = unit else f.unit = unit end
+    local ev = f.unitEvents
+    ev:UnregisterAllEvents()
+    for _, event in ipairs(UNIT_EVENTS) do
+        pcall(ev.RegisterUnitEvent, ev, event, unit)
+    end
+    if f.combatTextEvents then
+        f.combatTextEvents:UnregisterAllEvents()
+        pcall(f.combatTextEvents.RegisterUnitEvent, f.combatTextEvents, "UNIT_COMBAT", unit)
+    end
+    if f:IsVisible() then UF.UnitChanged(f) end
 end
 
 -- ------------------------------------------------------------ create --
@@ -622,6 +648,10 @@ local function flush()
             if key == "party" then
                 for _, f in ipairs(UF.byKey.partypet or {}) do UF.Apply(f) end
                 for _, f in ipairs(UF.byKey.partytarget or {}) do UF.Apply(f) end
+            end
+            -- main tank / assist targets hang on their frames
+            if UF.byKey[key .. "target"] and (key == "maintank" or key == "mainassist") then
+                for _, f in ipairs(UF.byKey[key .. "target"]) do UF.Apply(f) end
             end
             if ns.db.units[key].enabled then ns:HideBlizzard(key) end
         end

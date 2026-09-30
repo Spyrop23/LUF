@@ -11,6 +11,7 @@ local _, ns = ...
 ns.unitKeys = {
     "player", "pet", "pettarget", "target", "targettarget", "targettargettarget",
     "party", "partypet", "partytarget", "raid",
+    "maintank", "maintanktarget", "mainassist", "mainassisttarget",
 }
 
 ns.unitLabels = {
@@ -24,7 +25,44 @@ ns.unitLabels = {
     partypet = "Party Pets",
     partytarget = "Party Targets",
     raid = "Raid",
+    maintank = "Main Tank",
+    maintanktarget = "Main Tank Target",
+    mainassist = "Main Assist",
+    mainassisttarget = "Main Assist Target",
 }
+
+-- Main tank / main assist frames: how many, and their raid role.
+local ROLE_FRAMES = {
+    { key = "maintank", role = "MAINTANK", count = 4 },
+    { key = "mainassist", role = "MAINASSIST", count = 2 },
+}
+
+-- raidN units with the role, in raid order (only in a raid; the role is
+-- the 10th value of GetRaidRosterInfo).
+local function raidMembersWithRole(role)
+    local list = {}
+    if not (IsInRaid and IsInRaid()) or not GetRaidRosterInfo then return list end
+    for i = 1, 40 do
+        local ok, r = pcall(function() return (select(10, GetRaidRosterInfo(i))) end)
+        if ok and ns.CanRead(r) and r == role then table.insert(list, "raid" .. i) end
+    end
+    return list
+end
+
+-- Points the main tank / assist frames (and their targets) at the members
+-- that have the role right now. Out of combat.
+function ns.AssignRaidRoles()
+    local UF = ns.UF
+    for _, rf in ipairs(ROLE_FRAMES) do
+        local members = raidMembersWithRole(rf.role)
+        for i, f in ipairs(UF.byKey[rf.key] or {}) do
+            UF.SetUnit(f, members[i] or "none")
+        end
+        for i, f in ipairs(UF.byKey[rf.key .. "target"] or {}) do
+            UF.SetUnit(f, members[i] and (members[i] .. "target") or "none")
+        end
+    end
+end
 
 local function spawnAll()
     local UF = ns.UF
@@ -53,6 +91,21 @@ local function spawnAll()
         if UF.frames[unit] then UF.Apply(UF.frames[unit]) else UF.Create(unit, { key = "raid", index = i }) end
     end
     UF.ArrangeRaid()
+    -- main tanks / assists: fixed frames that follow the raid roles
+    for _, rf in ipairs(ROLE_FRAMES) do
+        for i = 1, rf.count do
+            local id = rf.key .. i
+            local f = UF.frames[id]
+            if f then UF.Apply(f) else f = UF.Create(id, { key = rf.key, index = i }) end
+            local tid = rf.key .. "target" .. i
+            if UF.frames[tid] then
+                UF.Apply(UF.frames[tid])
+            else
+                UF.Create(tid, { key = rf.key .. "target", index = i, anchorFrame = f })
+            end
+        end
+    end
+    ns.AssignRaidRoles()
     for _, key in ipairs(ns.unitKeys) do
         ns:HideBlizzard(key)
     end
@@ -61,6 +114,7 @@ end
 -- Who is in which subgroup changes with the roster; frames move out of combat.
 ns:RegisterEvent("GROUP_ROSTER_UPDATE", function()
     if ns.UF.byKey.raid then ns:RunOutOfCombat(ns.UF.ArrangeRaid) end
+    if ns.UF.byKey.maintank then ns:RunOutOfCombat(ns.AssignRaidRoles) end
 end)
 
 ns:OnLogin(function()

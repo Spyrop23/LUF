@@ -714,7 +714,7 @@ local function build()
         btn:SetScript("OnClick", function() showPage(page.id) end)
         navButtons[page.id] = btn
         y = y - 24
-        if page.id == "general" or page.id == "raid" then y = y - 8 end
+        if page.id == "general" or page.id == "raid" or page.id == "mainassisttarget" then y = y - 8 end
     end
 
     -- tab bar (unit pages) above the scrolling page area
