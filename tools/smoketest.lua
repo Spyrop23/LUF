@@ -476,6 +476,11 @@ ns.db.units.player.indicators.pvp.enabled = true; ns:ApplyKey("player")
 assert(plf.indicators.icons.pvp.shown and plf.indicators.icons.pvp.atlas:find("Horde"), "pvp icon")
 SlashCmdList.LIZUF("unlock")
 assert(p1f.indicators.icons.raidTarget.cell == 8, "config mode shows one mark, not the sheet")
+local markOf = GetRaidTargetIndex
+GetRaidTargetIndex = function() return secret(5) end
+ns.Indicators.Update(p1f)
+assert(p1f.indicators.icons.raidTarget.cell == 5, "config mode shows the real mark (moon)")
+GetRaidTargetIndex = markOf
 SlashCmdList.LIZUF("lock")
 print("indicators ok")
 

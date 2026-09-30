@@ -199,9 +199,12 @@ function IN.Update(f)
         if not (d.enabled and exists) then
             tex:Hide()
         elseif ns.unlocked then
-            -- config mode: show where the icons go (the raid mark as a skull,
-            -- not the whole sheet of marks)
-            if k[1] == "raidTarget" then setRaidCell(tex, 8) end
+            -- config mode: show where the icons go (the raid mark: the real
+            -- one if the unit has one, else a skull - never the whole sheet)
+            if k[1] == "raidTarget" then
+                local index = call(GetRaidTargetIndex, unit)
+                if type(index) == "nil" or not setRaidCell(tex, index) then setRaidCell(tex, 8) end
+            end
             tex:SetAlpha(1)
             tex:Show()
         else
