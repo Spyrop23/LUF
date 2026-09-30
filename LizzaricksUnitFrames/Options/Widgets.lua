@@ -82,7 +82,8 @@ function Builder:Text(text, height)
 end
 
 -- A page of spell rows (icon, text, one button each) with paging.
--- items(): { { id =, icon =, text = }, ... }; onAction(item) for the button.
+-- items(): { { id =, icon =, text =, actionText =, disabled = }, ... };
+-- onAction(item) for the button.
 function Builder:List(count, items, action, onAction)
     local ROW_H = 22
     local width = self.width - 16
@@ -144,6 +145,9 @@ function Builder:List(count, items, action, onAction)
             if item then
                 r.icon:SetTexture(item.icon)
                 r.text:SetText(item.text)
+                -- an item may relabel or disable its button ("Added")
+                r.button:SetText(item.actionText or action)
+                r.button:SetEnabled(not item.disabled)
             end
         end
         info:SetText(#list == 0 and "|cff888888(empty)|r" or string.format("Page %d / %d   (%d)", page, pages, #list))

@@ -575,10 +575,13 @@ for _ = 1, 5 do tick() end
 local lists = {}
 for _, w in ipairs(frames) do if w.rows then table.insert(lists, w) end end
 assert(#lists == 2, "two spell lists on the filters page")
+lists[1], lists[2] = lists[2], lists[1]   -- the page shows the list's auras first, the results below
 lists[1]:Refresh()
 assert(lists[1].rows[1].shown and lists[1].rows[1].item.id == 1454, "search result row")
 lists[1].rows[1].button.scripts.OnClick(lists[1].rows[1].button)
 assert(FL.Get(FL.selected)[1454], "added from the result row")
+lists[1]:Refresh()
+assert(lists[1].rows[1].button.text == "Added", "result marked as added")
 lists[2]:Refresh()
 local before = #FL.Items(FL.selected)
 lists[2].rows[1].button.scripts.OnClick(lists[2].rows[1].button)

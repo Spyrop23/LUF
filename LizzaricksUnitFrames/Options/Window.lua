@@ -387,6 +387,12 @@ addPage("filters", "Filters", function(b)
         O:Refresh()
     end, 180)
 
+    b:Header("Auras in filter")
+    b:Text(function() return selected() and ("List: |cffffd100" .. selected() .. "|r") or "No list yet." end, 16)
+    b:List(10, function() return FL.Items(selected()) end, "Remove", function(item)
+        FL.Remove(selected(), item.id)
+    end)
+
     b:Header("Add aura")
     b:Edit("Search name or ID", function() return searchText end, function(v)
         local changedQuery = v ~= searchText
@@ -398,15 +404,15 @@ addPage("filters", "Filters", function(b)
         if not selected() then s = s .. "  |cffff5555Create a list first.|r" end
         return s
     end, 16)
-    b:List(10, FL.SearchItems, "Add", function(item)
+    b:List(10, function()
+        local items, list = FL.SearchItems(), FL.Get(selected())
+        for _, item in ipairs(items) do
+            if list and list[item.id] then item.actionText, item.disabled = "Added", true end
+        end
+        return items
+    end, "Add", function(item)
         if not selected() then ns:Print("Create a filter list first.") return end
         FL.Add(selected(), item.id)
-    end)
-
-    b:Header("Auras in filter")
-    b:Text(function() return selected() and ("List: |cffffd100" .. selected() .. "|r") or "No list yet." end, 16)
-    b:List(10, function() return FL.Items(selected()) end, "Remove", function(item)
-        FL.Remove(selected(), item.id)
     end)
 
     b:Header("Export / Import")
