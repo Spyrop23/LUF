@@ -24,7 +24,8 @@ local POLL_EVERY = 0.2
 
 -- Units the client sends no events for: polled while shown (Luna does the
 -- same for its "fake units").
-local POLLED = { targettarget = true, targettargettarget = true, pettarget = true }
+local POLLED = { targettarget = true, targettargettarget = true, pettarget = true,
+    party1target = true, party2target = true, party3target = true, party4target = true }
 
 -- Global events that change which unit a frame shows, by settings key.
 local GLOBAL_EVENTS = {
@@ -35,6 +36,7 @@ local GLOBAL_EVENTS = {
     pettarget = { "UNIT_PET" },
     party = { "GROUP_ROSTER_UPDATE" },
     partypet = { "GROUP_ROSTER_UPDATE", "UNIT_PET" },
+    partytarget = { "GROUP_ROSTER_UPDATE", "UNIT_TARGET" },
     raid = { "GROUP_ROSTER_UPDATE" },
 }
 
@@ -570,7 +572,7 @@ function UF.Watch(f)
         return
     end
     local party = ns.db.units.party
-    if (f.key == "party" or f.key == "partypet") and party.hideInRaid and RegisterStateDriver then
+    if (f.key == "party" or f.key == "partypet" or f.key == "partytarget") and party.hideInRaid and RegisterStateDriver then
         RegisterStateDriver(f, "visibility", "[group:raid] hide; [@" .. f.unit .. ",exists] show; hide")
     else
         RegisterUnitWatch(f)
@@ -609,6 +611,7 @@ local function flush()
             -- (and their visibility rule: hide in raid)
             if key == "party" then
                 for _, f in ipairs(UF.byKey.partypet or {}) do UF.Apply(f) end
+                for _, f in ipairs(UF.byKey.partytarget or {}) do UF.Apply(f) end
             end
             if ns.db.units[key].enabled then ns:HideBlizzard(key) end
         end

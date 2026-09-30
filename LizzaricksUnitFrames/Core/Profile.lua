@@ -132,6 +132,11 @@ ns.defaults = {
             x = 5, y = -20, height = 20,
             tags = { healthBar = { left = "", center = "[smarthealth]", right = "" } },
         })),
+        -- a party member's target: upper half next to the member, the pet below
+        partytarget = unitDefaults(small({
+            enabled = false, x = 5, y = 0, height = 20,
+            tags = { healthBar = { left = "[name]", center = "", right = "[perhp]" } },
+        })),
         raid = unitDefaults(small({
             x = 10, y = -420, width = 60, height = 30, spacing = 2, groupSpacing = 4,
             groupDirection = "DOWN", groupsPerRow = 8, separateGroups = false,

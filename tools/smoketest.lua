@@ -492,6 +492,20 @@ hdb.mouseover, hdb.debuff, thdb.target = false, "off", false
 ns:ApplyKey("player"); ns:ApplyKey("target")
 print("highlight ok")
 
+-- party targets: party1target hangs on party1, off by default, polled
+local pt = ns.UF.frames.party1target
+assert(pt and pt.key == "partytarget" and pt.anchorFrame == ns.UF.frames.party1, "party target frame")
+assert(not pt.shown, "party targets off by default")
+assert(pt.globalEvents.scripts.OnUpdate, "party target is polled")
+ns.db.units.partytarget.enabled = true
+units.party1target = true
+ns:ApplyKey("partytarget")
+assert(pt.driver and pt.shown, "party target shown with its unit, hides in raid")
+ns.db.units.partytarget.enabled = false
+units.party1target = nil
+ns:ApplyKey("partytarget")
+print("party target ok")
+
 -- colors page: an override changes the class colour in place, reset restores it
 ns.SetColor("class.WARRIOR", 1, 0, 0)
 assert(ns.colors.class.WARRIOR[1] == 1 and ns.colors.class.WARRIOR[2] == 0, "class colour override")

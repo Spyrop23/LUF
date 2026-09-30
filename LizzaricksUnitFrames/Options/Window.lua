@@ -116,7 +116,7 @@ local function unitTabs(key)
         b:Slider("Width", 20, 600, 1, p("width"))
         b:Slider("Height", 10, 300, 1, p("height"))
         b:Slider("Scale", 0.5, 3, 0.05, p("scale"))
-        if key == "partypet" then
+        if key == "partypet" or key == "partytarget" then
             b:Text("Position is relative to the party member's frame.")
         end
         -- p() returns getter and setter; spelled out where more arguments follow
