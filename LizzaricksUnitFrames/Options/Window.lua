@@ -497,7 +497,7 @@ end)
 
 -- Luna's "Hide Blizzard" page: every Blizzard frame in one place (the same
 -- settings as on each frame's General tab).
-local BLIZZARD_ORDER = { "player", "pet", "target", "targettarget", "party", "raid" }
+local BLIZZARD_ORDER = { "player", "pet", "target", "targettarget", "focus", "party", "raid" }
 addPage("blizzard", "Hide Blizzard", function(b)
     b:Header("Hide Blizzard frames")
     b:Text("Blizzard's frames are hidden while ours replace them. A hidden frame comes back after " ..
@@ -699,7 +699,7 @@ local function build()
     local y = -6
     for _, page in ipairs(pages) do
         local btn = CreateFrame("Button", nil, nav)
-        btn:SetSize(NAV_W - 8, 22)
+        btn:SetSize(NAV_W - 8, 20)
         btn:SetPoint("TOPLEFT", 4, y)
         btn.sel = btn:CreateTexture(nil, "BACKGROUND")
         btn.sel:SetAllPoints()
@@ -713,8 +713,8 @@ local function build()
         fs:SetText(page.label)
         btn:SetScript("OnClick", function() showPage(page.id) end)
         navButtons[page.id] = btn
-        y = y - 24
-        if page.id == "general" or page.id == "raid" or page.id == "mainassisttarget" then y = y - 8 end
+        y = y - 21   -- 22 pages: 21 px each keeps them inside the window
+        if page.id == "general" or page.id == "raid" or page.id == "mainassisttarget" then y = y - 6 end
     end
 
     -- tab bar (unit pages) above the scrolling page area

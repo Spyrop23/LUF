@@ -71,6 +71,8 @@ local SILENCER = {
     -- Blizzard's target-of-target frame is a child of TargetFrame.
     targettarget = function() silenceWhole(_G.TargetFrame and _G.TargetFrame.totFrame) end,
     pet = function() silenceWhole(_G.PetFrame) end,
+    -- the focus frame, its target-of-focus frame is a child of it
+    focus = function() silenceWhole(_G.FocusFrame) end,
     -- party members (and their pets) in both styles
     party = function()
         silenceWhole(_G.PartyFrame)
@@ -86,7 +88,7 @@ local SILENCER = {
 }
 
 -- Settings keys that have a Blizzard frame to hide.
-ns.blizzardFrames = { player = true, target = true, targettarget = true, pet = true, party = true, raid = true }
+ns.blizzardFrames = { player = true, target = true, targettarget = true, focus = true, pet = true, party = true, raid = true }
 
 local done = {}
 

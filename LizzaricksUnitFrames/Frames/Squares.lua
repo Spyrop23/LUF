@@ -23,7 +23,7 @@ local _, ns = ...
 local SQ = {}
 ns.Squares = SQ
 
-SQ.supported = { player = true, pet = true, target = true, party = true, partypet = true, raid = true }
+SQ.supported = { player = true, pet = true, target = true, focus = true, party = true, partypet = true, raid = true }
 
 SQ.POSITIONS = {
     { "topleft", "Top left", "TOPLEFT" }, { "top", "Top", "TOP" }, { "topright", "Top right", "TOPRIGHT" },

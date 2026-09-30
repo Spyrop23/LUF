@@ -22,7 +22,7 @@ local CB = {}
 ns.CastBar = CB
 
 -- Settings keys that offer a cast bar (as in Luna).
-CB.supported = { player = true, target = true, party = true }
+CB.supported = { player = true, target = true, focus = true, party = true }
 
 local ELAPSED   = Enum and Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.ElapsedTime or 0
 local REMAINING = Enum and Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime or 1

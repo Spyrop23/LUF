@@ -133,6 +133,13 @@ ns.defaults = {
         }),
         targettarget = unitDefaults(merge({ x = 510, width = 150 }, noPortrait)),
         targettargettarget = unitDefaults(merge({ x = 670, width = 150 }, noPortrait)),
+        -- focus below target of target, its target (off by default) next to it
+        focus = unitDefaults(merge({
+            x = 510, y = -65, width = 200, height = 34,
+            castBar = { enabled = true },
+            auras = { debuffs = true, position = "BOTTOM" },
+        }, noPortrait)),
+        focustarget = unitDefaults(small({ x = 720, y = -65, width = 120, enabled = false })),
         party = unitDefaults({ y = -140, spacing = 20, hideInRaid = true,
             auras = { debuffs = true, position = "RIGHT", perRow = 4 } }),
         partypet = unitDefaults(small({

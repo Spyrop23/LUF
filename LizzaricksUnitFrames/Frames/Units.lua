@@ -10,6 +10,7 @@ local _, ns = ...
 -- Settings keys in menu order, with their labels.
 ns.unitKeys = {
     "player", "pet", "pettarget", "target", "targettarget", "targettargettarget",
+    "focus", "focustarget",
     "party", "partypet", "partytarget", "raid",
     "maintank", "maintanktarget", "mainassist", "mainassisttarget",
 }
@@ -21,6 +22,8 @@ ns.unitLabels = {
     target = "Target",
     targettarget = "Target of Target",
     targettargettarget = "Target of Target of Target",
+    focus = "Focus",
+    focustarget = "Focus Target",
     party = "Party",
     partypet = "Party Pets",
     partytarget = "Party Targets",
@@ -66,7 +69,8 @@ end
 
 local function spawnAll()
     local UF = ns.UF
-    for _, unit in ipairs({ "player", "pet", "pettarget", "target", "targettarget", "targettargettarget" }) do
+    for _, unit in ipairs({ "player", "pet", "pettarget", "target", "targettarget", "targettargettarget",
+        "focus", "focustarget" }) do
         if UF.frames[unit] then UF.Apply(UF.frames[unit]) else UF.Create(unit) end
     end
     for i = 1, 4 do

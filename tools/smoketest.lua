@@ -117,6 +117,7 @@ PlayerFrame.PlayerFrameContainer = newWidget("Frame")
 TargetFrame = newWidget("Frame", "TargetFrame")
 TargetFrame.totFrame = newWidget("Frame")
 newWidget("Frame", "PetFrame")
+newWidget("Frame", "FocusFrame")
 newWidget("Frame", "PartyFrame")
 newWidget("Frame", "PlayerCastingBarFrame")
 UISpecialFrames = {}
@@ -544,6 +545,17 @@ ns.AssignRaidRoles()
 assert(mt1.unit == "none", "roles cleared outside a raid")
 GetRaidRosterInfo = rosterInfo
 print("main tank ok")
+
+-- focus: our frame replaces Blizzard's, with auras and a cast bar
+units.focus = true
+fire("PLAYER_FOCUS_CHANGED")
+local ff = ns.UF.frames.focus
+ns.UF.Watch(ff)
+assert(ff.shown and ff.auraContainer and ff.auraContainer.unitSet == "focus" and ff.castBar, "focus frame")
+assert(ns:IsBlizzardHidden("focus") and FocusFrame.parent ~= UIParent, "Blizzard's focus frame hidden")
+assert(not ns.UF.frames.focustarget.shown, "focus target off by default")
+units.focus = nil
+print("focus ok")
 
 -- colors page: an override changes the class colour in place, reset restores it
 ns.SetColor("class.WARRIOR", 1, 0, 0)

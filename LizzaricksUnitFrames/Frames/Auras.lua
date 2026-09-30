@@ -23,7 +23,7 @@ ns.Auras = AU
 
 -- Settings keys with auras. Polled units (target of target ...) get no aura
 -- events from the client, so they have none.
-AU.supported = { player = true, pet = true, target = true, party = true, partypet = true }
+AU.supported = { player = true, pet = true, target = true, focus = true, party = true, partypet = true }
 
 local F = AuraUtil and AuraUtil.AuraFilters or {}
 local HELPFUL, HARMFUL = F.Helpful or "HELPFUL", F.Harmful or "HARMFUL"

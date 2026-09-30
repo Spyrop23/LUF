@@ -24,7 +24,7 @@ local POLL_EVERY = 0.2
 
 -- Units the client sends no events for: polled while shown (Luna does the
 -- same for its "fake units").
-local POLLED = { targettarget = true, targettargettarget = true, pettarget = true,
+local POLLED = { targettarget = true, targettargettarget = true, pettarget = true, focustarget = true,
     party1target = true, party2target = true, party3target = true, party4target = true }
 -- Settings keys whose units change with the raid roster (raidNtarget ...).
 local POLLED_KEYS = { maintanktarget = true, mainassisttarget = true }
@@ -34,6 +34,8 @@ local GLOBAL_EVENTS = {
     target = { "PLAYER_TARGET_CHANGED" },
     targettarget = { "PLAYER_TARGET_CHANGED" },
     targettargettarget = { "PLAYER_TARGET_CHANGED" },
+    focus = { "PLAYER_FOCUS_CHANGED" },
+    focustarget = { "PLAYER_FOCUS_CHANGED" },
     pet = { "UNIT_PET" },
     pettarget = { "UNIT_PET" },
     party = { "GROUP_ROSTER_UPDATE" },
