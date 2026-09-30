@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.10.1
 - The chat command is now `/luf` (e.g. `/luf unlock`). The old `/lzuf` and `/lizuf` still work.
 
 ## 0.10.0
