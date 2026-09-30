@@ -287,6 +287,8 @@ function UF.Layout(f)
     if ns.Auras then ns.Auras.Layout(f) end
     if ns.Status then ns.Status.Layout(f) end
     if ns.Squares then ns.Squares.Layout(f) end
+    if ns.Borders then ns.Borders.Layout(f) end
+    if ns.Indicators then ns.Indicators.Layout(f) end
     UF.Update(f)
 end
 
@@ -440,6 +442,8 @@ function UF.UnitChanged(f)
     if ns.CastBar then ns.CastBar.Refresh(f) end
     if ns.Auras then ns.Auras.Refresh(f) end
     if ns.Squares then ns.Squares.Refresh(f) end
+    if ns.Borders then ns.Borders.Refresh(f) end
+    if ns.Indicators then ns.Indicators.Refresh(f) end
 end
 
 -- Which parts an event touches; everything else redraws the whole frame.
@@ -527,8 +531,16 @@ function UF.Create(unit, opts)
     if ns.CastBar then ns.CastBar.Create(f) end
     if ns.Status then ns.Status.Create(f) end
     if ns.Squares then ns.Squares.Create(f) end
+    if ns.Borders then ns.Borders.Create(f) end
+    if ns.Indicators then ns.Indicators.Create(f) end
     wireEvents(f)
     f:HookScript("OnShow", UF.UnitChanged)
+    -- the unit's tooltip, as Blizzard's frames show it
+    f:HookScript("OnEnter", function(self)
+        if GameTooltip_SetDefaultAnchor then GameTooltip_SetDefaultAnchor(GameTooltip, self) end
+        if pcall(GameTooltip.SetUnit, GameTooltip, self.unit) then GameTooltip:Show() end
+    end)
+    f:HookScript("OnLeave", function() GameTooltip:Hide() end)
 
     UF.frames[unit] = f
     UF.byKey[f.key] = UF.byKey[f.key] or {}

@@ -16,6 +16,16 @@
   the name, e.g. "Demon Armor  Rank 1  ID: 706") and add them with one click; hover a result
   for its tooltip. Each frame's Auras tab can use a list to hide those buffs/debuffs or to
   show only them, and every square can take its spells from a list.
+- Borders, as in Luna (new Borders tab on every frame): a coloured edge on mouseover (white),
+  on aggro (threat colour) and on debuff (Off / Your own = ones you can dispel / All), coloured
+  by type: magic blue, curse purple, poison green, disease brown, others red. The debuff border
+  works in combat and wins over aggro and mouseover. Size 1-10 and "Always on top".
+- Indicators, as in Luna (Indicators tab on every frame): raid target icon, class, master looter,
+  leader, PvP flag and incoming resurrection, each with on/off, size, point and X/Y offset; plus
+  the elite/rare/boss dragon on the left or right side of the frame (on for the target).
+- Hovering a frame shows the unit's tooltip.
+- Download zip now carries the version in its name (LizzaricksUnitFrames-0.9.2.zip); the folder
+  inside stays LizzaricksUnitFrames.
 - Every slider now has an input box: type the value and press Enter (kept within the slider's
   range; "0,35" and "0.35" both work).
 

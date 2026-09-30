@@ -37,7 +37,10 @@ function Widget:CreateFontString() return newWidget("FontString") end
 function Widget:SetScript(k, fn) self.scripts[k] = fn end
 function Widget:GetScript(k) return self.scripts[k] end
 function Widget:GetStatusBarTexture() self.fill = self.fill or newWidget("Texture"); return self.fill end
-function Widget:HookScript(k, fn) self.scripts[k] = fn end
+function Widget:HookScript(k, fn)
+    local old = self.scripts[k]
+    self.scripts[k] = old and function(...) old(...); fn(...) end or fn
+end
 function Widget:RegisterEvent(e) self.events[e] = true end
 function Widget:RegisterUnitEvent(e, unit) self.events[e] = unit or true end
 function Widget:UnregisterEvent(e) self.events[e] = nil end
@@ -131,6 +134,7 @@ Enum = {
     StatusBarTimerDirection = { ElapsedTime = 0, RemainingTime = 1 },
     StatusBarInterpolation = { Immediate = 0 },
     CustomAuraButtonDispelTypeTextureStyle = { PreserveAsset = 3 },
+    LootMethod = { Masterlooter = 2 },
 }
 CurveConstants = { ScaleTo100 = { curve = true } }
 C_SwingTimer = {}
@@ -151,6 +155,14 @@ C_Spell = {
     GetSpellTexture = function(id) return SPELLS[id] and 136185 end,
     RequestLoadSpellData = function(id) SPELLS[id][2] = SPELLS[id][2] == "" and "Rank 5" or SPELLS[id][2] end,
 }
+function GetRaidTargetIndex(u) if u == "target" then return secret(8) end end
+function Widget:SetSpriteSheetCell(i) self.cell = reveal(i) end
+function UnitIsGroupLeader(u) return secret(u == "party1") end
+function UnitIsPVP(u) return u == "player" end
+function UnitIsPVPFreeForAll() return false end
+function UnitFactionGroup() return "Horde" end
+function UnitHasIncomingResurrection(u) return secret(false) end
+C_PartyInfo = { GetLootMethod = function() return 2, 0, nil end }
 function UnitThreatSituation(u) return u == "party1" and 3 or 0 end
 function GetThreatStatusColor(s) return 1, 0, 0 end
 function UnitCanAttack() return true end
@@ -423,6 +435,39 @@ assert(tadb.buffList == "" and pdb.topright.list == "", "delete clears reference
 FL.selected = "Warlock (2)"
 FL.Search("")
 print("filters ok")
+
+-- borders: mouseover and aggro, debuff border as an aura slot
+local p1f = ns.UF.frames.party1
+ns.db.units.party.borders.aggro = true
+ns:ApplyKey("party")
+ns.Borders.Update(p1f)
+assert(p1f.border.shown and p1f.border.edges[1].shown, "aggro border on party1")
+local plf = ns.UF.frames.player
+assert(not plf.border.shown, "no border without hover")
+plf.scripts.OnEnter(plf)
+assert(plf.border.shown, "mouseover border")
+plf.scripts.OnLeave(plf)
+assert(not plf.border.shown, "mouseover border gone")
+assert(plf.borderContainer and plf.borderContainer.slots.border.filter == "HARMFUL|RAID", "debuff border slot")
+ns.db.units.player.borders.debuff = "all"; ns:ApplyKey("player")
+assert(plf.borderContainer.slots.border.filter == "HARMFUL", "debuff border: all")
+ns.db.units.player.borders.debuff = "off"; ns:ApplyKey("player")
+assert(not plf.borderContainer, "debuff border off")
+print("borders ok")
+
+-- indicators: raid mark (secret index), leader (secret bool), master looter, pvp, elite
+local tgf = ns.UF.frames.target
+ns.Indicators.Update(tgf)
+assert(tgf.indicators.icons.raidTarget.shown and tgf.indicators.icons.raidTarget.cell == 8, "raid mark")
+assert(tgf.indicators.icons.elite.shown and tgf.indicators.icons.elite.atlas:find("Winged"), "elite dragon")
+ns.Indicators.Update(p1f)
+assert(p1f.indicators.icons.leader.alpha == 1, "party1 leads")
+ns.Indicators.Update(plf)
+assert(plf.indicators.icons.leader.alpha == 0, "player not leader")
+assert(plf.indicators.icons.masterLooter.alpha == 1, "player is master looter")
+ns.db.units.player.indicators.pvp.enabled = true; ns:ApplyKey("player")
+assert(plf.indicators.icons.pvp.shown and plf.indicators.icons.pvp.atlas:find("Horde"), "pvp icon")
+print("indicators ok")
 
 -- status icon: resting -> Zzz, combat -> swords
 local st = ns.UF.frames.player.status

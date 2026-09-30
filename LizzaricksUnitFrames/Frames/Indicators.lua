@@ -1,0 +1,234 @@
+-- LizzaricksUnitFrames / Frames / Indicators
+--
+-- Luna's small icons on a unit frame: raid target mark, class, group
+-- leader, master looter, PvP flag, incoming resurrection and the elite
+-- dragon. Each has on/off, size, anchor point and offset; the elite dragon
+-- sits on one side of the frame.
+--
+-- Secrets: the raid mark index is secret, so it goes straight into the
+-- texture (SetSpriteSheetCell) and only its existence is tested. Yes/no
+-- values that may be secret (leader, resurrection, master looter) drive the
+-- icon's alpha through SetAlphaFromBoolean. Class and faction are used only
+-- when readable; otherwise the icon stays hidden.
+local _, ns = ...
+
+local IN = {}
+ns.Indicators = IN
+
+IN.POINTS = {
+    { "TOPLEFT", "Top left" }, { "TOP", "Top" }, { "TOPRIGHT", "Top right" },
+    { "LEFT", "Left" }, { "CENTER", "Center" }, { "RIGHT", "Right" },
+    { "BOTTOMLEFT", "Bottom left" }, { "BOTTOM", "Bottom" }, { "BOTTOMRIGHT", "Bottom right" },
+}
+IN.SIDES = { { "LEFT", "Left" }, { "RIGHT", "Right" } }
+
+-- key, label (order of the options page)
+IN.KINDS = {
+    { "raidTarget", "Raid target icon" },
+    { "class", "Class" },
+    { "masterLooter", "Master looter" },
+    { "leader", "Leader" },
+    { "pvp", "Player vs. Player" },
+    { "resurrect", "Resurrections" },
+}
+
+local RAID_ICONS = "Interface\\TargetingFrame\\UI-RaidTargetingIcons"
+local MASTER_LOOTER = "Interface\\GroupFrame\\UI-Group-MasterLooter"
+
+local function try(obj, method, ...)
+    local f = obj and obj[method]
+    if not f then return false end
+    return (pcall(f, obj, ...))
+end
+
+local function call(fn, ...)
+    if not fn then return nil end
+    local ok, a, b, c = pcall(fn, ...)
+    if ok then return a, b, c end
+end
+
+-- Shows the icon when `value` is true; `value` may be secret.
+local function showIf(tex, value)
+    if type(value) == "nil" then tex:Hide() return end
+    tex:Show()
+    if not try(tex, "SetAlphaFromBoolean", value, 1, 0) then
+        tex:SetAlpha((ns.CanRead(value) and value) and 1 or 0)
+    end
+end
+
+local frames = {}
+
+function IN.Create(f)
+    local holder = CreateFrame("Frame", nil, f)
+    holder:SetAllPoints(f)
+    holder:SetFrameLevel(f:GetFrameLevel() + 14)
+    local icons = {}
+    for _, k in ipairs(IN.KINDS) do
+        icons[k[1]] = holder:CreateTexture(nil, "OVERLAY")
+        icons[k[1]]:Hide()
+    end
+    icons.raidTarget:SetTexture(RAID_ICONS)
+    icons.leader:SetAtlas("UI-HUD-UnitFrame-Player-Group-LeaderIcon")
+    if not icons.masterLooter:SetTexture(MASTER_LOOTER) then
+        icons.masterLooter:SetAtlas("Coin-Gold")
+    end
+    icons.resurrect:SetAtlas("RaidFrame-Icon-Rez")
+    icons.elite = holder:CreateTexture(nil, "ARTWORK")
+    icons.elite:Hide()
+    f.indicators = { holder = holder, icons = icons }
+    frames[f] = true
+end
+
+-- Geometry (protected context: called from UF.Layout).
+function IN.Layout(f)
+    local ind = f.indicators
+    if not ind then return end
+    local all = f.db.indicators
+    for _, k in ipairs(IN.KINDS) do
+        local tex, d = ind.icons[k[1]], all[k[1]]
+        tex:ClearAllPoints()
+        tex:SetPoint("CENTER", f, d.point, d.x or 0, d.y or 0)
+        tex:SetSize(d.size, d.size)
+    end
+    -- the dragon hangs off the chosen side, facing outwards
+    local e, d = ind.icons.elite, all.elite
+    local h = f.db.height * (d.scale or 1.6)
+    e:ClearAllPoints()
+    e:SetSize(h * 1.2, h)
+    if d.side == "LEFT" then
+        e:SetPoint("CENTER", f, "LEFT", 0, 0)
+    else
+        e:SetPoint("CENTER", f, "RIGHT", 0, 0)
+    end
+    IN.Update(f)
+end
+
+-- ------------------------------------------------------------ update --
+
+local CLASS_ATLAS = "UI-HUD-UnitFrame-Player-Portrait-ClassIcon-"
+
+local function masterLooterUnit()
+    if not (C_PartyInfo and C_PartyInfo.GetLootMethod) then return nil end
+    local method, partyID, raidID = call(C_PartyInfo.GetLootMethod)
+    if not (ns.CanRead(method) and Enum.LootMethod and method == Enum.LootMethod.Masterlooter) then return nil end
+    if ns.CanRead(raidID) and raidID and IsInRaid() then return "raid" .. raidID end
+    if ns.CanRead(partyID) and partyID then return partyID == 0 and "player" or "party" .. partyID end
+end
+
+local UPDATE = {}
+
+function UPDATE.raidTarget(tex, unit)
+    local index = call(GetRaidTargetIndex, unit)
+    if type(index) == "nil" then tex:Hide() return end
+    if not try(tex, "SetSpriteSheetCell", index, 4, 4) then
+        if not (ns.CanRead(index) and type(index) == "number") then tex:Hide() return end
+        local i = index - 1
+        tex:SetTexCoord((i % 4) / 4, (i % 4 + 1) / 4, math.floor(i / 4) / 4, (math.floor(i / 4) + 1) / 4)
+    end
+    tex:Show()
+end
+
+function UPDATE.class(tex, unit)
+    local isPlayer = call(UnitIsPlayer, unit)
+    local _, token = call(UnitClass, unit)
+    if not (ns.CanRead(isPlayer) and isPlayer and ns.CanRead(token) and type(token) == "string") then
+        tex:Hide()
+        return
+    end
+    tex:SetAtlas(CLASS_ATLAS .. token:sub(1, 1) .. token:sub(2):lower())
+    tex:Show()
+end
+
+function UPDATE.leader(tex, unit)
+    showIf(tex, call(UnitIsGroupLeader, unit))
+end
+
+function UPDATE.masterLooter(tex, unit)
+    local looter = masterLooterUnit()
+    if not looter then tex:Hide() return end
+    showIf(tex, call(UnitIsUnit, unit, looter))
+end
+
+function UPDATE.pvp(tex, unit)
+    local ffa, flagged = call(UnitIsPVPFreeForAll, unit), call(UnitIsPVP, unit)
+    local faction = call(UnitFactionGroup, unit)
+    if ns.CanRead(ffa) and ffa then
+        tex:SetAtlas("UI-HUD-UnitFrame-Player-PVP-FFAIcon")
+        tex:Show()
+    elseif ns.CanRead(flagged) and flagged and ns.CanRead(faction)
+        and (faction == "Horde" or faction == "Alliance") then
+        tex:SetAtlas("UI-HUD-UnitFrame-Player-PVP-" .. faction .. "Icon")
+        tex:Show()
+    else
+        tex:Hide()
+    end
+end
+
+function UPDATE.resurrect(tex, unit)
+    showIf(tex, call(UnitHasIncomingResurrection, unit))
+end
+
+local ELITE = {
+    worldboss = "UI-HUD-UnitFrame-Target-PortraitOn-Boss-Gold-Winged",
+    elite = "UI-HUD-UnitFrame-Target-PortraitOn-Boss-Gold-Winged",
+    rareelite = "UI-HUD-UnitFrame-Target-PortraitOn-Boss-Rare-Silver-Winged",
+    rare = "UI-HUD-UnitFrame-Target-PortraitOn-Boss-Rare-Silver-Winged",
+}
+
+local function updateElite(tex, unit, d)
+    local class = call(UnitClassification, unit)
+    local atlas = ns.CanRead(class) and ELITE[class]
+    if not atlas then tex:Hide() return end
+    tex:SetAtlas(atlas)
+    -- Blizzard's art faces left; mirror it for the right side
+    if d.side == "LEFT" then tex:SetTexCoord(0, 1, 0, 1) else tex:SetTexCoord(1, 0, 0, 1) end
+    tex:Show()
+end
+
+function IN.Update(f)
+    local ind = f.indicators
+    if not ind then return end
+    local all, unit = f.db.indicators, f.unit
+    local exists = ns.unlocked or call(UnitExists, unit)
+    for _, k in ipairs(IN.KINDS) do
+        local tex, d = ind.icons[k[1]], all[k[1]]
+        if not (d.enabled and exists) then
+            tex:Hide()
+        elseif ns.unlocked then
+            -- config mode: show where the icons go
+            tex:SetAlpha(1)
+            tex:Show()
+        else
+            UPDATE[k[1]](tex, unit, d)
+        end
+    end
+    if all.elite.enabled and exists then
+        updateElite(ind.icons.elite, unit, all.elite)
+    else
+        ind.icons.elite:Hide()
+    end
+end
+
+IN.Refresh = IN.Update
+
+local function updateAll()
+    for f in pairs(frames) do
+        if f:IsVisible() then IN.Update(f) end
+    end
+end
+
+for _, event in ipairs({ "RAID_TARGET_UPDATE", "GROUP_ROSTER_UPDATE", "PARTY_LEADER_CHANGED",
+    "PARTY_LOOT_METHOD_CHANGED", "UNIT_FACTION", "PLAYER_FLAGS_CHANGED", "INCOMING_RESURRECT_CHANGED",
+    "UNIT_CLASSIFICATION_CHANGED" }) do
+    ns:RegisterEvent(event, updateAll)
+end
+
+-- Target of target and friends get no events of their own.
+local ticker = CreateFrame("Frame")
+local wait = 0
+ticker:SetScript("OnUpdate", function(_, elapsed)
+    wait = wait + elapsed
+    if wait < 0.5 then return end
+    wait = 0
+    updateAll()
+end)

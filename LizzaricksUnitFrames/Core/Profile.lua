@@ -55,6 +55,16 @@ local function unitDefaults(o)
         xpBar     = { enabled = false, weight = 2, background = true, backgroundAlpha = 0.2 },
         range     = { enabled = true, alpha = 0.4 },
         squares   = squareDefaults(),
+        borders   = { mouseover = true, aggro = false, debuff = "own", size = 2, onTop = false },   -- Luna's defaults
+        indicators = {
+            raidTarget   = { enabled = true, size = 20, point = "TOP", x = 0, y = 0 },
+            class        = { enabled = false, size = 16, point = "BOTTOMRIGHT", x = -1, y = 1 },
+            masterLooter = { enabled = true, size = 12, point = "TOPRIGHT", x = -16, y = -1 },
+            leader       = { enabled = true, size = 14, point = "TOPRIGHT", x = -4, y = -1 },
+            pvp          = { enabled = false, size = 24, point = "RIGHT", x = 0, y = 0 },
+            resurrect    = { enabled = true, size = 20, point = "CENTER", x = 0, y = 0 },
+            elite        = { enabled = false, side = "RIGHT", scale = 1.6 },
+        },
         auras     = {
             buffs = false, debuffs = false,
             buffFilter = "all", debuffFilter = "all",
@@ -107,6 +117,7 @@ ns.defaults = {
         pettarget = unitDefaults(small({ x = 260, y = -72, enabled = false })),
         target = unitDefaults({
             x = 260,
+            indicators = { elite = { enabled = true } },
             castBar = { enabled = true },
             auras = { buffs = true, debuffs = true },
             tags = { healthBar = { right = "[smarthealthp]" } },

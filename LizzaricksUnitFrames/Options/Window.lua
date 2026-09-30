@@ -243,8 +243,36 @@ local function unitTabs(key)
         end)
     end
 
-    if (ns.Status and ns.Status.supported[key]) or key == "pet" then
+    tab("borders", "Borders", function(b)
+        b:Header("Borders")
+        b:Check("On mouseover", p("borders.mouseover"))
+        b:Check("On aggro", p("borders.aggro"))
+        if ns.Borders.debuffSupported[key] then
+            b:Dropdown("On debuff", ns.Borders.DEBUFF_MODES, p("borders.debuff"))
+            b:Text("The debuff border is coloured by type (magic blue, curse purple, poison green, " ..
+                "disease brown, others red) and wins over aggro and mouseover.", 30)
+        end
+        b:Slider("Size", 1, 10, 1, p("borders.size"))
+        b:Check("Always on top (above auras, squares and icons)", p("borders.onTop"))
+    end)
+
+    do
         tab("indicators", "Indicators", function(b)
+            for _, k in ipairs(ns.Indicators.KINDS) do
+                local base = "indicators." .. k[1] .. "."
+                b:Header(k[2])
+                b:Check("Enabled", p(base .. "enabled"))
+                b:Slider("Size", 5, 40, 1, p(base .. "size"))
+                b:Dropdown("Point", ns.Indicators.POINTS, p(base .. "point"))
+                b:Slider("X position", -50, 50, 1, p(base .. "x"))
+                b:Slider("Y position", -100, 100, 1, p(base .. "y"))
+            end
+            b:Header("Elite")
+            b:Text("A dragon on the side of the frame for elite, rare and boss units.", 16)
+            b:Check("Enabled", p("indicators.elite.enabled"))
+            b:Dropdown("Side", ns.Indicators.SIDES, p("indicators.elite.side"))
+            local ges, ses = p("indicators.elite.scale")
+            b:Slider("Size (x frame height)", 0.5, 3, 0.1, ges, ses, "%.1f")
             if ns.Status and ns.Status.supported[key] then
                 b:Header("Status icon")
                 b:Text("Crossed swords in combat, Zzz while resting.")
