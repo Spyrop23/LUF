@@ -482,6 +482,16 @@ ns.Indicators.Update(p1f)
 assert(p1f.indicators.icons.raidTarget.cell == 5, "config mode shows the real mark (moon)")
 GetRaidTargetIndex = markOf
 SlashCmdList.LIZUF("lock")
+local tl = ns.db.units.party.squares.topleft
+tl.enabled, tl.type, tl.texture, tl.spells = true, "buff", true, "706"
+ns:ApplyKey("party")
+SlashCmdList.LIZUF("unlock")
+ns.Squares.Update(p1f)
+assert(p1f.squares.topleft.tex.texture == 136185, "config preview shows the spell icon")
+SlashCmdList.LIZUF("lock")
+ns.Squares.Update(p1f)
+assert(p1f.squares.topleft.tex.texture ~= 136185, "back to the plain square after locking")
+tl.enabled = false
 print("indicators ok")
 
 -- status icon: resting -> Zzz, combat -> swords

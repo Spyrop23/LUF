@@ -74,6 +74,8 @@ local function filterFor(kind)
     if kind == "dispel" then return join(HARMFUL, RAID) end
 end
 
+local previewIcon
+
 local function try(obj, method, ...)
     local f = obj and obj[method]
     if not f then return false end
@@ -96,6 +98,20 @@ function SQ.ParseSpells(text)
         end
     end
     return ids, unknown
+end
+
+-- Config-mode picture of an icon square: the first listed spell's icon,
+-- else a question mark (stand-in frames have no auras to show).
+previewIcon = function(d)
+    local ids = SQ.ParseSpells(d.spells)
+    for id in pairs(ns.Filters and ns.Filters.Get(d.list) or {}) do ids[id] = true end
+    local first
+    for id in pairs(ids) do if not first or id < first then first = id end end
+    if first and C_Spell and C_Spell.GetSpellTexture then
+        local ok, icon = pcall(C_Spell.GetSpellTexture, first)
+        if ok and ns.CanRead(icon) and icon then return icon end
+    end
+    return 134400
 end
 
 -- ------------------------------------------------------------ building --
@@ -219,6 +235,7 @@ function SQ.Layout(f)
         h:SetSize(d.size, d.size)
         h:SetShown(d.enabled)
         h.kind = d.enabled and d.type or nil
+        h.previewIcon = (d.enabled and d.texture and AURA_TYPES[d.type]) and previewIcon(d) or nil
         -- aura squares draw nothing themselves, except the red of "missing"
         if d.type == "missing" then
             local c = COLORS.missing
@@ -251,7 +268,18 @@ function SQ.Update(f)
         local kind = h.kind
         if kind then
             local show, r, g, b = false, 1, 1, 1
-            if ns.unlocked then
+            local icon = ns.unlocked and h.previewIcon
+            if icon then
+                h.tex:SetTexture(icon)
+                h.tex:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+            elseif h.showingIcon then
+                h.tex:SetTexture(ns.media.background)
+                h.tex:SetTexCoord(0, 1, 0, 1)
+            end
+            h.showingIcon = icon and true or false
+            if icon then
+                show = true
+            elseif ns.unlocked then
                 local c = COLORS[kind] or { 1, 0, 0 }
                 show, r, g, b = true, c[1], c[2], c[3]
             elseif kind == "aggro" then
