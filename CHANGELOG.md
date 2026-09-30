@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- The chat command is now `/luf` (e.g. `/luf unlock`). The old `/lzuf` and `/lizuf` still work.
+
 ## 0.10.0
 **Heads-up for existing users:** this update turns on a few new things by default on every
 frame: a white border on mouseover, a debuff border for debuffs you can dispel, and the raid

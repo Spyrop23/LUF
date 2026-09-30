@@ -12,7 +12,7 @@ its options menu, rebuilt from scratch so it keeps working in combat.
 - Player, pet, pet target, target, target of target, target of target of target, focus, focus target
 - Party (1-4) with their pets and targets, raid (40 frames, one column per raid group)
 - Main tanks and main assists (from the raid roles) with their targets
-- Luna's default layout; move everything with `/lzuf unlock` or a right click on the minimap button
+- Luna's default layout; move everything with `/luf unlock` or a right click on the minimap button
 - Raid grid: members in columns or rows, groups per row, or move each group on its own
 
 ## Bars and texts
@@ -45,7 +45,7 @@ its options menu, rebuilt from scratch so it keeps working in combat.
 - Colors page (classes, power, reactions, pet happiness, cast bars) with a colour picker
 - Profiles per character (create, copy, delete, reset)
 - Hide Blizzard page: Blizzard's frames and cast bar in one place
-- `/lzuf` opens the menu, as do the minimap button and the addon compartment
+- `/luf` opens the menu, as do the minimap button and the addon compartment
 
 ## Limits of WoW: Forever
 Some values are kept secret by the game in combat. The addon never works around this. It lets

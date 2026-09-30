@@ -1,7 +1,7 @@
 -- LizzaricksUnitFrames / Options / Window
 --
 -- The options window: page list on the left, the page on the right in a
--- scroll frame; unit pages have a row of tabs above it, as in Luna. Opened with /lzuf, the minimap button or the addon
+-- scroll frame; unit pages have a row of tabs above it, as in Luna. Opened with /luf, the minimap button or the addon
 -- compartment. Changes apply at once (out of combat; in combat they wait).
 local _, ns = ...
 
@@ -94,7 +94,7 @@ addPage("general", "General", function(b)
     b:Text("Left click on a frame targets the unit, right click opens its menu.\n" ..
         "Hidden Blizzard frames come back after a /reload once you untick \"Hide Blizzard frame\".\n" ..
         "Settings changed in combat are applied when combat ends.", 48)
-    b:Text("Commands: /lzuf (this window), /lzuf unlock, /lzuf lock, /lzuf profile <name>, /lzuf reset", 16)
+    b:Text("Commands: /luf (this window), /luf unlock, /luf lock, /luf profile <name>, /luf reset", 16)
 end)
 
 -- A unit page is a set of tabs, as in Luna. Each tab builds its own list of
@@ -764,7 +764,7 @@ ns:OnLogin(function()
     local panel = CreateFrame("Frame")
     local text = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     text:SetPoint("TOPLEFT", 16, -16)
-    text:SetText("Lizzarick's Unit Frames\n\nType /lzuf or click the minimap button.")
+    text:SetText("Lizzarick's Unit Frames\n\nType /luf or click the minimap button.")
     text:SetJustifyH("LEFT")
     local btn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
     btn:SetSize(200, 24)

@@ -1,21 +1,21 @@
 -- LizzaricksUnitFrames / Core / Slash
 --
--- /lzuf                    options window
--- /lzuf lock | unlock      config mode off / on
--- /lzuf profile [name]     show or switch the profile (new names are created)
--- /lzuf reset              reset the current profile to defaults
--- /lzuf help               this list
+-- /luf                    options window
+-- /luf lock | unlock      config mode off / on
+-- /luf profile [name]     show or switch the profile (new names are created)
+-- /luf reset              reset the current profile to defaults
+-- /luf help               this list
 local _, ns = ...
 
 local function help()
     ns:Print("v%s commands:", ns.version)
-    print("  /lzuf - options window")
-    print("  /lzuf unlock - move the frames (config mode)")
-    print("  /lzuf lock - end config mode")
-    print("  /lzuf profile [name] - show or switch the profile")
-    print("  /lzuf reset - reset the current profile")
-    print("  /lzuf pet - show what the game reports about your pet's happiness")
-    print("  /lzuf buffs - your buffs: which count as \"mine\" and \"castable\" (out of combat)")
+    print("  /luf - options window")
+    print("  /luf unlock - move the frames (config mode)")
+    print("  /luf lock - end config mode")
+    print("  /luf profile [name] - show or switch the profile")
+    print("  /luf reset - reset the current profile")
+    print("  /luf pet - show what the game reports about your pet's happiness")
+    print("  /luf buffs - your buffs: which count as \"mine\" and \"castable\" (out of combat)")
 end
 
 -- Spell IDs of the player's buffs that pass `filter` (out of combat only:
@@ -87,8 +87,10 @@ local commands = {
     end,
 }
 
-SLASH_LIZUF1 = "/lzuf"
-SLASH_LIZUF2 = "/lizuf"
+SLASH_LIZUF1 = "/luf"
+-- the commands up to 0.10.0 keep working
+SLASH_LIZUF2 = "/lzuf"
+SLASH_LIZUF3 = "/lizuf"
 SlashCmdList.LIZUF = function(msg)
     local cmd, arg = (msg or ""):match("^%s*(%S*)%s*(.-)%s*$")
     local fn = commands[cmd:lower()]

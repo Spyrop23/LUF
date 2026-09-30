@@ -162,7 +162,7 @@ function ns:SetLocked(locked)
     if locked then
         ns:Print("Frames locked.")
     else
-        ns:Print("Frames unlocked: drag them with the left mouse button. |cffffff00/lzuf lock|r when done.")
+        ns:Print("Frames unlocked: drag them with the left mouse button. |cffffff00/luf lock|r when done.")
     end
     if ns.Options then ns.Options:Refresh() end
 end

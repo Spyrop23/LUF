@@ -36,16 +36,16 @@ tools/      Smoke-Test und Paket-Skript
 
 - **Minimap-Button** (Mondsymbol): Linksklick öffnet das Menü, Rechtsklick entsperrt (unlock) oder sperrt
   die Frames zum Verschieben, Ziehen verschiebt den Button.
-- Das Menü öffnet sich auch über das Addon-Menü am Minimap-Rand, über Optionen → AddOns → Lizzarick's Unit Frames und mit `/lzuf` (oder `/lizuf`).
+- Das Menü öffnet sich auch über das Addon-Menü am Minimap-Rand, über Optionen → AddOns → Lizzarick's Unit Frames und mit `/luf` (die alten Befehle `/lzuf` und `/lizuf` gehen weiterhin).
 
 | Befehl | Wirkung |
 |---|---|
-| `/lzuf` | Optionsmenü öffnen/schließen |
-| `/lzuf unlock` | Config-Mode: alle Frames zeigen und mit der linken Maustaste verschieben |
-| `/lzuf lock` | Config-Mode beenden (passiert beim Kampfbeginn automatisch) |
-| `/lzuf profile [name]` | Profil anzeigen oder wechseln (neue Namen werden angelegt) |
-| `/lzuf reset` | aktuelles Profil auf Standard zurücksetzen |
-| `/lzuf tags` | Tag-Übersicht im Menü |
+| `/luf` | Optionsmenü öffnen/schließen |
+| `/luf unlock` | Config-Mode: alle Frames zeigen und mit der linken Maustaste verschieben |
+| `/luf lock` | Config-Mode beenden (passiert beim Kampfbeginn automatisch) |
+| `/luf profile [name]` | Profil anzeigen oder wechseln (neue Namen werden angelegt) |
+| `/luf reset` | aktuelles Profil auf Standard zurücksetzen |
+| `/luf tags` | Tag-Übersicht im Menü |
 
 ## Stand (0.10.0)
 

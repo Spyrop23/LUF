@@ -780,6 +780,7 @@ LizUF_OnAddonCompartmentClick()
 SlashCmdList.LIZUF("profile Raid")
 SlashCmdList.LIZUF("profile")
 SlashCmdList.LIZUF("reset")
+assert(SLASH_LIZUF1 == "/luf" and SLASH_LIZUF2 == "/lzuf", "slash commands: /luf, old /lzuf kept")
 SlashCmdList.LIZUF("pet")
 C_UnitAuras = { GetAuraDataByIndex = function(unit, i, filter)
     if i == 1 then return { spellId = 19740, name = "Blessing of Might" } end
