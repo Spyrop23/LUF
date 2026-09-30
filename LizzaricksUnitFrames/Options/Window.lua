@@ -54,7 +54,7 @@ local COLOR_TYPES = {
 local PORTRAIT_TYPES = { { "3D", "3D model" }, { "2D", "2D picture" } }
 local SIDES = { { "LEFT", "Left" }, { "RIGHT", "Right" } }
 local CAST_POS = { { "BELOW", "Below the frame" }, { "ABOVE", "Above the frame" } }
-local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", xpBar = "Experience bar" }
+local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", xpBar = "Experience bar", emptyBar = "Empty bar" }
 local RAID_DIRECTIONS = { { "DOWN", "Below each other (columns)" }, { "RIGHT", "Next to each other (rows)" } }
 local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
@@ -163,6 +163,21 @@ local function unitTabs(key)
         b:Slider("Height (weight)", 1, 10, 0.5, gpw, spw, "%.1f")
         b:Check("Background", p("powerBar.background"))
         b:Slider("Background alpha", 0, 1, 0.05, p("powerBar.backgroundAlpha"))
+    end)
+
+    tab("empty", "Empty bar", function(b)
+        b:Header("Empty bar")
+        b:Text("A bar without a value, only for texts (set them on the Tags tab), as in Luna.", 16)
+        b:Check("Enabled", p("emptyBar.enabled"))
+        local gew, sew = p("emptyBar.weight")
+        b:Slider("Height (weight)", 1, 10, 0.5, gew, sew, "%.1f")
+        b:Check("Background", p("emptyBar.background"))
+        local gec = p("emptyBar.color")   -- only the getter: the setter below builds the table
+        b:Color("Background colour", gec, function(r, g, bl)
+            ns.db.units[key].emptyBar.color = { r, g, bl }
+            ns:ApplyKey(key)
+        end)
+        b:Slider("Background alpha", 0, 1, 0.05, p("emptyBar.backgroundAlpha"))
     end)
 
     if ns.CastBar and ns.CastBar.supported[key] then

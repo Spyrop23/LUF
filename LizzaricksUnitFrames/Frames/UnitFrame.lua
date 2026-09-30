@@ -54,7 +54,8 @@ local UNIT_EVENTS = {
     "UNIT_HAPPINESS", "UNIT_HEAL_PREDICTION", "UNIT_ABSORB_AMOUNT_CHANGED",
 }
 
-local BAR_KEYS = { "healthBar", "powerBar", "xpBar" }
+-- emptyBar: Luna's "empty bar", no value, only a background and texts
+local BAR_KEYS = { "healthBar", "powerBar", "emptyBar", "xpBar" }
 UF.BAR_KEYS = BAR_KEYS
 
 -- ------------------------------------------------------------ regions --
@@ -89,6 +90,9 @@ local function buildRegions(f)
 
     f.healthBar = createBar(f)
     f.powerBar = createBar(f)
+    f.emptyBar = createBar(f)
+    f.emptyBar:SetMinMaxValues(0, 1)
+    f.emptyBar:SetValue(0)
     f.xpBar = createBar(f)
     f.xpBar.rested = f.xpBar:CreateTexture(nil, "ARTWORK")   -- rested part beyond the fill
     if ns.HealPrediction then ns.HealPrediction.Create(f) end
@@ -258,6 +262,10 @@ function UF.Layout(f)
         bar:SetPoint("TOPRIGHT", f, "TOPRIGHT", -right, y)
         bar:SetHeight(h)
         bar.bg:SetShown(bdb.background)
+        if key == "emptyBar" then
+            local c = bdb.color or { 0, 0, 0 }
+            bar.bg:SetVertexColor(c[1], c[2], c[3], bdb.backgroundAlpha)
+        end
         bar:Show()
         y = y - h - BORDER
 

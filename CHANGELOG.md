@@ -34,6 +34,8 @@ Borders and Indicators tabs.
   adjustable. Off by default.
 - Colors page, as in Luna: class, power, reaction, pet happiness, static health, cast bar,
   channel, tapped and offline colours, each with a colour picker; per profile, with a reset.
+- Empty bar, as in Luna (new tab): a bar without a value, only for texts, with its own weight,
+  background colour and tags. Off by default.
 - Party Targets, as in Luna: the target of each party member, next to the member's frame (upper
   half; the party pet sits below). Off by default: Party Targets → General → Enabled.
 - Hide Blizzard page, as in Luna: every "Hide Blizzard frame" setting (and the cast bar) in one

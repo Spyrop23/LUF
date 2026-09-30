@@ -659,15 +659,32 @@ ColorPickerFrame = {
     GetColorRGB = function() return 0.1, 0.2, 0.3 end,
     GetPreviousValues = function() return 0.78, 0.61, 0.43 end,
 }
-local swatches = {}
-for _, w in ipairs(frames) do if w.swatch then table.insert(swatches, w) end end
-assert(#swatches == 29, "colour swatches: " .. #swatches)
-swatches[1].swatch.scripts.OnClick(swatches[1].swatch)
+local swatches, warrior, emptySwatch = {}, nil, nil
+for _, w in ipairs(frames) do
+    if w.swatch then
+        table.insert(swatches, w)
+        if w.label.text == "Warrior" then warrior = w end
+        if w.label.text == "Background colour" and not emptySwatch then emptySwatch = w end
+    end
+end
+assert(#swatches >= 29 and warrior and emptySwatch, "colour swatches: " .. #swatches)
+warrior.swatch.scripts.OnClick(warrior.swatch)
 picked.swatchFunc()
 assert(ns.colors.class.WARRIOR[1] == 0.1 and ns.db.colors["class.WARRIOR"], "colour picked")
 picked.cancelFunc()
 assert(ns.colors.class.WARRIOR[1] == 0.78, "cancel restores the colour")
 ns.ResetColors()
+-- empty bar: its background colour comes from its own swatch
+emptySwatch.swatch.scripts.OnClick(emptySwatch.swatch)
+picked.swatchFunc()
+assert(ns.db.units.player.emptyBar.color[1] == 0.1, "empty bar colour picked")
+ns.db.units.player.emptyBar.enabled = true
+ns:ApplyKey("player")
+local eb = ns.UF.frames.player.emptyBar
+assert(eb.shown and (eb.text.center.text or ""):find("^Thrall"), "empty bar shows its texts: " .. tostring(eb.text.center.text))
+ns.db.units.player.emptyBar.enabled = false
+ns:ApplyKey("player")
+assert(not eb.shown, "empty bar off")
 
 -- filters page: search, add from the result list, remove from the list
 FL.Search("Life")

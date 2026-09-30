@@ -316,7 +316,7 @@ function Builder:Color(text, get, set)
             cancelFunc = function() set(ColorPickerFrame:GetPreviousValues()); f:Refresh() end,
         })
     end)
-    f.swatch = swatch
+    f.swatch, f.label = swatch, fs
     function f:Refresh()
         local c = get()
         fill:SetVertexColor(c[1], c[2], c[3], 1)
