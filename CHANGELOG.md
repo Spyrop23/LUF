@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.10.2
 - Raid frames in a party, as in Luna: Raid → General → "Use the raid frames in a party too". In a
   party the first raid group shows you and party 1-4 (with everything set up for the raid:
   squares, borders, range ...); in a raid the frames switch back. "Hide the party frames then"

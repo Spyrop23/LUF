@@ -47,7 +47,7 @@ tools/      Smoke-Test und Paket-Skript
 | `/luf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/luf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.10.1)
+## Stand (0.10.2)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4), die Begleiter und Ziele der Gruppenmitglieder, Main Tanks und Main Assists
