@@ -66,6 +66,7 @@ function Widget:SetFormattedText(fmt, ...)
 end
 function Widget:SetText(t) self.text = reveal(t) end
 function Widget:GetText() return self.text end
+function Widget:GetStringWidth() return #(self.text or "") * 6 end
 function Widget:SetValue(v)
     self.value = reveal(v)
     if self.scripts.OnValueChanged then self.scripts.OnValueChanged(self, self.value, true) end
@@ -424,14 +425,25 @@ local function use(w)
     end
     used = used + 1
 end
+local tabsSeen = 0
 for _, btn in ipairs(nav) do
     btn.scripts.OnClick(btn)
+    -- click every tab of this page
+    local tabs = {}
+    for _, w in ipairs(frames) do
+        if w.tabId and w.shown then table.insert(tabs, w) end
+    end
+    for _, t in ipairs(tabs) do
+        t.scripts.OnClick(t)
+        tabsSeen = tabsSeen + 1
+    end
 end
+assert(tabsSeen >= 60, "tabs clicked: " .. tabsSeen)
 for _, w in ipairs(frames) do
     if w.check or w.slider or w.dropdown or w.edit then use(w) end
 end
 assert(ns:IsBlizzardHidden("playercast"), "player cast bar was hidden")
-print("options: " .. #nav .. " pages, " .. used .. " controls used")
+print("options: " .. #nav .. " pages, " .. tabsSeen .. " tabs, " .. used .. " controls used")
 dump()
 
 -- minimap button

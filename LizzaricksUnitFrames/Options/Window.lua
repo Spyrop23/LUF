@@ -1,7 +1,7 @@
 -- LizzaricksUnitFrames / Options / Window
 --
 -- The options window: page list on the left, the page on the right in a
--- scroll frame. Opened with /lzuf, the minimap button or the addon
+-- scroll frame; unit pages have a row of tabs above it, as in Luna. Opened with /lzuf, the minimap button or the addon
 -- compartment. Changes apply at once (out of combat; in combat they wait).
 local _, ns = ...
 
@@ -89,17 +89,22 @@ addPage("general", "General", function(b)
     b:Text("Commands: /lzuf (this window), /lzuf unlock, /lzuf lock, /lzuf profile <name>, /lzuf reset", 16)
 end)
 
-local function unitPage(key)
-    return function(b)
-        local function p(path) return unitPath(key, path) end
-        local label = ns.unitLabels[key]
+-- A unit page is a set of tabs, as in Luna. Each tab builds its own list of
+-- controls; tabs that do not apply to a unit are left out.
+local function unitTabs(key)
+    local function p(path) return unitPath(key, path) end
+    local label = ns.unitLabels[key]
+    local tabs = {}
+    local function tab(id, text, build) table.insert(tabs, { id = id, label = text, build = build }) end
 
+    tab("general", "General", function(b)
         b:Header(label)
         b:Check("Enabled", p("enabled"))
         if ns.blizzardFrames[key] then
             local g, s = p("hideBlizzard")
             b:Check("Hide Blizzard frame", blizzardToggle(g, s, key, "Blizzard's " .. label:lower() .. " frame"))
         end
+        b:Header("Size and position")
         b:Slider("Width", 20, 600, 1, p("width"))
         b:Slider("Height", 10, 300, 1, p("height"))
         b:Slider("Scale", 0.5, 3, 0.05, p("scale"))
@@ -112,6 +117,7 @@ local function unitPage(key)
         b:Edit("X position", gx, sx, 80, true)
         b:Edit("Y position", gy, sy, 80, true)
         if key == "party" then
+            b:Header("Party")
             b:Slider("Space between members", 0, 200, 1, p("spacing"))
             b:Check("Hide party frames in a raid", p("hideInRaid"))
         elseif key == "raid" then
@@ -126,12 +132,9 @@ local function unitPage(key)
                 ns:ApplyKey("raid")
             end, 220)
         end
-        if ns.Range and ns.Range.supported[key] then
-            b:Header("Range")
-            b:Check("Fade out of range", p("range.enabled"))
-            b:Slider("Alpha out of range", 0, 1, 0.05, p("range.alpha"))
-        end
+    end)
 
+    tab("health", "Health bar", function(b)
         b:Header("Health bar")
         local colorTypes = COLOR_TYPES
         if key == "pet" then
@@ -143,48 +146,19 @@ local function unitPage(key)
         b:Slider("Height (weight)", 1, 10, 0.5, ghw, shw, "%.1f")
         b:Check("Background", p("healthBar.background"))
         b:Slider("Background alpha", 0, 1, 0.05, p("healthBar.backgroundAlpha"))
+    end)
 
-        b:Header("Incoming heals")
-        b:Check("Show incoming heals (own dark green, others light green)", p("healPrediction.enabled"))
-        b:Slider("May reach past the bar (1 = no, 1.3 = 30%)", 1, 1.3, 0.01, p("healPrediction.overflow"))
-        b:Slider("Opacity", 0.1, 1, 0.05, p("healPrediction.alpha"))
-        b:Check("Show absorb shields", p("healPrediction.absorbs"))
-
+    tab("power", "Power bar", function(b)
         b:Header("Power bar")
         b:Check("Enabled", p("powerBar.enabled"))
         local gpw, spw = p("powerBar.weight")
         b:Slider("Height (weight)", 1, 10, 0.5, gpw, spw, "%.1f")
         b:Check("Background", p("powerBar.background"))
         b:Slider("Background alpha", 0, 1, 0.05, p("powerBar.backgroundAlpha"))
+    end)
 
-        if key == "pet" then
-            b:Header("Happiness")
-            b:Check("Show happiness icon", p("happiness.enabled"))
-            b:Slider("Icon size", 8, 32, 1, p("happiness.size"))
-        end
-
-        b:Header("Portrait")
-        b:Check("Enabled", p("portrait.enabled"))
-        b:Dropdown("Type", PORTRAIT_TYPES, p("portrait.type"))
-        b:Dropdown("Side", SIDES, p("portrait.side"))
-        b:Slider("Width (part of the frame)", 0.05, 0.5, 0.01, p("portrait.width"))
-
-        if ns.Status and ns.Status.supported[key] then
-            b:Header("Status icon")
-            b:Text("Crossed swords in combat, Zzz while resting.")
-            b:Check("Show status icon", p("status.enabled"))
-            b:Slider("Size", 8, 40, 1, p("status.size"))
-            b:Dropdown("Position on the frame", ns.Status.POINTS, p("status.point"))
-        end
-
-        if ns.UF.XP_SUPPORTED[key] then
-            b:Header("Experience bar")
-            b:Check("Enabled", p("xpBar.enabled"))
-            local gxw, sxw = p("xpBar.weight")
-            b:Slider("Height (weight)", 1, 10, 0.5, gxw, sxw, "%.1f")
-        end
-
-        if ns.CastBar and ns.CastBar.supported[key] then
+    if ns.CastBar and ns.CastBar.supported[key] then
+        tab("cast", "Cast bar", function(b)
             b:Header("Cast bar")
             b:Check("Enabled", p("castBar.enabled"))
             b:Slider("Height", 4, 40, 1, p("castBar.height"))
@@ -194,42 +168,101 @@ local function unitPage(key)
                 local g, s = p("castBar.hideBlizzard")
                 b:Check("Hide Blizzard cast bar", blizzardToggle(g, s, "playercast", "Blizzard's cast bar"))
             end
-        end
+        end)
+    end
 
-        if ns.Auras and ns.Auras.supported[key] then
-            b:Header("Buffs and debuffs")
+    if ns.UF.XP_SUPPORTED[key] then
+        tab("xp", "XP bar", function(b)
+            b:Header("Experience bar")
+            b:Check("Enabled", p("xpBar.enabled"))
+            local gxw, sxw = p("xpBar.weight")
+            b:Slider("Height (weight)", 1, 10, 0.5, gxw, sxw, "%.1f")
+        end)
+    end
+
+    tab("portrait", "Portrait", function(b)
+        b:Header("Portrait")
+        b:Check("Enabled", p("portrait.enabled"))
+        b:Dropdown("Type", PORTRAIT_TYPES, p("portrait.type"))
+        b:Dropdown("Side", SIDES, p("portrait.side"))
+        b:Slider("Width (part of the frame)", 0.05, 0.5, 0.01, p("portrait.width"))
+    end)
+
+    tab("heals", "Incoming heals", function(b)
+        b:Header("Incoming heals")
+        b:Check("Show incoming heals (own dark green, others light green)", p("healPrediction.enabled"))
+        b:Slider("May reach past the bar (1 = no, 1.3 = 30%)", 1, 1.3, 0.01, p("healPrediction.overflow"))
+        b:Slider("Opacity", 0.1, 1, 0.05, p("healPrediction.alpha"))
+        b:Check("Show absorb shields", p("healPrediction.absorbs"))
+    end)
+
+    if ns.Auras and ns.Auras.supported[key] then
+        tab("auras", "Auras", function(b)
+            b:Header("Buffs")
             b:Check("Show buffs", p("auras.buffs"))
             b:Dropdown("Which buffs", BUFF_FILTERS, p("auras.buffFilter"))
             b:Slider("Max. buffs", 1, 40, 1, p("auras.maxBuffs"))
+            b:Slider("Buff icon size", 8, 50, 1, p("auras.size"))
+            b:Header("Debuffs")
             b:Check("Show debuffs", p("auras.debuffs"))
             b:Dropdown("Which debuffs", DEBUFF_FILTERS, p("auras.debuffFilter"))
             b:Slider("Max. debuffs", 1, 40, 1, p("auras.maxDebuffs"))
-            b:Check("Colour debuff border by type (magic, poison ...)", p("auras.dispelColors"))
-            b:Dropdown("Position", AURA_POS, p("auras.position"))
-            b:Slider("Buff icon size", 8, 50, 1, p("auras.size"))
             b:Slider("Debuff icon size", 8, 60, 1, p("auras.debuffSize"))
+            b:Check("Colour debuff border by type (magic, poison ...)", p("auras.dispelColors"))
+            b:Header("Layout")
+            b:Dropdown("Position", AURA_POS, p("auras.position"))
             b:Slider("Space between icons", 0, 10, 1, p("auras.spacing"))
             b:Slider("Space between buffs and debuffs", 0, 30, 1, p("auras.groupGap"))
             b:Slider("Icons per row (left/right)", 1, 20, 1, p("auras.perRow"))
             b:Check("Remaining time under the icon", p("auras.duration"))
             b:Check("Cooldown swipe on the icon", p("auras.swipe"))
-        end
+        end)
+    end
 
+    if ns.Range and ns.Range.supported[key] then
+        tab("range", "Range", function(b)
+            b:Header("Range")
+            b:Check("Fade out of range", p("range.enabled"))
+            b:Slider("Alpha out of range", 0, 1, 0.05, p("range.alpha"))
+        end)
+    end
+
+    if (ns.Status and ns.Status.supported[key]) or key == "pet" then
+        tab("indicators", "Indicators", function(b)
+            if ns.Status and ns.Status.supported[key] then
+                b:Header("Status icon")
+                b:Text("Crossed swords in combat, Zzz while resting.")
+                b:Check("Show status icon", p("status.enabled"))
+                b:Slider("Size", 8, 40, 1, p("status.size"))
+                b:Dropdown("Position on the frame", ns.Status.POINTS, p("status.point"))
+            end
+            if key == "pet" then
+                b:Header("Happiness")
+                b:Text("The health bar shows the happiness as its colour (Health bar tab).")
+                b:Check("Show happiness icon", p("happiness.enabled"))
+                b:Slider("Icon size", 8, 32, 1, p("happiness.size"))
+            end
+        end)
+    end
+
+    tab("texts", "Texts", function(b)
         for _, bar in ipairs(ns.UF.BAR_KEYS) do
-          if bar ~= "xpBar" or ns.UF.XP_SUPPORTED[key] then
-            b:Header("Texts on the " .. BAR_LABELS[bar]:lower())
-            b:Slider("Font size", 5, 24, 1, p("tags." .. bar .. ".size"))
-            b:Edit("Left", p("tags." .. bar .. ".left"))
-            b:Edit("Center", p("tags." .. bar .. ".center"))
-            b:Edit("Right", p("tags." .. bar .. ".right"))
-          end
+            if bar ~= "xpBar" or ns.UF.XP_SUPPORTED[key] then
+                b:Header(BAR_LABELS[bar])
+                b:Slider("Font size", 5, 24, 1, p("tags." .. bar .. ".size"))
+                b:Edit("Left", p("tags." .. bar .. ".left"))
+                b:Edit("Center", p("tags." .. bar .. ".center"))
+                b:Edit("Right", p("tags." .. bar .. ".right"))
+            end
         end
         b:Text("Texts use tags like [name] or [smarthealth]; see the Tags page.", 16)
-    end
+    end)
+
+    return tabs
 end
 
 for _, key in ipairs(ns.unitKeys) do
-    addPage(key, ns.unitLabels[key], unitPage(key))
+    table.insert(pages, { id = key, label = ns.unitLabels[key], tabs = unitTabs(key) })
 end
 
 addPage("tags", "Tags", function(b)
@@ -281,26 +314,95 @@ end)
 
 -- ------------------------------------------------------------ window --
 
-local window, content, navButtons, current = nil, nil, {}, nil
-local built = {}   -- page id -> { frame, builder }
+local window, content, tabBar, navButtons, current = nil, nil, nil, {}, nil
+local built = {}      -- "page" or "page:tab" -> { frame, builder }
+local lastTab = {}    -- page id -> tab id shown last
+local wantedTab       -- tab id to keep when switching pages (as Luna does)
+local tabButtons = {}
 
-local function showPage(id)
-    current = id
-    for pid, pg in pairs(built) do pg.frame:SetShown(pid == id) end
-    if not built[id] then
-        for _, page in ipairs(pages) do
-            if page.id == id then
-                local frame = CreateFrame("Frame", nil, content)
-                frame:SetPoint("TOPLEFT")
-                frame:SetWidth(content:GetWidth())
-                local b = ns.Widgets.NewBuilder(frame, content:GetWidth())
-                page.build(b)
-                frame:SetHeight(b:Height())
-                built[id] = { frame = frame, builder = b }
+local TAB_H, TAB_GAP = 22, 3
+
+local function pageById(id)
+    for _, page in ipairs(pages) do
+        if page.id == id then return page end
+    end
+end
+
+-- Lays out the tab buttons of a page in rows; returns the bar height.
+local function layoutTabs(page, tabId, onClick)
+    for _, btn in ipairs(tabButtons) do btn:Hide() end
+    if not page.tabs then return 0 end
+    local width = WIDTH - NAV_W - 32
+    local x, y = 0, 0
+    for i, t in ipairs(page.tabs) do
+        local btn = tabButtons[i]
+        if not btn then
+            btn = CreateFrame("Button", nil, tabBar, "BackdropTemplate")
+            btn:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
+            btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            btn.text:SetPoint("CENTER")
+            local hl = btn:CreateTexture(nil, "HIGHLIGHT")
+            hl:SetAllPoints()
+            hl:SetColorTexture(1, 1, 1, 0.08)
+            tabButtons[i] = btn
+        end
+        btn.tabId = t.id
+        btn.text:SetText(t.label)
+        local w = math.max(70, math.floor(btn.text:GetStringWidth() + 22))
+        if x > 0 and x + w > width then
+            x, y = 0, y + TAB_H + TAB_GAP
+        end
+        btn:ClearAllPoints()
+        btn:SetPoint("TOPLEFT", tabBar, "TOPLEFT", x, -y)
+        btn:SetSize(w, TAB_H)
+        local selected = t.id == tabId
+        btn:SetBackdropColor(0.62, 0.83, 1, selected and 0.25 or 0.06)
+        btn:SetBackdropBorderColor(0.62, 0.83, 1, selected and 0.8 or 0.25)
+        btn.text:SetTextColor(1, selected and 0.82 or 1, selected and 0 or 1)
+        btn:SetScript("OnClick", function() onClick(t.id) end)
+        btn:Show()
+        x = x + w + TAB_GAP
+    end
+    return y + TAB_H + 8
+end
+
+local function showPage(id, tabId)
+    local page = pageById(id)
+    if not page then return end
+    if page.tabs then
+        -- keep the tab the user was on if this page has it, else its own last one
+        local function has(t)
+            for _, tb in ipairs(page.tabs) do if tb.id == t then return true end end
+        end
+        tabId = tabId or (wantedTab and has(wantedTab) and wantedTab) or lastTab[id] or page.tabs[1].id
+        if not has(tabId) then tabId = page.tabs[1].id end
+        lastTab[id], wantedTab = tabId, tabId
+    end
+    local key = page.tabs and (id .. ":" .. tabId) or id
+    current = key
+
+    local barH = layoutTabs(page, tabId, function(t) showPage(id, t) end)
+    window.scroll:ClearAllPoints()
+    window.scroll:SetPoint("TOPLEFT", tabBar, "TOPLEFT", 0, -barH)
+    window.scroll:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", -32, 10)
+
+    for k, pg in pairs(built) do pg.frame:SetShown(k == key) end
+    if not built[key] then
+        local buildFn = page.build
+        if page.tabs then
+            for _, t in ipairs(page.tabs) do
+                if t.id == tabId then buildFn = t.build end
             end
         end
+        local frame = CreateFrame("Frame", nil, content)
+        frame:SetPoint("TOPLEFT")
+        frame:SetWidth(content:GetWidth())
+        local b = ns.Widgets.NewBuilder(frame, content:GetWidth())
+        buildFn(b)
+        frame:SetHeight(b:Height())
+        built[key] = { frame = frame, builder = b }
     end
-    local pg = built[id]
+    local pg = built[key]
     pg.builder:Refresh()
     content:SetHeight(pg.frame:GetHeight())
     window.scroll:SetVerticalScroll(0)
@@ -366,9 +468,14 @@ local function build()
         if page.id == "general" or page.id == "raid" then y = y - 8 end
     end
 
-    -- page area
+    -- tab bar (unit pages) above the scrolling page area
+    tabBar = CreateFrame("Frame", nil, w)
+    tabBar:SetPoint("TOPLEFT", nav, "TOPRIGHT", 10, 0)
+    -- fixed width: the window may still be hidden when the tabs are laid out
+    tabBar:SetSize(WIDTH - NAV_W - 32, 1)
+
     local scroll = CreateFrame("ScrollFrame", "LizUFOptionsScroll", w, "UIPanelScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT", nav, "TOPRIGHT", 10, 0)
+    scroll:SetPoint("TOPLEFT", tabBar, "TOPLEFT", 0, 0)
     scroll:SetPoint("BOTTOMRIGHT", w, "BOTTOMRIGHT", -32, 10)
     content = CreateFrame("Frame", nil, scroll)
     content:SetSize(WIDTH - NAV_W - 60, 10)

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+- Options window reorganised with tabs, as in Luna: every unit page now has tabs for General,
+  Health bar, Power bar, Cast bar, XP bar, Portrait, Incoming heals, Auras, Range, Indicators and
+  Texts (only the ones that apply to that frame). The selected tab is kept when you switch between
+  frames.
+
 ## 0.9.2
 - New tag `[statuscolor]`: starts red while in combat and green while resting (player only).
   Combat wins over resting. Example: `[statuscolor][name][nocolor] [smarthealth]`.

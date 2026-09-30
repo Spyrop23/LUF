@@ -20,9 +20,11 @@ jobs:
           lua5.1 tools/smoketest.lua
       - name: Build LizzaricksUnitFrames.zip
         run: sh tools/package.sh
-      # Always the newest build under Releases -> "latest": the zip unzips
-      # straight into Interface/AddOns with the right folder name.
+      # A release is only made on request: Actions -> package -> "Run workflow".
+      # Pushes to main just check and build. The zip unzips straight into
+      # Interface/AddOns with the right folder name.
       - name: Publish release "latest"
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
