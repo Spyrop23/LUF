@@ -50,7 +50,8 @@ tools/      Smoke-Test und Paket-Skript
 ## Stand (0.10.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
-  Gruppe (party1–4), die Begleiter der Gruppenmitglieder und **Raid** (40 Frames, eine Spalte pro
+  Gruppe (party1–4), die Begleiter und Ziele der Gruppenmitglieder, Main Tanks und Main Assists
+  mit ihren Zielen und **Raid** (40 Frames, eine Spalte pro
   Raidgruppe), jeweils im Luna-Standardlayout. Die Gruppe blendet sich im Raid auf Wunsch aus.
   Raid-Raster einstellbar: Mitglieder untereinander oder nebeneinander, Gruppen pro Reihe, oder jede
   Gruppe einzeln verschiebbar. Beim Ziehen bewegt sich die ganze Gruppe bzw. der ganze Raid mit.
@@ -82,6 +83,13 @@ tools/      Smoke-Test und Paket-Skript
   oder alle), gefärbt nach Typ, auch im Kampf.
 - **Indikatoren** wie bei Luna: Raid-Zeichen, Klasse, Plündermeister, Anführer, PvP, eingehende
   Wiederbelebung, Rolle (Tank/Heiler/Schaden) und der Elite-Drache, jeweils mit Größe und Position.
+- **Highlight** wie bei Luna: Frame leuchtet beim Überfahren, als aktuelles Ziel oder getönt nach
+  Debuff-Typ.
+- **Kampftext** wie bei Luna: Schaden, Heilung und Ausweichen/Parieren blinken auf dem Portrait.
+- **Leere Leiste** (Empty bar) für zusätzliche Texte.
+- **Ziele der Gruppe** (Party Targets) sowie **Main Tank / Main Assist** mit ihren Zielen, nach
+  den Raid-Rollen.
+- **Farben-Seite** (Klassen, Ressourcen, Reaktion, Begleiter …) und **Hide-Blizzard-Seite**.
 - **Tooltip** der Einheit beim Überfahren eines Frames.
 - **Tags:** 30 Luna-Tags auf drei Textfeldern pro Leiste, siehe Tag-Seite im Menü.
 - **Menü** mit Reitern wie bei Luna: pro Frame Allgemein, Leisten, Zauberleiste, XP, Portrait,
