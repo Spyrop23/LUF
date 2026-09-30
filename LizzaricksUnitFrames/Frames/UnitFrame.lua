@@ -299,6 +299,7 @@ function UF.Layout(f)
     if ns.Squares then ns.Squares.Layout(f) end
     if ns.Borders then ns.Borders.Layout(f) end
     if ns.Highlight then ns.Highlight.Layout(f) end
+    if ns.CombatText then ns.CombatText.Layout(f) end
     if ns.Indicators then ns.Indicators.Layout(f) end
     UF.Update(f)
 end
@@ -553,6 +554,7 @@ function UF.Create(unit, opts)
     if ns.Squares then ns.Squares.Create(f) end
     if ns.Borders then ns.Borders.Create(f) end
     if ns.Highlight then ns.Highlight.Create(f) end
+    if ns.CombatText then ns.CombatText.Create(f) end
     if ns.Indicators then ns.Indicators.Create(f) end
     wireEvents(f)
     f:HookScript("OnShow", UF.UnitChanged)

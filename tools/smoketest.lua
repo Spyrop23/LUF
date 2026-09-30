@@ -492,6 +492,25 @@ hdb.mouseover, hdb.debuff, thdb.target = false, "off", false
 ns:ApplyKey("player"); ns:ApplyKey("target")
 print("highlight ok")
 
+-- combat text: damage, crit, heal, miss; secret amounts go straight to the text
+local ctx = plf.combatText
+for _, w in ipairs(frames) do
+    if w.events.UNIT_COMBAT == "player" then
+        w.scripts.OnEvent(w, "UNIT_COMBAT", "player", "WOUND", "", secret(123), 1)
+    end
+end
+assert(ctx.text.shown and ctx.text.text == "-123", "damage text: " .. tostring(ctx.text.text))
+ns.CombatText.Show(plf, "HEAL", "CRITICAL", 50)
+assert(ctx.text.text == "+50", "heal text")
+MISS = "Miss"
+ns.CombatText.Show(plf, "MISS", "", 0)
+assert(ctx.text.text == "Miss", "miss text")
+ns.CombatText.Show(plf, "WOUND", "ABSORB", 0)
+assert(ctx.text.text == "Absorb", "absorbed hit shows the reason")
+ctx.scripts.OnUpdate(ctx, 5)
+assert(not ctx.text.shown, "combat text fades out")
+print("combat text ok")
+
 -- party targets: party1target hangs on party1, off by default, polled
 local pt = ns.UF.frames.party1target
 assert(pt and pt.key == "partytarget" and pt.anchorFrame == ns.UF.frames.party1, "party target frame")

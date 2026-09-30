@@ -282,6 +282,13 @@ local function unitTabs(key)
         b:Slider("Strength", 0.05, 0.8, 0.05, p("highlight.alpha"))
     end)
 
+    tab("combattext", "Combat text", function(b)
+        b:Header("Combat text")
+        b:Text("Damage (red), heals (green) and misses of the unit flash on its portrait, as in Luna.", 16)
+        b:Check("Enabled", p("combatText.enabled"))
+        b:Slider("Font size", 8, 40, 1, p("combatText.size"))
+    end)
+
     do
         tab("indicators", "Indicators", function(b)
             for _, k in ipairs(ns.Indicators.KINDS) do

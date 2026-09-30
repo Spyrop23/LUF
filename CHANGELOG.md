@@ -3,8 +3,8 @@
 ## 0.10.0
 **Heads-up for existing users:** this update turns on a few new things by default on every
 frame: a white border on mouseover, a debuff border for debuffs you can dispel, and the raid
-target, leader, master looter, resurrection and role icons. Switch them off per frame on the
-Borders and Indicators tabs.
+target, leader, master looter, resurrection and role icons, and combat text on player, pet and
+target. Switch them off per frame on the Borders, Indicators and Combat text tabs.
 
 - Options window reorganised with tabs, as in Luna: every unit page now has tabs for General,
   Health bar, Power bar, Cast bar, XP bar, Portrait, Incoming heals, Auras, Range, Indicators and
@@ -34,6 +34,9 @@ Borders and Indicators tabs.
   adjustable. Off by default.
 - Colors page, as in Luna: class, power, reaction, pet happiness, static health, cast bar,
   channel, tapped and offline colours, each with a colour picker; per profile, with a reset.
+- Combat text, as in Luna (new tab): damage (red), heals (green), energize (blue) and misses,
+  dodges, parries ... flash on the portrait and fade out; critical hits are larger. On for
+  player, pet and target, font size adjustable.
 - Empty bar, as in Luna (new tab): a bar without a value, only for texts, with its own weight,
   background colour and tags. Off by default.
 - Party Targets, as in Luna: the target of each party member, next to the member's frame (upper

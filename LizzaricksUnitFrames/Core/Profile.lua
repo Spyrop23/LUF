@@ -58,6 +58,7 @@ local function unitDefaults(o)
         squares   = squareDefaults(),
         borders   = { mouseover = true, aggro = false, debuff = "own", size = 2, onTop = false },   -- Luna's defaults
         highlight = { mouseover = false, target = false, debuff = "off", alpha = 0.25 },
+        combatText = { enabled = false, size = 20 },
         indicators = {
             raidTarget   = { enabled = true, size = 20, point = "TOP", x = 0, y = 0 },
             class        = { enabled = false, size = 16, point = "BOTTOMRIGHT", x = -1, y = 1 },
@@ -109,6 +110,7 @@ ns.defaults = {
         player = unitDefaults({
             castBar = { enabled = true },
             status = { enabled = true, size = 16, point = "BOTTOMLEFT" },   -- Luna's default
+            combatText = { enabled = true },
         }),
         pet = unitDefaults({
             y = -72, height = 30,
@@ -116,12 +118,14 @@ ns.defaults = {
             happiness = { enabled = false, size = 14 },   -- the colour says enough
             auras = { buffs = true, debuffs = true, size = 16, debuffSize = 20 },
             xpBar = { enabled = true },
+            combatText = { enabled = true },
             tags = { xpBar = { center = "[xppet] [percxppet]" } },
         }),
         pettarget = unitDefaults(small({ x = 260, y = -72, enabled = false })),
         target = unitDefaults({
             x = 260,
             indicators = { elite = { enabled = true } },
+            combatText = { enabled = true },
             castBar = { enabled = true },
             auras = { buffs = true, debuffs = true },
             tags = { healthBar = { right = "[smarthealthp]" } },
