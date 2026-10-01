@@ -58,6 +58,7 @@ local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", xpBar = "
 local RAID_DIRECTIONS = { { "DOWN", "Below each other (columns)" }, { "RIGHT", "Next to each other (rows)" } }
 local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
+local GROW_SIDES = { { "RIGHT", "Left edge, grow right" }, { "LEFT", "Right edge, grow left" } }
 local DEBUFF_POS = { { "SAME", "With the buffs (own row)" } }
 for _, pos in ipairs(AURA_POS) do table.insert(DEBUFF_POS, pos) end
 local BUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can cast" } }
@@ -232,11 +233,20 @@ local function unitTabs(key)
             b:Dropdown("Which buffs", BUFF_FILTERS, p("auras.buffFilter"))
             b:Slider("Max. buffs", 1, 40, 1, p("auras.maxBuffs"))
             b:Slider("Buff icon size", 8, 50, 1, p("auras.size"))
+            b:Slider("Bigger buffs (your own, + px)", 0, 20, 1, p("auras.biggerBuffs"))
+            b:Dropdown("Position", AURA_POS, p("auras.position"))
+            b:Dropdown("Horizontal limit side", GROW_SIDES, p("auras.buffGrow"))
+            b:Slider("Horizontal limit (% of frame width)", 20, 150, 5, p("auras.buffLimit"))
             b:Header("Debuffs")
             b:Check("Show debuffs", p("auras.debuffs"))
             b:Dropdown("Which debuffs", DEBUFF_FILTERS, p("auras.debuffFilter"))
             b:Slider("Max. debuffs", 1, 40, 1, p("auras.maxDebuffs"))
             b:Slider("Debuff icon size", 8, 60, 1, p("auras.debuffSize"))
+            b:Slider("Bigger debuffs (your own, + px)", 0, 20, 1, p("auras.biggerDebuffs"))
+            b:Dropdown("Position", DEBUFF_POS, p("auras.debuffPosition"))
+            b:Dropdown("Horizontal limit side", GROW_SIDES, p("auras.debuffGrow"))
+            b:Slider("Horizontal limit (% of frame width)", 20, 150, 5, p("auras.debuffLimit"))
+            b:Text("Side and limit apply above/below the frame. \"With the buffs\": the buffs' side and limit count.", 30)
             b:Check("Colour debuff border by type (magic, poison ...)", p("auras.dispelColors"))
             b:Header("Filter lists")
             b:Text("Lists are made on the Filters page. WoW: Forever only checks spell IDs of buffs on " ..
@@ -247,8 +257,6 @@ local function unitTabs(key)
             b:Dropdown("Debuff filter list", filterListOptions, p("auras.debuffList"))
             b:Dropdown("Debuff list mode", LIST_MODES, p("auras.debuffListMode"))
             b:Header("Layout")
-            b:Dropdown("Position (buffs)", AURA_POS, p("auras.position"))
-            b:Dropdown("Debuff position", DEBUFF_POS, p("auras.debuffPosition"))
             b:Slider("Space between icons", 0, 10, 1, p("auras.spacing"))
             b:Slider("Space between buffs and debuffs", 0, 30, 1, p("auras.groupGap"))
             b:Slider("Icons per row (left/right)", 1, 20, 1, p("auras.perRow"))

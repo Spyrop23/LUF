@@ -80,6 +80,10 @@ local function unitDefaults(o)
             maxBuffs = 16, maxDebuffs = 16,
             position = "BOTTOM",
             debuffPosition = "SAME",   -- "SAME" = with the buffs, else a place of their own
+            -- Luna's horizontal limit side / limit (% of the frame width) and
+            -- bigger buffs (extra pixels for your own auras)
+            buffGrow = "RIGHT", debuffGrow = "RIGHT", buffLimit = 100, debuffLimit = 100,
+            biggerBuffs = 0, biggerDebuffs = 0,
             duration = true, swipe = true, dispelColors = true,
         },
         tags = {

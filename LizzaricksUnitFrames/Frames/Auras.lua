@@ -36,16 +36,18 @@ local function filter(...)
     return table.concat({ ... }, "|")
 end
 
-local BUFF_FILTERS = {
-    all = function() return filter(HELPFUL) end,
-    own = function() return filter(HELPFUL, PLAYER) end,
-    raid = function() return filter(HELPFUL, RAID) end,     -- ones you can cast
-}
-local DEBUFF_FILTERS = {
-    all = function() return filter(HARMFUL) end,
-    own = function() return filter(HARMFUL, PLAYER) end,
-    raid = function() return filter(HARMFUL, RAID) end,     -- ones you can dispel
-}
+-- Filter components per setting; "raid" = buffs you can cast / debuffs you
+-- can dispel.
+local BUFF_FILTERS = { all = { HELPFUL }, own = { HELPFUL, PLAYER }, raid = { HELPFUL, RAID } }
+local DEBUFF_FILTERS = { all = { HARMFUL }, own = { HARMFUL, PLAYER }, raid = { HARMFUL, RAID } }
+
+-- The base components plus one more ("PLAYER" or "!PLAYER": cast by you or
+-- not; the client documents the "!" negation and filters in C, in combat too).
+local function withExtra(parts, extra)
+    local list = { unpack(parts) }
+    if extra then table.insert(list, extra) end
+    return filter(unpack(list))
+end
 
 -- Debuff border colours by dispel type (Blizzard's DebuffTypeColor).
 local DISPEL_COLORS = {
@@ -98,8 +100,7 @@ AU.CanBuild = function() return canBuild() end
 
 -- ------------------------------------------------------------ buttons --
 
-local function initializer(db, debuffs)
-    local size = debuffs and (db.debuffSize or db.size) or db.size
+local function initializer(db, debuffs, size)
     return function(button)
         button:SetSize(size, size)
 
@@ -167,15 +168,20 @@ end
 local DIR = AnchorUtil and AnchorUtil.FlowDirection
 
 -- Where a container sits and which way it grows, by position setting.
--- size: its largest icon; gap: space to keep free next to the frame (e.g.
--- for the cast bar).
-local function place(c, f, db, pos, size, gapBelow, gapAbove)
+-- size: its largest icon; grow: "RIGHT" or "LEFT" (Luna's "horizontal limit
+-- side": the frame edge the icons start from above/below the frame);
+-- limit: row width in % of the frame width (Luna's "horizontal limit");
+-- gap: space to keep free next to the frame (e.g. for the cast bar).
+local function place(c, f, db, pos, size, grow, limit, gapBelow, gapAbove)
     local spacing = db.spacing
+    local width = f.db.width * (limit or 100) / 100
+    local fromRight = grow == "LEFT"
     c:ClearAllPoints()
     local anchor, h, v, line
     if pos == "TOP" then
-        c:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 0, 2 + gapAbove)
-        anchor, h, v, line = "BOTTOMLEFT", "Right", "Up", f.db.width
+        anchor = fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT"
+        c:SetPoint(anchor, f, fromRight and "TOPRIGHT" or "TOPLEFT", 0, 2 + gapAbove)
+        h, v, line = fromRight and "Left" or "Right", "Up", width
     elseif pos == "RIGHT" then
         c:SetPoint("TOPLEFT", f, "TOPRIGHT", 2, 0)
         anchor, h, v, line = "TOPLEFT", "Right", "Down", db.perRow * (size + spacing)
@@ -183,8 +189,9 @@ local function place(c, f, db, pos, size, gapBelow, gapAbove)
         c:SetPoint("TOPRIGHT", f, "TOPLEFT", -2, 0)
         anchor, h, v, line = "TOPRIGHT", "Left", "Down", db.perRow * (size + spacing)
     else -- BOTTOM
-        c:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 0, -2 - gapBelow)
-        anchor, h, v, line = "TOPLEFT", "Right", "Down", f.db.width
+        anchor = fromRight and "TOPRIGHT" or "TOPLEFT"
+        c:SetPoint(anchor, f, fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT", 0, -2 - gapBelow)
+        h, v, line = fromRight and "Left" or "Right", "Down", width
     end
     try(c, "SetFlowLayoutPadding", 0, 0, 0, 0)
     if DIR then try(c, "SetFlowLayoutGrowthDirection", DIR[h], DIR[v]) end
@@ -199,29 +206,48 @@ local function buildContainer(f, db, which)
     if not ok or not c then return nil end
     local sortMethod = _G.AuraContainerSortMethod and _G.AuraContainerSortMethod.Default
     local sortDirection = _G.AuraContainerSortDirection and _G.AuraContainerSortDirection.Normal
-    local function group(debuffs)
+    -- first: the first debuff group (in a shared container: own row, gap above)
+    local function group(debuffs, size, first)
         local FL = ns.Filters
         local candidate = FL and (debuffs and FL.CandidateFilters(db.debuffList, db.debuffListMode)
             or not debuffs and FL.CandidateFilters(db.buffList, db.buffListMode)) or nil
+        local newRow = first and which == "both"
         return {
             candidateFilters = candidate,
             maxFrameCount = debuffs and (db.debuffs and db.maxDebuffs or 0) or (db.buffs and db.maxBuffs or 0),
             sortMethod = sortMethod,
             sortDirection = sortDirection,
-            initializeFrame = initializer(db, debuffs),
+            initializeFrame = initializer(db, debuffs, size),
             layout = {
-                elementWidth = debuffs and db.debuffSize or db.size,
-                elementHeight = (debuffs and db.debuffSize or db.size) + (db.duration and 8 or 0),
+                elementWidth = size,
+                elementHeight = size + (db.duration and 8 or 0),
                 elementSpacing = db.spacing, lineSpacing = db.spacing,
-                forceNewLine = debuffs and which == "both",   -- debuffs start on their own row
-                groupLineSpacing = (debuffs and which == "both") and (db.groupGap or 4) or nil,   -- gap above them
+                forceNewLine = newRow,   -- debuffs start on their own row
+                groupLineSpacing = newRow and (db.groupGap or 4) or nil,   -- gap above them
             },
         }
     end
-    local buffFilter = (BUFF_FILTERS[db.buffFilter] or BUFF_FILTERS.all)()
-    local debuffFilter = (DEBUFF_FILTERS[db.debuffFilter] or DEBUFF_FILTERS.all)()
-    if which ~= "debuffs" and not pcall(c.AddAuraGroup, c, "buffs", buffFilter, group(false)) then return nil end
-    if which ~= "buffs" and not pcall(c.AddAuraGroup, c, "debuffs", debuffFilter, group(true)) then return nil end
+    -- Luna's "bigger buffs": your own auras in a group of their own, larger;
+    -- everyone else's ("!PLAYER") right after them at the normal size.
+    local function add(debuffs)
+        local parts = debuffs and (DEBUFF_FILTERS[db.debuffFilter] or DEBUFF_FILTERS.all)
+            or (BUFF_FILTERS[db.buffFilter] or BUFF_FILTERS.all)
+        local key = debuffs and "debuffs" or "buffs"
+        local size = debuffs and (db.debuffSize or db.size) or db.size
+        local bigger = (debuffs and db.biggerDebuffs or db.biggerBuffs) or 0
+        local ownOnly = (debuffs and db.debuffFilter or db.buffFilter) == "own"
+        -- the first debuff group opens the debuff row
+        if bigger <= 0 then
+            return pcall(c.AddAuraGroup, c, key, withExtra(parts), group(debuffs, size, debuffs))
+        end
+        if ownOnly then   -- only your own anyway: all of them bigger
+            return pcall(c.AddAuraGroup, c, key, withExtra(parts), group(debuffs, size + bigger, debuffs))
+        end
+        return pcall(c.AddAuraGroup, c, key .. "Mine", withExtra(parts, PLAYER), group(debuffs, size + bigger, debuffs))
+            and pcall(c.AddAuraGroup, c, key, withExtra(parts, "!" .. PLAYER), group(debuffs, size, false))
+    end
+    if which ~= "debuffs" and not add(false) then return nil end
+    if which ~= "buffs" and not add(true) then return nil end
     return c
 end
 
@@ -238,6 +264,7 @@ local function signature(db)
         tostring(db.buffs), tostring(db.debuffs), db.size, db.debuffSize, db.spacing, db.groupGap or 4, db.maxBuffs, db.maxDebuffs,
         db.buffFilter, db.debuffFilter, tostring(db.duration), tostring(db.swipe), tostring(db.dispelColors),
         db.buffListMode or "", db.debuffListMode or "", tostring(separate(db)),
+        db.biggerBuffs or 0, db.biggerDebuffs or 0,
         ns.Filters and ns.Filters.Get(db.buffList) and ns.Filters.Signature(db.buffList) or "",
         ns.Filters and ns.Filters.Get(db.debuffList) and ns.Filters.Signature(db.debuffList) or "",
     }, ":")
@@ -276,14 +303,17 @@ function AU.Layout(f)
     local castOn = ns.CastBar and ns.CastBar.supported[f.key] and cast and cast.enabled
     local below = (castOn and cast.position ~= "ABOVE") and (cast.height + 1) or 0
     local above = (castOn and cast.position == "ABOVE") and (cast.height + 1) or 0
+    local buffSize = db.size + math.max(db.biggerBuffs or 0, 0)
+    local debuffSize = (db.debuffSize or db.size) + math.max(db.biggerDebuffs or 0, 0)
     if split then
-        place(f.auraContainer, f, db, db.position, db.size, below, above)
+        place(f.auraContainer, f, db, db.position, buffSize, db.buffGrow, db.buffLimit, below, above)
         if f.debuffContainer then
-            place(f.debuffContainer, f, db, db.debuffPosition, db.debuffSize or db.size, below, above)
+            place(f.debuffContainer, f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit, below, above)
             f.debuffContainer:Show()
         end
     else
-        place(f.auraContainer, f, db, db.position, math.max(db.size, db.debuffSize or db.size), below, above)
+        -- together: the buffs' side and width count for both
+        place(f.auraContainer, f, db, db.position, math.max(buffSize, debuffSize), db.buffGrow, db.buffLimit, below, above)
     end
     f.auraContainer:Show()
 end

@@ -95,8 +95,10 @@ function Widget:AddAuraGroup(key, filterString, opts)
     assert(type(filterString) == "string" and filterString ~= "", "filter string")
     self.groups = self.groups or {}
     assert(not self.unitSet, "group added after SetUnit")
-    self.groups[key] = { filter = filterString, max = opts.maxFrameCount, cf = opts.candidateFilters }
-    opts.initializeFrame(newWidget("AuraButton"))   -- the engine builds buttons at once
+    local button = newWidget("AuraButton")
+    self.groups[key] = { filter = filterString, max = opts.maxFrameCount, cf = opts.candidateFilters,
+        button = button, newLine = opts.layout and opts.layout.forceNewLine }
+    opts.initializeFrame(button)   -- the engine builds buttons at once
 end
 function Widget:SetUnit(u) self.unitSet = u end
 function Widget:AddAuraSlot(key, filterString, opts)
@@ -347,9 +349,35 @@ assert(tfa.debuffContainer and tfa.debuffContainer.groups.debuffs and not tfa.de
 assert(tfa.debuffContainer.point[1] == "BOTTOMLEFT" and tfa.debuffContainer.point[3] == "TOPLEFT", "debuffs above the frame")
 assert(tfa.auraContainer.point[3] == "BOTTOMLEFT", "buffs below the frame")
 assert(tfa.debuffContainer.unitSet == "target", "debuff container bound to the unit")
+-- debuffs above, growing from the right edge, half the frame wide
+tau.debuffGrow, tau.debuffLimit = "LEFT", 50
+ns:ApplyKey("target")
+local dp = tfa.debuffContainer.point
+assert(dp[1] == "BOTTOMRIGHT" and dp[3] == "TOPRIGHT", "debuffs start at the right edge")
+tau.debuffGrow, tau.debuffLimit = "RIGHT", 100
 tau.debuffPosition = "SAME"
 ns:ApplyKey("target")
 assert(tfa.auraContainer.groups.debuffs and not tfa.debuffContainer, "back to one container")
+assert(tfa.auraContainer.groups.debuffs.newLine and not tfa.auraContainer.groups.buffs.newLine, "debuffs on their own row")
+-- bigger buffs: your own in a larger group of their own, the rest via "!PLAYER"
+tau.biggerBuffs = 4
+ns:ApplyKey("target")
+local tg = tfa.auraContainer.groups
+assert(tg.buffsMine and tg.buffsMine.filter == "HELPFUL|PLAYER" and tg.buffs.filter == "HELPFUL|!PLAYER", "own and others' buffs")
+assert(tg.buffsMine.button.w == tau.size + 4 and tg.buffs.button.w == tau.size, "own buffs bigger")
+assert(tg.debuffs.newLine and not tg.debuffsMine, "debuffs unchanged, still on their own row")
+tau.biggerDebuffs = 6
+ns:ApplyKey("target")
+tg = tfa.auraContainer.groups
+assert(tg.debuffsMine.newLine and not tg.debuffs.newLine, "own debuffs open the debuff row")
+assert(tg.debuffsMine.button.w == tau.debuffSize + 6, "own debuffs bigger")
+tau.buffFilter = "own"
+ns:ApplyKey("target")
+tg = tfa.auraContainer.groups
+assert(not tg.buffsMine and tg.buffs.filter == "HELPFUL|PLAYER" and tg.buffs.button.w == tau.size + 4, "only own buffs: all bigger")
+tau.buffFilter, tau.biggerBuffs, tau.biggerDebuffs = "all", 0, 0
+ns:ApplyKey("target")
+assert(not tfa.auraContainer.groups.buffsMine, "bigger buffs off")
 print("separate debuffs ok")
 
 -- raid: outside a raid the roster is ignored -> fixed 8x5 grid

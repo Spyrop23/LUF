@@ -4,6 +4,13 @@
 - Buffs and debuffs at separate places: Auras tab → "Debuff position". "With the buffs" keeps
   them together as before; Below / Above / Right / Left gives the debuffs a place of their own,
   e.g. buffs above the frame and debuffs below. Thanks to **vbrokop** for the idea!
+- Horizontal limit side and horizontal limit, as in Luna, separately for buffs and debuffs:
+  above/below the frame the icons start at the left edge (growing right) or at the right edge
+  (growing left), and a row may be 20-150 % of the frame width.
+- Bigger buffs / bigger debuffs, as in Luna: your own auras are shown larger (+0-20 px), the
+  others follow at the normal size. Works in combat; the max. count applies to your own and to
+  the others' auras each.
+- The Auras tab is laid out like Luna's: everything for buffs, then everything for debuffs.
 
 ## 0.10.2
 - Raid frames in a party, as in Luna: Raid → General → "Use the raid frames in a party too". In a
