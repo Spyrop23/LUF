@@ -166,11 +166,11 @@ end
 
 local DIR = AnchorUtil and AnchorUtil.FlowDirection
 
--- Where the container sits and which way it grows, by position setting.
--- gap: space to keep free next to the frame (e.g. for the cast bar).
-local function place(c, f, db, gapBelow, gapAbove)
-    local pos, spacing = db.position, db.spacing
-    local size = math.max(db.size, db.debuffSize or db.size)
+-- Where a container sits and which way it grows, by position setting.
+-- size: its largest icon; gap: space to keep free next to the frame (e.g.
+-- for the cast bar).
+local function place(c, f, db, pos, size, gapBelow, gapAbove)
+    local spacing = db.spacing
     c:ClearAllPoints()
     local anchor, h, v, line
     if pos == "TOP" then
@@ -192,7 +192,9 @@ local function place(c, f, db, gapBelow, gapAbove)
     try(c, "SetFlowLayoutMaximumLineSize", line)
 end
 
-local function buildContainer(f, db)
+-- which: "both" (one container, debuffs on their own row after the buffs),
+-- "buffs" or "debuffs" (each in its own container at its own position).
+local function buildContainer(f, db, which)
     local ok, c = pcall(CreateFrame, "AuraContainer", nil, f, "CustomAuraContainerTemplate")
     if not ok or not c then return nil end
     local sortMethod = _G.AuraContainerSortMethod and _G.AuraContainerSortMethod.Default
@@ -211,16 +213,22 @@ local function buildContainer(f, db)
                 elementWidth = debuffs and db.debuffSize or db.size,
                 elementHeight = (debuffs and db.debuffSize or db.size) + (db.duration and 8 or 0),
                 elementSpacing = db.spacing, lineSpacing = db.spacing,
-                forceNewLine = debuffs,   -- debuffs start on their own row
-                groupLineSpacing = debuffs and (db.groupGap or 4) or nil,   -- gap above them
+                forceNewLine = debuffs and which == "both",   -- debuffs start on their own row
+                groupLineSpacing = (debuffs and which == "both") and (db.groupGap or 4) or nil,   -- gap above them
             },
         }
     end
     local buffFilter = (BUFF_FILTERS[db.buffFilter] or BUFF_FILTERS.all)()
     local debuffFilter = (DEBUFF_FILTERS[db.debuffFilter] or DEBUFF_FILTERS.all)()
-    if not pcall(c.AddAuraGroup, c, "buffs", buffFilter, group(false)) then return nil end
-    if not pcall(c.AddAuraGroup, c, "debuffs", debuffFilter, group(true)) then return nil end
+    if which ~= "debuffs" and not pcall(c.AddAuraGroup, c, "buffs", buffFilter, group(false)) then return nil end
+    if which ~= "buffs" and not pcall(c.AddAuraGroup, c, "debuffs", debuffFilter, group(true)) then return nil end
     return c
+end
+
+-- Debuffs at their own place (not "with the buffs" and not where the buffs are).
+local function separate(db)
+    local p = db.debuffPosition
+    return p ~= nil and p ~= "SAME" and p ~= db.position
 end
 
 -- A fingerprint of everything the container was built with; a change
@@ -229,7 +237,7 @@ local function signature(db)
     return table.concat({
         tostring(db.buffs), tostring(db.debuffs), db.size, db.debuffSize, db.spacing, db.groupGap or 4, db.maxBuffs, db.maxDebuffs,
         db.buffFilter, db.debuffFilter, tostring(db.duration), tostring(db.swipe), tostring(db.dispelColors),
-        db.buffListMode or "", db.debuffListMode or "",
+        db.buffListMode or "", db.debuffListMode or "", tostring(separate(db)),
         ns.Filters and ns.Filters.Get(db.buffList) and ns.Filters.Signature(db.buffList) or "",
         ns.Filters and ns.Filters.Get(db.debuffList) and ns.Filters.Signature(db.debuffList) or "",
     }, ":")
@@ -241,34 +249,49 @@ function AU.Layout(f)
     local db = f.db.auras
     local wanted = db and (db.buffs or db.debuffs)
 
-    if f.auraContainer and (not wanted or f.auraSignature ~= signature(db)) then
-        -- retire the old one: no unit, hidden (containers cannot be destroyed)
-        try(f.auraContainer, "SetUnit", "none")
-        f.auraContainer:Hide()
-        f.auraContainer = nil
+    if (f.auraContainer or f.debuffContainer) and (not wanted or f.auraSignature ~= signature(db)) then
+        -- retire the old ones: no unit, hidden (containers cannot be destroyed)
+        for _, c in pairs({ buffs = f.auraContainer, debuffs = f.debuffContainer }) do
+            try(c, "SetUnit", "none")
+            c:Hide()
+        end
+        f.auraContainer, f.debuffContainer = nil, nil
     end
     if not wanted or not canBuild() then return end
 
+    local split = separate(db)
     if not f.auraContainer then
-        f.auraContainer = buildContainer(f, db)
+        -- one container for both, or buffs here and debuffs in a second one
+        f.auraContainer = buildContainer(f, db, split and "buffs" or "both")
+        f.debuffContainer = split and buildContainer(f, db, "debuffs") or nil
         f.auraSignature = signature(db)
         if not f.auraContainer then return end
-        -- only now, after every group exists
-        ns.UF.BindAuraContainer(f.auraContainer, f)
     end
 
-    ns.UF.BindAuraContainer(f.auraContainer, f)   -- config mode swaps the unit
+    -- only now, after every group exists; config mode swaps the unit
+    ns.UF.BindAuraContainer(f.auraContainer, f)
+    ns.UF.BindAuraContainer(f.debuffContainer, f)
 
     local cast = f.db.castBar
     local castOn = ns.CastBar and ns.CastBar.supported[f.key] and cast and cast.enabled
     local below = (castOn and cast.position ~= "ABOVE") and (cast.height + 1) or 0
     local above = (castOn and cast.position == "ABOVE") and (cast.height + 1) or 0
-    place(f.auraContainer, f, db, below, above)
+    if split then
+        place(f.auraContainer, f, db, db.position, db.size, below, above)
+        if f.debuffContainer then
+            place(f.debuffContainer, f, db, db.debuffPosition, db.debuffSize or db.size, below, above)
+            f.debuffContainer:Show()
+        end
+    else
+        place(f.auraContainer, f, db, db.position, math.max(db.size, db.debuffSize or db.size), below, above)
+    end
     f.auraContainer:Show()
 end
 
 -- The unit behind the frame changed (new target, roster change).
 function AU.Refresh(f)
-    ns.UF.BindAuraContainer(f.auraContainer, f)
-    try(f.auraContainer, "UpdateAllAuras")
+    for _, c in pairs({ buffs = f.auraContainer, debuffs = f.debuffContainer }) do
+        ns.UF.BindAuraContainer(c, f)
+        try(c, "UpdateAllAuras")
+    end
 end

@@ -79,6 +79,7 @@ local function unitDefaults(o)
             size = 18, debuffSize = 22, spacing = 2, groupGap = 4, perRow = 8,
             maxBuffs = 16, maxDebuffs = 16,
             position = "BOTTOM",
+            debuffPosition = "SAME",   -- "SAME" = with the buffs, else a place of their own
             duration = true, swipe = true, dispelColors = true,
         },
         tags = {

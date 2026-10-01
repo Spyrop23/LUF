@@ -337,6 +337,21 @@ assert(ns.db.units.pet.auras.debuffSize > ns.db.units.pet.auras.size, "debuffs l
 assert(not ns.UF.frames.player.auraContainer, "player auras off by default")
 print("pet auras: buffs=" .. pc.groups.buffs.filter .. " debuffs=" .. pc.groups.debuffs.filter)
 
+-- buffs and debuffs at separate places (feature request): two containers
+local tau = ns.db.units.target.auras
+tau.debuffPosition = "TOP"
+ns:ApplyKey("target")
+local tfa = ns.UF.frames.target
+assert(tfa.auraContainer.groups.buffs and not tfa.auraContainer.groups.debuffs, "buff container only buffs")
+assert(tfa.debuffContainer and tfa.debuffContainer.groups.debuffs and not tfa.debuffContainer.groups.buffs, "own debuff container")
+assert(tfa.debuffContainer.point[1] == "BOTTOMLEFT" and tfa.debuffContainer.point[3] == "TOPLEFT", "debuffs above the frame")
+assert(tfa.auraContainer.point[3] == "BOTTOMLEFT", "buffs below the frame")
+assert(tfa.debuffContainer.unitSet == "target", "debuff container bound to the unit")
+tau.debuffPosition = "SAME"
+ns:ApplyKey("target")
+assert(tfa.auraContainer.groups.debuffs and not tfa.debuffContainer, "back to one container")
+print("separate debuffs ok")
+
 -- raid: outside a raid the roster is ignored -> fixed 8x5 grid
 assert(ns.UF.frames.raid40.raidGroup == 8 and ns.UF.frames.raid40.raidSlot == 5, "raid grid outside a raid")
 assert(ns.UF.frames.raid7.raidGroup == 2 and ns.UF.frames.raid7.raidSlot == 2, "raid grid")

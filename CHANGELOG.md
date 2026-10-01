@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+- Buffs and debuffs at separate places: Auras tab → "Debuff position". "With the buffs" keeps
+  them together as before; Below / Above / Right / Left gives the debuffs a place of their own,
+  e.g. buffs above the frame and debuffs below. Thanks to **vbrokop** for the idea!
+
 ## 0.10.2
 - Raid frames in a party, as in Luna: Raid → General → "Use the raid frames in a party too". In a
   party the first raid group shows you and party 1-4 (with everything set up for the raid:

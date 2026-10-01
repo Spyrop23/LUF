@@ -58,6 +58,8 @@ local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", xpBar = "
 local RAID_DIRECTIONS = { { "DOWN", "Below each other (columns)" }, { "RIGHT", "Next to each other (rows)" } }
 local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
+local DEBUFF_POS = { { "SAME", "With the buffs (own row)" } }
+for _, pos in ipairs(AURA_POS) do table.insert(DEBUFF_POS, pos) end
 local BUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can cast" } }
 local DEBUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can dispel" } }
 local LIST_MODES = { { "exclude", "Hide the auras in the list" }, { "include", "Show only the auras in the list" } }
@@ -245,7 +247,8 @@ local function unitTabs(key)
             b:Dropdown("Debuff filter list", filterListOptions, p("auras.debuffList"))
             b:Dropdown("Debuff list mode", LIST_MODES, p("auras.debuffListMode"))
             b:Header("Layout")
-            b:Dropdown("Position", AURA_POS, p("auras.position"))
+            b:Dropdown("Position (buffs)", AURA_POS, p("auras.position"))
+            b:Dropdown("Debuff position", DEBUFF_POS, p("auras.debuffPosition"))
             b:Slider("Space between icons", 0, 10, 1, p("auras.spacing"))
             b:Slider("Space between buffs and debuffs", 0, 30, 1, p("auras.groupGap"))
             b:Slider("Icons per row (left/right)", 1, 20, 1, p("auras.perRow"))
