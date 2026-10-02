@@ -1,10 +1,13 @@
 # Lizzarick's Unit Frames
 
-**Luna-style unit frames for World of Warcraft: Forever**, no libraries needed.
+**Luna-style unit frames for World of Warcraft: Forever and Retail (Midnight)**, no libraries
+needed. One download for both games.
 
-Luna Unit Frames can't run on WoW: Forever. The client is a modern one, with the new addon
-restrictions (secret values, no combat log). Lizzarick's Unit Frames brings back Luna's look and
-its options menu, rebuilt from scratch so it keeps working in combat.
+Luna Unit Frames can't run on WoW: Forever or Midnight. Both are modern clients with the new
+addon restrictions (secret values, no combat log). Lizzarick's Unit Frames brings back Luna's
+look and its options menu, rebuilt from scratch so it keeps working in combat. In Retail it
+knows the Retail classes and power types; Classic-only options (pet happiness, pet XP, master
+looter) are hidden there.
 
 ![All frames in config mode](https://raw.githubusercontent.com/Spyrop23/LUF/main/docs/screenshot-frames.jpg)
 

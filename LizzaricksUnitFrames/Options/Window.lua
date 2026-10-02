@@ -153,7 +153,7 @@ local function unitTabs(key)
     tab("health", "Health bar", function(b)
         b:Header("Health bar")
         local colorTypes = COLOR_TYPES
-        if key == "pet" then
+        if key == "pet" and not ns.isRetail then   -- pet happiness: Classic/Forever only
             colorTypes = { { "happiness", "Happiness (red / yellow / green)" } }
             for _, c in ipairs(COLOR_TYPES) do table.insert(colorTypes, c) end
         end
@@ -314,13 +314,16 @@ local function unitTabs(key)
     do
         tab("indicators", "Indicators", function(b)
             for _, k in ipairs(ns.Indicators.KINDS) do
-                local base = "indicators." .. k[1] .. "."
-                b:Header(k[2])
-                b:Check("Enabled", p(base .. "enabled"))
-                b:Slider("Size", 5, 80, 1, p(base .. "size"))
-                b:Dropdown("Point", ns.Indicators.POINTS, p(base .. "point"))
-                b:Slider("X position", -50, 50, 1, p(base .. "x"))
-                b:Slider("Y position", -100, 100, 1, p(base .. "y"))
+                -- Retail has no master looter
+                if not (ns.isRetail and k[1] == "masterLooter") then
+                    local base = "indicators." .. k[1] .. "."
+                    b:Header(k[2])
+                    b:Check("Enabled", p(base .. "enabled"))
+                    b:Slider("Size", 5, 80, 1, p(base .. "size"))
+                    b:Dropdown("Point", ns.Indicators.POINTS, p(base .. "point"))
+                    b:Slider("X position", -50, 50, 1, p(base .. "x"))
+                    b:Slider("Y position", -100, 100, 1, p(base .. "y"))
+                end
             end
             b:Header("Elite")
             b:Text("A dragon on the side of the frame for elite, rare and boss units.", 16)
@@ -335,7 +338,7 @@ local function unitTabs(key)
                 b:Slider("Size", 8, 40, 1, p("status.size"))
                 b:Dropdown("Position on the frame", ns.Status.POINTS, p("status.point"))
             end
-            if key == "pet" then
+            if key == "pet" and not ns.isRetail then
                 b:Header("Happiness")
                 b:Text("The health bar shows the happiness as its colour (Health bar tab).")
                 b:Check("Show happiness icon", p("happiness.enabled"))
@@ -489,7 +492,11 @@ end)
 -- Luna's Colors page: every colour of the frames, per profile.
 local CLASS_ORDER = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }
 local CLASS_NAMES = { WARRIOR = "Warrior", PALADIN = "Paladin", HUNTER = "Hunter", ROGUE = "Rogue", PRIEST = "Priest",
-    SHAMAN = "Shaman", MAGE = "Mage", WARLOCK = "Warlock", DRUID = "Druid" }
+    SHAMAN = "Shaman", MAGE = "Mage", WARLOCK = "Warlock", DRUID = "Druid",
+    DEATHKNIGHT = "Death Knight", DEMONHUNTER = "Demon Hunter", MONK = "Monk", EVOKER = "Evoker" }
+if ns.isRetail then
+    for _, c in ipairs({ "DEATHKNIGHT", "MONK", "DEMONHUNTER", "EVOKER" }) do table.insert(CLASS_ORDER, c) end
+end
 local REACTIONS = { "Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Revered", "Exalted" }
 addPage("colors", "Colors", function(b)
     local function color(text, path)
@@ -502,12 +509,22 @@ addPage("colors", "Colors", function(b)
     color("Rage", "power.RAGE")
     color("Energy", "power.ENERGY")
     color("Focus (pets)", "power.FOCUS")
+    if ns.isRetail then
+        color("Runic power", "power.RUNIC_POWER")
+        color("Astral power", "power.LUNAR_POWER")
+        color("Maelstrom", "power.MAELSTROM")
+        color("Insanity", "power.INSANITY")
+        color("Fury", "power.FURY")
+        color("Pain", "power.PAIN")
+    end
     b:Header("Reaction")
     for i, name in ipairs(REACTIONS) do color(name, "reaction." .. i) end
-    b:Header("Pet happiness")
-    color("Unhappy", "happiness.1")
-    color("Content", "happiness.2")
-    color("Happy", "happiness.3")
+    if not ns.isRetail then
+        b:Header("Pet happiness")
+        color("Unhappy", "happiness.1")
+        color("Content", "happiness.2")
+        color("Happy", "happiness.3")
+    end
     b:Header("Other")
     color("Static health", "static")
     color("Cast bar", "cast")

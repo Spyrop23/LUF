@@ -264,6 +264,10 @@ function ns:SetProfile(name)
         self.db.migrated033 = true
         self.db.units.pet.happiness.enabled = false
     end
+    -- Retail: no pet happiness, pets coloured like other frames
+    if ns.isRetail and self.db.units.pet.healthBar.colorType == "happiness" then
+        self.db.units.pet.healthBar.colorType = "class"
+    end
     self.db.colors = self.db.colors or {}   -- Colors page overrides
     ns.ApplyColors()
     if self.OnProfileChanged then self:OnProfileChanged() end

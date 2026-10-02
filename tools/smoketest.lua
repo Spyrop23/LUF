@@ -172,12 +172,20 @@ C_PartyInfo = { GetLootMethod = function() return 2, 0, nil end }
 function UnitThreatSituation(u) return u == "party1" and 3 or 0 end
 function GetThreatStatusColor(s) return 1, 0, 0 end
 function UnitCanAttack() return true end
+-- LUF_RETAIL=1: the same test as a Retail (Midnight 12.1) client: other
+-- build number, no Forever swing timer, no pet happiness.
+local RETAIL = os.getenv("LUF_RETAIL") == "1"
 C_PetInfo = {
     GetPetHappiness = function() return 2, 100, 0 end,
     GetPetLoyalty = function() return "Loyal" end,
 }
 function CreateColor(r, g, b) return { r = r, g = g, b = b } end
 function GetBuildInfo() return "1.60.1", "69977", "", 16001 end
+if RETAIL then
+    C_PetInfo, C_SwingTimer = nil, nil
+    function GetBuildInfo() return "12.1.0", "69933", "", 120100 end
+    PowerBarColor = { RUNIC_POWER = { r = 0, g = 0.82, b = 1 }, ESSENCE = { r = 0.4, g = 0.8, b = 1 } }
+end
 function GetCursorPosition() return 100, 100 end
 function InCombatLockdown() return false end
 function hooksecurefunc() end
@@ -318,13 +326,30 @@ dump()
 assert(ns.UF.frames.party1.shown and not ns.UF.frames.party2.shown, "party visibility")
 assert(ns.UF.frames.pet.shown, "pet shown")
 local pet = ns.UF.frames.pet
-assert(pet.healthBar.color[1] == 0.93 and pet.healthBar.color[3] == 0, "pet coloured by happiness (content = yellow)")
-assert(not pet.happiness.shown, "happiness icon off by default")
-fire("UNIT_HAPPINESS", "pet")
 local pfs = newWidget("FontString")
-ns.Tags.Render(pfs, "[happiness] [loyalty]", "pet")
-print("pet tags: " .. pfs.text)
-assert(pfs.text:find("Content") and pfs.text:find("Loyal"), "pet tags")
+if RETAIL then
+    -- no happiness in Retail: the pet is coloured by reaction, tags stay empty
+    assert(ns.isRetail and not ns.isForever, "Retail detected")
+    assert(ns.db.units.pet.healthBar.colorType == "class", "pet colour switched from happiness")
+    assert(pet.healthBar.color[1] == 0.9 and pet.healthBar.color[2] == 0.7, "pet coloured by reaction")
+    ns.Tags.Render(pfs, "[happiness][loyalty]", "pet")
+    assert(pfs.text == "", "no pet happiness tags in Retail: " .. tostring(pfs.text))
+    -- Retail power types: ours, else Blizzard's PowerBarColor
+    assert(ns.colors.power.RUNIC_POWER and ns.colors.class.DEATHKNIGHT, "Retail power and class colours")
+    local powerType = UnitPowerType
+    UnitPowerType = function() return 19, "ESSENCE" end
+    local ec = ns.PowerColor("player")
+    assert(ec[1] == 0.4 and ec[3] == 1, "unknown power type falls back to Blizzard's PowerBarColor")
+    UnitPowerType = powerType
+    print("retail pet ok")
+else
+    assert(pet.healthBar.color[1] == 0.93 and pet.healthBar.color[3] == 0, "pet coloured by happiness (content = yellow)")
+    assert(not pet.happiness.shown, "happiness icon off by default")
+    fire("UNIT_HAPPINESS", "pet")
+    ns.Tags.Render(pfs, "[happiness] [loyalty]", "pet")
+    print("pet tags: " .. pfs.text)
+    assert(pfs.text:find("Content") and pfs.text:find("Loyal"), "pet tags")
+end
 
 -- heal prediction: own/others split from the calculator, secrets passed through
 local ph = ns.UF.frames.player.heal
@@ -439,8 +464,12 @@ assert(ns.UF.frames.party1.driver, "party uses the hide-in-raid driver")
 tick()
 assert(ns.UF.frames.party1.alpha == 0.4, "party1 faded, got " .. tostring(ns.UF.frames.party1.alpha))
 assert(ns.UF.frames.pet.alpha ~= 0.4, "own pet never fades")
--- pet XP bar
-assert(pet.xpBar.value == 150 and pet.xpBar.shown, "pet xp bar")
+-- pet XP bar (hunter pets level only in Classic/Forever)
+if RETAIL then
+    assert(not pet.xpBar.shown, "no pet xp bar in Retail")
+else
+    assert(pet.xpBar.value == 150 and pet.xpBar.shown, "pet xp bar")
+end
 print("raid/range/xp ok")
 
 -- squares: aggro on party1, a spell-list buff slot on the player

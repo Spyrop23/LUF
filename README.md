@@ -1,7 +1,10 @@
 # Lizzarick's Unit Frames
 
 Unit Frames im Stil von **Luna Unit Frames** für **World of Warcraft: Forever**
-(Client 1.60.1, `## Interface: 16001`). Ohne fremde Libraries.
+(Client 1.60.1, `## Interface: 16001`) und **Retail / Midnight** (12.x, `120000`–`120100`).
+Ein Addon für beide Spiele, ohne fremde Libraries. In Retail fehlen nur die Classic-Funktionen
+(Begleiter-Zufriedenheit, Begleiter-XP, Plündermeister); dafür kennt es die Retail-Klassen und
+-Ressourcen.
 
 Luna selbst lässt sich nicht portieren. Forever ist technisch ein Retail-Client mit den
 Midnight-Addon-Sperren (Secret Values, kein Combat Log). Lizzarick's Unit Frames übernimmt deshalb Aussehen und
@@ -16,7 +19,8 @@ Hinweis: Bis 0.7.1 hieß das Addon „FUF – Forever Unit Frames“ (Ordner `FU
 
 **Am einfachsten:** über CurseForge, oder unter **Releases → Lizzarick's Unit Frames (latest)** die
 Datei `LizzaricksUnitFrames-<Version>.zip` laden und direkt nach
-`World of Warcraft/_classic_beta_/Interface/AddOns/` entpacken.
+`World of Warcraft/_classic_beta_/Interface/AddOns/` (Forever) bzw.
+`World of Warcraft/_retail_/Interface/AddOns/` (Retail) entpacken.
 
 **Oder über „Code → Download ZIP“:** Im Zip liegt ein Ordner `LUF-main`. Aus ihm nur den inneren
 Ordner **`LizzaricksUnitFrames`** nach `…/Interface/AddOns/` kopieren.

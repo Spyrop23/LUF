@@ -1,7 +1,7 @@
-## Interface: 16001
+## Interface: 16001, 120000, 120001, 120100
 ## Title: |cff9fd4ffLizzarick's|r Unit Frames
-## Notes: Luna-style unit frames for World of Warcraft: Forever, by Lizzarick.
-## Notes-deDE: Unit Frames im Stil von Luna für World of Warcraft: Forever.
+## Notes: Luna-style unit frames for World of Warcraft: Forever and Retail (Midnight), by Lizzarick.
+## Notes-deDE: Unit Frames im Stil von Luna für World of Warcraft: Forever und Retail (Midnight).
 ## Author: Spyrop23
 ## Version: 0.10.3
 ## SavedVariables: LizzaricksUFDB

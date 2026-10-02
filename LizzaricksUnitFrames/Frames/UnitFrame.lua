@@ -51,7 +51,8 @@ local GLOBAL_EVENTS = {
 -- Experience events (only for frames with an XP bar).
 local XP_EVENTS = { player = { "PLAYER_XP_UPDATE", "UPDATE_EXHAUSTION", "PLAYER_LEVEL_UP" },
     pet = { "UNIT_PET_EXPERIENCE", "UNIT_PET" } }
-UF.XP_SUPPORTED = { player = true, pet = true }
+-- pet XP only where hunter pets level (Classic/Forever)
+UF.XP_SUPPORTED = { player = true, pet = not ns.isRetail }
 
 local UNIT_EVENTS = {
     "UNIT_HEALTH", "UNIT_MAXHEALTH",

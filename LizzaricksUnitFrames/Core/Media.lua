@@ -53,12 +53,24 @@ ns.colors = {
         DRUID   = { 1.00, 0.49, 0.04 },
         SHAMAN  = { 0.14, 0.35, 1.00 },
         WARRIOR = { 0.78, 0.61, 0.43 },
+        -- Retail classes (Blizzard's class colours)
+        DEATHKNIGHT = { 0.77, 0.12, 0.23 },
+        DEMONHUNTER = { 0.64, 0.19, 0.79 },
+        MONK        = { 0.00, 1.00, 0.60 },
+        EVOKER      = { 0.20, 0.58, 0.50 },
     },
     power = {
         MANA   = { 0.30, 0.50, 0.85 },
         RAGE   = { 0.90, 0.20, 0.30 },
         FOCUS  = { 1.00, 0.50, 0.25 },
         ENERGY = { 1.00, 0.85, 0.10 },
+        -- Retail power types (Blizzard's PowerBarColor)
+        RUNIC_POWER  = { 0.00, 0.82, 1.00 },
+        LUNAR_POWER  = { 0.30, 0.52, 0.90 },
+        MAELSTROM    = { 0.00, 0.50, 1.00 },
+        INSANITY     = { 0.40, 0.00, 0.80 },
+        FURY         = { 0.79, 0.26, 0.99 },
+        PAIN         = { 1.00, 0.61, 0.00 },
     },
     -- Indexed by UnitReaction (1 hated .. 8 exalted).
     reaction = {
@@ -167,6 +179,9 @@ function ns.PowerColor(unit)
     if ns.CanRead(token) and token and ns.colors.power[token] then
         return ns.colors.power[token]
     end
+    -- other Retail power types: Blizzard's own colour table
+    local pbc = ns.CanRead(token) and token and _G.PowerBarColor and _G.PowerBarColor[token]
+    if type(pbc) == "table" and pbc.r then return { pbc.r, pbc.g, pbc.b } end
     return ns.colors.unknownPower
 end
 

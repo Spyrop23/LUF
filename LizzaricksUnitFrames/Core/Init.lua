@@ -9,9 +9,13 @@ ns.version = C_AddOns and C_AddOns.GetAddOnMetadata(addonName, "Version") or "?"
 
 -- Forever: interface 16000-19999 plus the Forever-only swing timer API.
 -- WOW_PROJECT_ID reports Mainline on Forever, so it cannot tell us.
+-- Retail (Midnight 12.x) has the same addon rules (secret values, aura
+-- containers); only a few Classic features (pet happiness, master looter,
+-- pet XP) do not exist there.
 do
     local toc = select(4, GetBuildInfo())
     ns.isForever = toc >= 16000 and toc < 20000 and C_SwingTimer ~= nil
+    ns.isRetail = toc >= 120000
 end
 
 function ns:Print(msg, ...)
@@ -87,7 +91,7 @@ ns:RegisterEvent("PLAYER_LOGIN", function()
     for i = 1, #ns.onLogin do
         ns.onLogin[i]()
     end
-    if not ns.isForever then
-        ns:Print("This addon is built for WoW: Forever only.")
+    if not (ns.isForever or ns.isRetail) then
+        ns:Print("This addon is built for WoW: Forever and Retail (Midnight).")
     end
 end)

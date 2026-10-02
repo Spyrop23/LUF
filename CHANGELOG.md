@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+- **Retail (Midnight 12.x) support:** the same addon now also loads in Retail WoW (one download
+  for both games, the client picks the right interface version). Retail classes (Death Knight,
+  Demon Hunter, Monk, Evoker) and power types (runic power, astral power, maelstrom, insanity,
+  fury, pain, others from Blizzard's colours) are included; Classic-only options (pet
+  happiness and loyalty, pet XP, master looter) are hidden in Retail.
+
 ## 0.10.3
 - Buffs and debuffs at separate places: Auras tab → "Debuff position". "With the buffs" keeps
   them together as before; Below / Above / Right / Left gives the debuffs a place of their own,
