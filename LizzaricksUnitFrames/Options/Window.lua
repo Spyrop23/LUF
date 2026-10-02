@@ -58,6 +58,7 @@ local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", xpBar = "
 local RAID_DIRECTIONS = { { "DOWN", "Below each other (columns)" }, { "RIGHT", "Next to each other (rows)" } }
 local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
+local TIME_POS = { { "BELOW", "Below the icon" }, { "INSIDE", "In the icon" }, { "ABOVE", "Above the icon" } }
 local GROW_SIDES = { { "RIGHT", "Left edge, grow right" }, { "LEFT", "Right edge, grow left" } }
 local DEBUFF_POS = { { "SAME", "With the buffs (own row)" } }
 for _, pos in ipairs(AURA_POS) do table.insert(DEBUFF_POS, pos) end
@@ -265,7 +266,8 @@ local function unitTabs(key)
             b:Slider("Space between icons", 0, 10, 1, p("auras.spacing"))
             b:Slider("Space between buffs and debuffs", 0, 30, 1, p("auras.groupGap"))
             b:Slider("Icons per row (left/right)", 1, 20, 1, p("auras.perRow"))
-            b:Check("Remaining time under the icon", p("auras.duration"))
+            b:Check("Show the time left", p("auras.duration"))
+            b:Dropdown("Time left position", TIME_POS, p("auras.durationPosition"))
             b:Check("Cooldown swipe on the icon", p("auras.swipe"))
         end)
     end

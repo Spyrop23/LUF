@@ -12,6 +12,7 @@
   the others' auras each.
 - X and Y offset for buffs and for debuffs: move each block left/right and up/down (-100 to
   100 px), e.g. buffs a little higher above the frame.
+- Time left position: below the icon (as before), in the icon or above it.
 - The Auras tab is laid out like Luna's: everything for buffs, then everything for debuffs.
 
 ## 0.10.2

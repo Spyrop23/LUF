@@ -149,8 +149,19 @@ local function initializer(db, debuffs, size)
 
         if db.duration then
             local text = button:CreateFontString(nil, "OVERLAY")
-            text:SetFont(ns.media.font, math.max(6, math.floor(size * 0.45)), "OUTLINE")
-            text:SetPoint("TOP", button, "BOTTOM", 0, 1)
+            local where = db.durationPosition or "BELOW"
+            if where == "INSIDE" then
+                -- in the middle of the icon, a bit larger, above the swipe
+                text:SetFont(ns.media.font, math.max(7, math.floor(size * 0.5)), "OUTLINE")
+                text:SetPoint("CENTER", button, "CENTER", 0, 0)
+                text:SetDrawLayer("OVERLAY", 7)
+            elseif where == "ABOVE" then
+                text:SetFont(ns.media.font, math.max(6, math.floor(size * 0.45)), "OUTLINE")
+                text:SetPoint("BOTTOM", button, "TOP", 0, -1)
+            else
+                text:SetFont(ns.media.font, math.max(6, math.floor(size * 0.45)), "OUTLINE")
+                text:SetPoint("TOP", button, "BOTTOM", 0, 1)
+            end
             local f = compactFormatter()
             if not (f and try(button, "SetDurationText", text, { textFormatter = f })) then
                 try(button, "SetDurationText", text, {})   -- the client's own wording
@@ -222,7 +233,8 @@ local function buildContainer(f, db, which)
             initializeFrame = initializer(db, debuffs, size),
             layout = {
                 elementWidth = size,
-                elementHeight = size + (db.duration and 8 or 0),
+                -- room for the time text above or below the icon (none inside)
+                elementHeight = size + ((db.duration and db.durationPosition ~= "INSIDE") and 8 or 0),
                 elementSpacing = db.spacing, lineSpacing = db.spacing,
                 forceNewLine = newRow,   -- debuffs start on their own row
                 groupLineSpacing = newRow and (db.groupGap or 4) or nil,   -- gap above them
@@ -266,7 +278,7 @@ local function signature(db)
         tostring(db.buffs), tostring(db.debuffs), db.size, db.debuffSize, db.spacing, db.groupGap or 4, db.maxBuffs, db.maxDebuffs,
         db.buffFilter, db.debuffFilter, tostring(db.duration), tostring(db.swipe), tostring(db.dispelColors),
         db.buffListMode or "", db.debuffListMode or "", tostring(separate(db)),
-        db.biggerBuffs or 0, db.biggerDebuffs or 0,
+        db.biggerBuffs or 0, db.biggerDebuffs or 0, db.durationPosition or "BELOW",
         ns.Filters and ns.Filters.Get(db.buffList) and ns.Filters.Signature(db.buffList) or "",
         ns.Filters and ns.Filters.Get(db.debuffList) and ns.Filters.Signature(db.debuffList) or "",
     }, ":")

@@ -85,6 +85,7 @@ local function unitDefaults(o)
             buffGrow = "RIGHT", debuffGrow = "RIGHT", buffLimit = 100, debuffLimit = 100,
             biggerBuffs = 0, biggerDebuffs = 0,
             buffX = 0, buffY = 0, debuffX = 0, debuffY = 0,   -- offsets of the blocks
+            durationPosition = "BELOW",   -- time left: BELOW / INSIDE / ABOVE the icon
             duration = true, swipe = true, dispelColors = true,
         },
         tags = {

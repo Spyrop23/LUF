@@ -361,6 +361,12 @@ tau.buffX, tau.buffY = 5, -10
 ns:ApplyKey("target")
 assert(tfa.auraContainer.point[4] == 5 and tfa.auraContainer.point[5] == y0 - 10, "buff offset")
 tau.buffX, tau.buffY = 0, 0
+-- time left in the icon: new container, no extra row height
+local before = tfa.auraContainer
+tau.durationPosition = "INSIDE"
+ns:ApplyKey("target")
+assert(tfa.auraContainer ~= before, "time position rebuilds the container")
+tau.durationPosition = "BELOW"
 tau.debuffPosition = "SAME"
 ns:ApplyKey("target")
 assert(tfa.auraContainer.groups.debuffs and not tfa.debuffContainer, "back to one container")
