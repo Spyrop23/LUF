@@ -84,6 +84,7 @@ local function unitDefaults(o)
             -- bigger buffs (extra pixels for your own auras)
             buffGrow = "RIGHT", debuffGrow = "RIGHT", buffLimit = 100, debuffLimit = 100,
             biggerBuffs = 0, biggerDebuffs = 0,
+            buffX = 0, buffY = 0, debuffX = 0, debuffY = 0,   -- offsets of the blocks
             duration = true, swipe = true, dispelColors = true,
         },
         tags = {

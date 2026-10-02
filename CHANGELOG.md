@@ -10,6 +10,8 @@
 - Bigger buffs / bigger debuffs, as in Luna: your own auras are shown larger (+0-20 px), the
   others follow at the normal size. Works in combat; the max. count applies to your own and to
   the others' auras each.
+- X and Y offset for buffs and for debuffs: move each block left/right and up/down (-100 to
+  100 px), e.g. buffs a little higher above the frame.
 - The Auras tab is laid out like Luna's: everything for buffs, then everything for debuffs.
 
 ## 0.10.2

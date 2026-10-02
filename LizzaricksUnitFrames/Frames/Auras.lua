@@ -172,25 +172,27 @@ local DIR = AnchorUtil and AnchorUtil.FlowDirection
 -- side": the frame edge the icons start from above/below the frame);
 -- limit: row width in % of the frame width (Luna's "horizontal limit");
 -- gap: space to keep free next to the frame (e.g. for the cast bar).
-local function place(c, f, db, pos, size, grow, limit, gapBelow, gapAbove)
+-- dx/dy: the user's offset (moves the whole block).
+local function place(c, f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
     local spacing = db.spacing
     local width = f.db.width * (limit or 100) / 100
     local fromRight = grow == "LEFT"
+    dx, dy = dx or 0, dy or 0
     c:ClearAllPoints()
     local anchor, h, v, line
     if pos == "TOP" then
         anchor = fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT"
-        c:SetPoint(anchor, f, fromRight and "TOPRIGHT" or "TOPLEFT", 0, 2 + gapAbove)
+        c:SetPoint(anchor, f, fromRight and "TOPRIGHT" or "TOPLEFT", dx, 2 + gapAbove + dy)
         h, v, line = fromRight and "Left" or "Right", "Up", width
     elseif pos == "RIGHT" then
-        c:SetPoint("TOPLEFT", f, "TOPRIGHT", 2, 0)
+        c:SetPoint("TOPLEFT", f, "TOPRIGHT", 2 + dx, dy)
         anchor, h, v, line = "TOPLEFT", "Right", "Down", db.perRow * (size + spacing)
     elseif pos == "LEFT" then
-        c:SetPoint("TOPRIGHT", f, "TOPLEFT", -2, 0)
+        c:SetPoint("TOPRIGHT", f, "TOPLEFT", -2 + dx, dy)
         anchor, h, v, line = "TOPRIGHT", "Left", "Down", db.perRow * (size + spacing)
     else -- BOTTOM
         anchor = fromRight and "TOPRIGHT" or "TOPLEFT"
-        c:SetPoint(anchor, f, fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT", 0, -2 - gapBelow)
+        c:SetPoint(anchor, f, fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT", dx, -2 - gapBelow + dy)
         h, v, line = fromRight and "Left" or "Right", "Down", width
     end
     try(c, "SetFlowLayoutPadding", 0, 0, 0, 0)
@@ -306,14 +308,17 @@ function AU.Layout(f)
     local buffSize = db.size + math.max(db.biggerBuffs or 0, 0)
     local debuffSize = (db.debuffSize or db.size) + math.max(db.biggerDebuffs or 0, 0)
     if split then
-        place(f.auraContainer, f, db, db.position, buffSize, db.buffGrow, db.buffLimit, below, above)
+        place(f.auraContainer, f, db, db.position, buffSize, db.buffGrow, db.buffLimit,
+            db.buffX, db.buffY, below, above)
         if f.debuffContainer then
-            place(f.debuffContainer, f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit, below, above)
+            place(f.debuffContainer, f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit,
+                db.debuffX, db.debuffY, below, above)
             f.debuffContainer:Show()
         end
     else
-        -- together: the buffs' side and width count for both
-        place(f.auraContainer, f, db, db.position, math.max(buffSize, debuffSize), db.buffGrow, db.buffLimit, below, above)
+        -- together: the buffs' side, width and offset count for both
+        place(f.auraContainer, f, db, db.position, math.max(buffSize, debuffSize), db.buffGrow, db.buffLimit,
+            db.buffX, db.buffY, below, above)
     end
     f.auraContainer:Show()
 end

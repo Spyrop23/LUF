@@ -355,6 +355,12 @@ ns:ApplyKey("target")
 local dp = tfa.debuffContainer.point
 assert(dp[1] == "BOTTOMRIGHT" and dp[3] == "TOPRIGHT", "debuffs start at the right edge")
 tau.debuffGrow, tau.debuffLimit = "RIGHT", 100
+-- offsets move a block: buffs below the frame, 10 px lower, 5 px right
+local y0 = tfa.auraContainer.point[5]
+tau.buffX, tau.buffY = 5, -10
+ns:ApplyKey("target")
+assert(tfa.auraContainer.point[4] == 5 and tfa.auraContainer.point[5] == y0 - 10, "buff offset")
+tau.buffX, tau.buffY = 0, 0
 tau.debuffPosition = "SAME"
 ns:ApplyKey("target")
 assert(tfa.auraContainer.groups.debuffs and not tfa.debuffContainer, "back to one container")
