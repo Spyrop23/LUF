@@ -617,6 +617,34 @@ assert(not cpf.shown, "back to warrior")
 assert(ns:IsBlizzardHidden("classpower") and PaladinPowerBarFrame.shown == false, "Blizzard's class bar hidden")
 print("class power ok")
 
+-- five second rule: a mana drop starts the spark, it runs 5 s along the bar (Forever only)
+do
+    local now = 100
+    local getTime = GetTime
+    GetTime = function() return now end
+    local mana = 80
+    UnitPower = function(u, pt) if u == "player" then return mana end return unitPower(u, pt) end
+    fire("UNIT_POWER_UPDATE", "player")
+    mana = 60
+    fire("UNIT_POWER_UPDATE", "player")
+    local pf = ns.UF.frames.player
+    now = 102.5
+    for _, w in ipairs(frames) do
+        if w.scripts.OnUpdate then w.scripts.OnUpdate(w, 0.01) end
+    end
+    local spark = pf.powerBar.fiveSecond
+    if RETAIL then
+        assert(not (spark and spark.shown), "Retail: no five second rule")
+    else
+        assert(spark and spark.shown, "spark runs after spending mana")
+        now = 106
+        tick()
+        assert(not spark.shown, "spark gone after 5 s")
+    end
+    UnitPower, GetTime = unitPower, getTime
+end
+print("five second rule ok")
+
 -- combat text: damage, crit, heal, miss; secret amounts go straight to the text
 local ctx = plf.combatText
 for _, w in ipairs(frames) do

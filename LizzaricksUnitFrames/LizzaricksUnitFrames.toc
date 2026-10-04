@@ -22,6 +22,7 @@ Core\Filters.lua
 Frames\UnitFrame.lua
 Frames\CastBar.lua
 Frames\ClassPower.lua
+Frames\ManaTimer.lua
 Frames\Auras.lua
 Frames\HealPrediction.lua
 Frames\Range.lua

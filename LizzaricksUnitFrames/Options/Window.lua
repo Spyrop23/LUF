@@ -171,6 +171,11 @@ local function unitTabs(key)
         b:Slider("Height (weight)", 1, 10, 0.5, gpw, spw, "%.1f")
         b:Check("Background", p("powerBar.background"))
         b:Slider("Background alpha", 0, 1, 0.05, p("powerBar.backgroundAlpha"))
+        if key == "player" and not ns.isRetail then
+            b:Check("Five second rule", p("powerBar.fiveSecond"))
+            b:Text("After you spend mana, a spark runs along the mana bar for 5 seconds: the time until " ..
+                "your mana regenerates again.", 30)
+        end
     end)
 
     if ns.ClassPower and ns.ClassPower.supported[key] then
