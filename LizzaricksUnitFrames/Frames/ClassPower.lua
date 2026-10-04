@@ -61,6 +61,24 @@ local function powerType()
     if class == "MAGE" and spec == 1 then return PT.ArcaneCharges or 16 end   -- Arcane
 end
 
+-- Classes that can have points at all (druids: in cat form); in Forever
+-- only combo points exist.
+local CLASSES = ns.isRetail
+    and { ROGUE = true, DRUID = true, PALADIN = true, WARLOCK = true, MONK = true, MAGE = true, EVOKER = true }
+    or { ROGUE = true, DRUID = true }
+
+-- Space the row takes next to the frame on `side` ("ABOVE"/"BELOW"), so the
+-- cast bar and the auras can make room. Kept for the class even while a
+-- form or spec shows no points, so nothing jumps around in combat.
+function CP.Reserved(f, side)
+    if not f.classPower then return 0 end
+    local db = f.db.classPower
+    if not (db and db.enabled) or (db.position or "ABOVE") ~= side then return 0 end
+    local _, class = call(UnitClass, "player")
+    if not (ns.unlocked or CLASSES[readable(class)]) then return 0 end
+    return db.height + 1
+end
+
 local function maxPoints(ptype)
     local max = readable(call(UnitPowerMax, "player", ptype))
     if type(max) ~= "number" or max <= 0 then return 0 end
@@ -125,12 +143,9 @@ function CP.Layout(f)
     local db = f.db.classPower
     holder:ClearAllPoints()
     holder:SetSize(f.db.width, db.height)
+    -- directly on the frame; the cast bar makes room (CP.Reserved)
     if db.position == "BELOW" then
-        -- under the cast bar when that one is below the frame too
-        local cast = f.db.castBar
-        local castBelow = ns.CastBar and ns.CastBar.supported[f.key] and cast and cast.enabled
-            and cast.position ~= "ABOVE"
-        holder:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 0, -1 - (castBelow and (cast.height + 1) or 0))
+        holder:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 0, -1)
     else
         holder:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 0, 1)
     end

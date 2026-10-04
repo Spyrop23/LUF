@@ -317,6 +317,12 @@ function AU.Layout(f)
     local castOn = ns.CastBar and ns.CastBar.supported[f.key] and cast and cast.enabled
     local below = (castOn and cast.position ~= "ABOVE") and (cast.height + 1) or 0
     local above = (castOn and cast.position == "ABOVE") and (cast.height + 1) or 0
+    -- and the class power row (player)
+    local CP = ns.ClassPower
+    if CP then
+        below = below + CP.Reserved(f, "BELOW")
+        above = above + CP.Reserved(f, "ABOVE")
+    end
     local buffSize = db.size + math.max(db.biggerBuffs or 0, 0)
     local debuffSize = (db.debuffSize or db.size) + math.max(db.biggerDebuffs or 0, 0)
     if split then

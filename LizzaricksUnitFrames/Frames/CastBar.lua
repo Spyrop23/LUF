@@ -233,12 +233,16 @@ function CB.Layout(f)
     local iconW = db.icon and h or 0
 
     cb:ClearAllPoints()
+    -- the class power row sits directly on the frame; the cast bar goes beyond it
+    local CP = ns.ClassPower
     if db.position == "ABOVE" then
-        cb:SetPoint("BOTTOMLEFT", f, "TOPLEFT", iconW + (db.icon and 1 or 0), 1)
-        cb:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", 0, 1)
+        local gap = 1 + (CP and CP.Reserved(f, "ABOVE") or 0)
+        cb:SetPoint("BOTTOMLEFT", f, "TOPLEFT", iconW + (db.icon and 1 or 0), gap)
+        cb:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", 0, gap)
     else
-        cb:SetPoint("TOPLEFT", f, "BOTTOMLEFT", iconW + (db.icon and 1 or 0), -1)
-        cb:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", 0, -1)
+        local gap = 1 + (CP and CP.Reserved(f, "BELOW") or 0)
+        cb:SetPoint("TOPLEFT", f, "BOTTOMLEFT", iconW + (db.icon and 1 or 0), -gap)
+        cb:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", 0, -gap)
     end
     cb:SetHeight(h)
 

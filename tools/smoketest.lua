@@ -593,6 +593,16 @@ ns.ClassPower.Update(ns.UF.frames.player)
 assert(cpf.shown and cpf.count == 5 and cpf.points[5].shown and not cpf.points[6].shown, "five combo points")
 local p3, p4 = cpf.points[3], cpf.points[4]
 assert(p3.value == 3 and p3.max == 3 and p4.min == 3 and p4.max == 4, "point 3 full, point 4 empty")
+-- below the frame: points directly on the frame, the cast bar below them
+local pldb = ns.db.units.player
+pldb.classPower.position = "BELOW"
+ns.UF.Layout(ns.UF.frames.player)
+assert(cpf.point[3] == "BOTTOMLEFT" and cpf.point[5] == -1, "class power directly under the frame")
+local cbp = ns.UF.frames.player.castBar.point
+assert(cbp[5] == -1 - (pldb.classPower.height + 1), "cast bar below the class power: " .. tostring(cbp[5]))
+pldb.classPower.position = "ABOVE"
+ns.UF.Layout(ns.UF.frames.player)
+assert(ns.UF.frames.player.castBar.point[5] == -1, "cast bar back on the frame")
 UnitClass = function(u) if u == "player" then return "Paladin", "PALADIN" end return unitClass(u) end
 UnitPowerMax = function(u, pt) if u == "player" and pt == 9 then return RETAIL and 5 or 0 end return powerMax(u, pt) end
 ns.ClassPower.Update(ns.UF.frames.player)
