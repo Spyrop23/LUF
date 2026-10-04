@@ -640,6 +640,27 @@ do
         now = 106
         tick()
         assert(not spark.shown, "spark gone after 5 s")
+        -- secret mana: the spell's mana cost starts it
+        UnitPower = unitPower
+        C_Spell = C_Spell or {}
+        local getCost = C_Spell.GetSpellPowerCost
+        C_Spell.GetSpellPowerCost = function(id)
+            if id == 133 then return { { type = 0, name = "MANA", cost = 30, costPercent = 0 } } end
+            if id == 78 then return { { type = 1, name = "RAGE", cost = 15, costPercent = 0 } } end
+        end
+        now = 200
+        fire("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 78)
+        tick()
+        assert(not spark.shown, "rage spell: no spark")
+        fire("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 133)
+        now = 201
+        for _, w in ipairs(frames) do
+            if w.scripts.OnUpdate then w.scripts.OnUpdate(w, 0.01) end
+        end
+        assert(spark.shown, "mana spell starts the spark with secret mana")
+        now = 210
+        tick()
+        C_Spell.GetSpellPowerCost = getCost
     end
     UnitPower, GetTime = unitPower, getTime
 end

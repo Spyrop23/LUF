@@ -5,8 +5,11 @@
 -- along the mana bar during that time; when it reaches the end, mana
 -- regenerates again.
 --
--- Spending is seen as a drop of the player's mana (readable in Forever).
--- Retail has no five second rule, so nothing happens there.
+-- The player's mana can be secret (it may not be compared), so spending is
+-- seen from the spell: a successful cast whose cost (C_Spell.GetSpellPowerCost)
+-- includes mana. A readable drop of mana counts too (e.g. a mana cost the
+-- spell data does not list). Retail has no five second rule, so nothing
+-- happens there.
 local _, ns = ...
 
 local MT = {}
@@ -73,7 +76,7 @@ local function onUpdate()
         if s and wanted(f) then
             local bar = f.powerBar
             local h = bar:GetHeight()
-            s:SetSize(math.max(8, h * 0.6), h * 2)
+            s:SetSize(math.max(12, h * 1.2), h * 2.5)
             s:ClearAllPoints()
             s:SetPoint("CENTER", bar, "LEFT", bar:GetWidth() * progress, 0)
             s:Show()
@@ -83,17 +86,43 @@ local function onUpdate()
     end
 end
 
+local function start()
+    if not showsMana() then return end
+    started = GetTime()
+    ticker:SetScript("OnUpdate", onUpdate)
+end
+
+local function readable(v) return ns.CanRead(v) and v or nil end
+
+-- Does the spell cost mana?
+local function costsMana(spellID)
+    local getCost = C_Spell and C_Spell.GetSpellPowerCost or GetSpellPowerCost
+    local costs = call(getCost, spellID)
+    if type(costs) ~= "table" then return false end
+    for _, c in ipairs(costs) do
+        if readable(c.type) == MANA then
+            local cost, percent = readable(c.cost) or 0, readable(c.costPercent) or 0
+            if cost > 0 or percent > 0 then return true end
+        end
+    end
+    return false
+end
+
+local function onCast(_, unit, _, spellID)
+    if unit ~= "player" or ns.isRetail then return end
+    spellID = readable(spellID)
+    if spellID and costsMana(spellID) then start() end
+end
+
 local function onPower(_, unit)
     if unit ~= "player" or ns.isRetail then return end
     local mana = call(UnitPower, "player", MANA)
     if not ns.CanRead(mana) then lastMana = nil return end
-    if lastMana and mana < lastMana and showsMana() then
-        started = GetTime()
-        ticker:SetScript("OnUpdate", onUpdate)
-    end
+    if lastMana and mana < lastMana then start() end
     lastMana = mana
 end
 
+ns:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", onCast)
 for _, event in ipairs({ "UNIT_POWER_UPDATE", "UNIT_POWER_FREQUENT" }) do
     ns:RegisterEvent(event, onPower)
 end
