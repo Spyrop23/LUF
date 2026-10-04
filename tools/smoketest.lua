@@ -580,6 +580,31 @@ hdb.mouseover, hdb.debuff, thdb.target = false, "off", false
 ns:ApplyKey("player"); ns:ApplyKey("target")
 print("highlight ok")
 
+-- class power: points fill themselves from the (secret) value, never compared
+local cpf = ns.UF.frames.player.classPower
+assert(cpf and not cpf.shown, "warrior: no class power row")
+local unitClass, powerMax, unitPower = UnitClass, UnitPowerMax, UnitPower
+UnitClass = function(u) if u == "player" then return "Rogue", "ROGUE" end return unitClass(u) end
+UnitPowerMax = function(u, pt) if u == "player" and pt == 4 then return 5 end return powerMax(u, pt) end
+UnitPower = function(u, pt) if pt == 4 then return secret(3) end return unitPower(u, pt) end
+GetComboPoints = function(u, t) return secret(3) end   -- Forever: combo points on the target
+ns.ClassPower.Update(ns.UF.frames.player)
+assert(cpf.shown and cpf.count == 5 and cpf.points[5].shown and not cpf.points[6].shown, "five combo points")
+local p3, p4 = cpf.points[3], cpf.points[4]
+assert(p3.value == 3 and p3.max == 3 and p4.min == 3 and p4.max == 4, "point 3 full, point 4 empty")
+UnitClass = function(u) if u == "player" then return "Paladin", "PALADIN" end return unitClass(u) end
+UnitPowerMax = function(u, pt) if u == "player" and pt == 9 then return RETAIL and 5 or 0 end return powerMax(u, pt) end
+ns.ClassPower.Update(ns.UF.frames.player)
+if RETAIL then
+    assert(cpf.shown and cpf.count == 5, "Retail: holy power")
+else
+    assert(not cpf.shown, "Forever: paladins have no holy power")
+end
+UnitClass, UnitPowerMax, UnitPower = unitClass, powerMax, unitPower
+ns.ClassPower.Update(ns.UF.frames.player)
+assert(not cpf.shown, "back to warrior")
+print("class power ok")
+
 -- combat text: damage, crit, heal, miss; secret amounts go straight to the text
 local ctx = plf.combatText
 for _, w in ipairs(frames) do

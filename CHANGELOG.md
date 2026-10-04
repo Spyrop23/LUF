@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+- Class power on the player frame (new "Class power" tab): combo points (rogue, druid in cat
+  form; in Forever on your target, as Classic does it), and in Retail holy power, soul shards,
+  chi (Windwalker), arcane charges (Arcane) and essence, as a row of points above or below the
+  frame. Works in combat: every point fills itself from the game's value. Height and spacing
+  adjustable. (Death Knight runes are not included yet.)
+
 ## 0.11.0
 - **Retail (Midnight 12.x) support:** the same addon now also loads in Retail WoW (one download
   for both games, the client picks the right interface version). Retail classes (Death Knight,

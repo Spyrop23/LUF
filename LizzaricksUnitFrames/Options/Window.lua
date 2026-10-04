@@ -173,6 +173,19 @@ local function unitTabs(key)
         b:Slider("Background alpha", 0, 1, 0.05, p("powerBar.backgroundAlpha"))
     end)
 
+    if ns.ClassPower and ns.ClassPower.supported[key] then
+        tab("classpower", "Class power", function(b)
+            b:Header("Class power")
+            b:Text("Combo points (rogue, druid in cat form), holy power, soul shards, chi (Windwalker), " ..
+                "arcane charges (Arcane) and essence as a row of points. Shows only for classes that " ..
+                "have one.", 44)
+            b:Check("Enabled", p("classPower.enabled"))
+            b:Dropdown("Position", ns.ClassPower.POSITIONS, p("classPower.position"))
+            b:Slider("Height", 3, 20, 1, p("classPower.height"))
+            b:Slider("Space between points", 0, 10, 1, p("classPower.spacing"))
+        end)
+    end
+
     tab("empty", "Empty bar", function(b)
         b:Header("Empty bar")
         b:Text("A bar without a value, only for texts (set them on the Tags tab), as in Luna.", 16)

@@ -303,6 +303,7 @@ function UF.Layout(f)
 
     if ns.HealPrediction then ns.HealPrediction.Layout(f, db.width - left - right) end
     if ns.CastBar then ns.CastBar.Layout(f) end
+    if ns.ClassPower then ns.ClassPower.Layout(f) end
     if ns.Auras then ns.Auras.Layout(f) end
     if ns.Status then ns.Status.Layout(f) end
     if ns.Squares then ns.Squares.Layout(f) end
@@ -469,6 +470,7 @@ end
 function UF.UnitChanged(f)
     UF.Update(f)
     if ns.CastBar then ns.CastBar.Refresh(f) end
+    if ns.ClassPower then ns.ClassPower.Refresh(f) end
     if ns.Auras then ns.Auras.Refresh(f) end
     if ns.Squares then ns.Squares.Refresh(f) end
     if ns.Borders then ns.Borders.Refresh(f) end
@@ -579,6 +581,7 @@ function UF.Create(unit, opts)
 
     buildRegions(f)
     if ns.CastBar then ns.CastBar.Create(f) end
+    if ns.ClassPower then ns.ClassPower.Create(f) end
     if ns.Status then ns.Status.Create(f) end
     if ns.Squares then ns.Squares.Create(f) end
     if ns.Borders then ns.Borders.Create(f) end
