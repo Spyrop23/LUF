@@ -56,7 +56,7 @@ UF.XP_SUPPORTED = { player = true, pet = not ns.isRetail }
 
 local UNIT_EVENTS = {
     "UNIT_HEALTH", "UNIT_MAXHEALTH",
-    "UNIT_POWER_UPDATE", "UNIT_MAXPOWER", "UNIT_DISPLAYPOWER",
+    "UNIT_POWER_UPDATE", "UNIT_POWER_FREQUENT", "UNIT_MAXPOWER", "UNIT_DISPLAYPOWER",
     "UNIT_NAME_UPDATE", "UNIT_LEVEL", "UNIT_FACTION", "UNIT_FLAGS",
     "UNIT_CONNECTION", "UNIT_CLASSIFICATION_CHANGED",
     "UNIT_PORTRAIT_UPDATE", "UNIT_MODEL_CHANGED", "PLAYER_FLAGS_CHANGED",
@@ -482,7 +482,7 @@ end
 local EVENT_PARTS = {
     UNIT_HEALTH = "health", UNIT_MAXHEALTH = "health",
     UNIT_HEAL_PREDICTION = "health", UNIT_ABSORB_AMOUNT_CHANGED = "health",
-    UNIT_POWER_UPDATE = "power", UNIT_MAXPOWER = "power", UNIT_DISPLAYPOWER = "power",
+    UNIT_POWER_UPDATE = "power", UNIT_POWER_FREQUENT = "power", UNIT_MAXPOWER = "power", UNIT_DISPLAYPOWER = "power",
     UNIT_PORTRAIT_UPDATE = "portrait", UNIT_MODEL_CHANGED = "portrait",
 }
 
@@ -514,6 +514,27 @@ local function onPoll(ev, elapsed)
     ev.wait = 0
     if ev.frame:IsVisible() then updateBarsAndTexts(ev.frame) end
 end
+
+-- Your own (and your pet's) power regenerates on the client between the
+-- server's ticks without any event; Blizzard's frames poll it every frame
+-- ("frequentUpdates"). Same here, so energy and mana run up point by point.
+local POWER_EVERY = 0.03
+local POWER_UNITS = { player = true, pet = true, vehicle = true }
+local powerTicker = CreateFrame("Frame")
+local powerWait = 0
+powerTicker:SetScript("OnUpdate", function(_, elapsed)
+    powerWait = powerWait + elapsed
+    if powerWait < POWER_EVERY then return end
+    powerWait = 0
+    for _, list in pairs(UF.byKey) do
+        for _, f in ipairs(list) do
+            if POWER_UNITS[f.unit] and not f.realUnit and f:IsVisible() and f.powerBar and f.powerBar:IsShown() then
+                UF.UpdatePower(f)
+                UF.UpdateTexts(f)
+            end
+        end
+    end
+end)
 
 local function wireEvents(f)
     local ev = CreateFrame("Frame")

@@ -9,6 +9,8 @@
   combo points, soul shards, chi, arcane charges, essence) is hidden meanwhile; untick "Hide
   Blizzard class bar" to keep it. The row sits directly on the frame; a cast bar (and auras) on
   the same side move further out to make room.
+- Your own power (energy, mana, rage ...) and your pet's now run up smoothly point by point, as
+  on Blizzard's frames, instead of jumping every few seconds.
 
 ## 0.11.0
 - **Retail (Midnight 12.x) support:** the same addon now also loads in Retail WoW (one download
