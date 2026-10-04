@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.0
 - Class power on the player frame (new "Class power" tab): combo points (rogue, druid in cat
   form; in Forever on your target, as Classic does it), and in Retail holy power, soul shards,
   chi (Windwalker), arcane charges (Arcane) and essence, as a row of points above or below the

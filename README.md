@@ -51,7 +51,7 @@ tools/      Smoke-Test und Paket-Skript
 | `/luf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/luf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.11.0)
+## Stand (0.12.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4), die Begleiter und Ziele der Gruppenmitglieder, Main Tanks und Main Assists
@@ -66,6 +66,9 @@ tools/      Smoke-Test und Paket-Skript
   und `[xppet] [percxppet]`.
 - **Leisten:** Lebens- und Ressourcenbalken (Farbe nach Klasse, Reaktion, Gesundheit oder fest),
   3D/2D-Portrait, Zauberleiste für Spieler, Ziel und Gruppe, auch bei Gegnern.
+  Energie und Mana laufen flüssig hoch; in Forever zeigt ein Funke die 5-Sekunden-Regel.
+- **Klassenressource** am Spieler-Frame: Combo-Punkte, in Retail auch Holy Power, Seelensplitter,
+  Chi, Arkane Ladungen und Essenz.
 - **15 eigene Leisten-Texturen** ohne Streifen, dazu Blizzard/Raid/Flat.
   Übersicht: [docs/textures.png](docs/textures.png)
 - **Buffs und Debuffs** für Spieler, Begleiter, Ziel, Gruppe und Gruppen-Begleiter, auch im Kampf.
