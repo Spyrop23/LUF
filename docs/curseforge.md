@@ -1,13 +1,8 @@
 # Lizzarick's Unit Frames
 
-**Luna-style unit frames for World of Warcraft: Forever and Retail (Midnight)**, no libraries
-needed. One download for both games.
+**Luna-style unit frames for World of Warcraft: Forever and Retail (Midnight)**, no libraries needed. One download for both games.
 
-Luna Unit Frames can't run on WoW: Forever or Midnight. Both are modern clients with the new
-addon restrictions (secret values, no combat log). Lizzarick's Unit Frames brings back Luna's
-look and its options menu, rebuilt from scratch so it keeps working in combat. In Retail it
-knows the Retail classes and power types; Classic-only options (pet happiness, pet XP, master
-looter) are hidden there.
+Luna Unit Frames can't run on WoW: Forever or Midnight. Both are modern clients with the new addon restrictions (secret values, no combat log). Lizzarick's Unit Frames brings back Luna's look and its options menu, rebuilt from scratch so it keeps working in combat. In Retail it knows the Retail classes and power types; Classic-only options (pet happiness, pet XP, master looter) are hidden there.
 
 ![All frames in config mode](https://raw.githubusercontent.com/Spyrop23/LUF/main/docs/screenshot-frames.jpg)
 
@@ -20,6 +15,8 @@ looter) are hidden there.
 
 ## Bars and texts
 - Health, power and XP bars (player and pet), 3D/2D portrait, cast bars for player, target, focus and party
+- Your power runs up smoothly; in Forever a spark on the mana bar shows the five second rule
+- Class power on the player frame: combo points, and in Retail holy power, soul shards, chi, arcane charges and essence
 - 15 smooth bar textures of our own
 - Health coloured by class, reaction, health gradient or happiness (hunter pets: red/yellow/green)
 - Incoming heals as in Luna (your own dark green, others light green) plus absorb shields
@@ -29,17 +26,13 @@ looter) are hidden there.
 ## Auras
 - Buffs and debuffs, also in combat, with tooltip, time left, stacks and a debuff border by type
 - Debuffs can be larger than buffs; position, size, count and spacing are adjustable
-- **Filter lists** as in Luna: search auras by name or spell ID (the rank is shown), build lists,
-  export and import them, then hide those auras or show only them
+- **Filter lists** as in Luna: search auras by name or spell ID (the rank is shown), build lists, export and import them, then hide those auras or show only them
 
 ## Squares, borders and indicators
-- **Squares:** nine small indicators per frame. Aggro, buffs and debuffs from a list or filter, your
-  own buffs, buffs you can cast, dispellable debuffs (coloured by type), missing buffs. As a
-  coloured square or the spell icon, up to 8 icons per square, optional timer
+- **Squares:** nine small indicators per frame. Aggro, buffs and debuffs from a list or filter, your own buffs, buffs you can cast, dispellable debuffs (coloured by type), missing buffs. As a coloured square or the spell icon, up to 8 icons per square, optional timer
 - **Borders:** on mouseover, on aggro and on debuff (the ones you can dispel, or all), coloured by type
 - **Highlight:** the frame lights up on mouseover, as your target, or tinted by debuff type
-- **Indicators:** raid target mark, class, leader, raid assistant, main tank, main assist, master
-  looter, PvP, incoming resurrection, role (tank/healer/damage), elite dragon, combat/resting icon
+- **Indicators:** raid target mark, class, leader, raid assistant, main tank, main assist, master looter, PvP, incoming resurrection, role (tank/healer/damage), elite dragon, combat/resting icon
 
 ## Options
 ![The options menu](https://raw.githubusercontent.com/Spyrop23/LUF/main/docs/screenshot-options.jpg)
@@ -51,6 +44,4 @@ looter) are hidden there.
 - `/luf` opens the menu, as do the minimap button and the addon compartment
 
 ## Limits of WoW: Forever
-Some values are kept secret by the game in combat. The addon never works around this. It lets
-the game draw those values itself. That is why a few Luna extras are not possible, such as
-calculated heal tags or single incoming heals.
+Some values are kept secret by the game in combat. The addon never works around this. It lets the game draw those values itself. That is why a few Luna extras are not possible, such as calculated heal tags or single incoming heals.
