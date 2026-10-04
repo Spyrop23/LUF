@@ -183,6 +183,9 @@ local function unitTabs(key)
             b:Dropdown("Position", ns.ClassPower.POSITIONS, p("classPower.position"))
             b:Slider("Height", 3, 20, 1, p("classPower.height"))
             b:Slider("Space between points", 0, 10, 1, p("classPower.spacing"))
+            local ghc, shc = p("classPower.hideBlizzard")
+            b:Check("Hide Blizzard class bar (holy power, combo points ...)",
+                blizzardToggle(ghc, shc, "classpower", "Blizzard's class bar"))
         end)
     end
 
@@ -564,6 +567,9 @@ addPage("blizzard", "Hide Blizzard", function(b)
     local g, s = unitPath("player", "castBar.hideBlizzard")
     b:Check("Cast bar (while our player cast bar is on)",
         blizzardToggle(g, s, "playercast", "Blizzard's cast bar"))
+    local gc, sc = unitPath("player", "classPower.hideBlizzard")
+    b:Check("Class bar: holy power, combo points ... (while our class power row is on)",
+        blizzardToggle(gc, sc, "classpower", "Blizzard's class bar"))
 end)
 
 addPage("tags", "Tags", function(b)

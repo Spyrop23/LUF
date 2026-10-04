@@ -5,7 +5,9 @@
   form; in Forever on your target, as Classic does it), and in Retail holy power, soul shards,
   chi (Windwalker), arcane charges (Arcane) and essence, as a row of points above or below the
   frame. Works in combat: every point fills itself from the game's value. Height and spacing
-  adjustable. (Death Knight runes are not included yet.)
+  adjustable. (Death Knight runes are not included yet.) Blizzard's own class bar (holy power,
+  combo points, soul shards, chi, arcane charges, essence) is hidden meanwhile; untick "Hide
+  Blizzard class bar" to keep it.
 
 ## 0.11.0
 - **Retail (Midnight 12.x) support:** the same addon now also loads in Retail WoW (one download

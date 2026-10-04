@@ -81,6 +81,14 @@ local SILENCER = {
     -- The player cast bar: moved to the hidden parent as a whole. Nothing
     -- on it is written or called, which would taint its secret cast values.
     playercast = function() silenceWhole(_G.PlayerCastingBarFrame) end,
+    -- Retail's class resource bars under the player frame (our Class power
+    -- row replaces them). Death Knight runes stay: we do not show those yet.
+    classpower = function()
+        for _, name in ipairs({ "PaladinPowerBarFrame", "RogueComboPointBarFrame", "DruidComboPointBarFrame",
+            "WarlockPowerFrame", "MonkHarmonyBarFrame", "MageArcaneChargesFrame", "EssencePlayerFrame" }) do
+            silenceWhole(_G[name])
+        end
+    end,
     raid = function()
         silenceWhole(_G.CompactRaidFrameContainer)
         silenceWhole(_G.CompactRaidFrameManager)
@@ -150,5 +158,9 @@ function ns:HideBlizzard(key)
     if db.hideBlizzard then silence(key) end
     if key == "player" and db.castBar.enabled and db.castBar.hideBlizzard then
         silence("playercast")
+    end
+    local cp = key == "player" and db.classPower
+    if cp and cp.enabled and cp.hideBlizzard then
+        silence("classpower")
     end
 end

@@ -120,6 +120,7 @@ TargetFrame = newWidget("Frame", "TargetFrame")
 TargetFrame.totFrame = newWidget("Frame")
 newWidget("Frame", "PetFrame")
 newWidget("Frame", "FocusFrame")
+newWidget("Frame", "PaladinPowerBarFrame")
 newWidget("Frame", "PartyFrame")
 newWidget("Frame", "PlayerCastingBarFrame")
 UISpecialFrames = {}
@@ -603,6 +604,7 @@ end
 UnitClass, UnitPowerMax, UnitPower = unitClass, powerMax, unitPower
 ns.ClassPower.Update(ns.UF.frames.player)
 assert(not cpf.shown, "back to warrior")
+assert(ns:IsBlizzardHidden("classpower") and PaladinPowerBarFrame.shown == false, "Blizzard's class bar hidden")
 print("class power ok")
 
 -- combat text: damage, crit, heal, miss; secret amounts go straight to the text
