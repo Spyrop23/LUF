@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.0
 - **Retail (Midnight 12.x) support:** the same addon now also loads in Retail WoW (one download
   for both games, the client picks the right interface version). Retail classes (Death Knight,
   Demon Hunter, Monk, Evoker) and power types (runic power, astral power, maelstrom, insanity,
