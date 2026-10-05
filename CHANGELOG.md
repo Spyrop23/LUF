@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.0
 - Fonts, as in Luna: General → "Font" offers the game's fonts (Friz Quadrata, Arial Narrow, Skurri, Morpheus), seven free fonts that ship with the addon (Aldrich, Bangers, Faster One, Iceland, Inconsolata, Trade Winds, Vera Serif) and every font another addon registered with LibSharedMedia. "Font outline" adds an outline to the frame texts. Thanks to **LagaerthaTV** for the idea!
 - Tag offsets are back: every text (left, center, right) on every bar has an X and Y offset on the Tags tab. Thanks to **lovemefaster**!
 - Elite/rare dragon: "Mirror" turns it around, plus an X/Y position. Thanks to **lovemefaster**!

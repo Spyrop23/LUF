@@ -51,7 +51,7 @@ tools/      Smoke-Test und Paket-Skript
 | `/luf reset` | aktuelles Profil auf Standard zurücksetzen |
 | `/luf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.12.0)
+## Stand (0.13.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4), die Begleiter und Ziele der Gruppenmitglieder, Main Tanks und Main Assists
@@ -70,6 +70,7 @@ tools/      Smoke-Test und Paket-Skript
 - **Klassenressource** am Spieler-Frame: Combo-Punkte, in Retail auch Holy Power, Seelensplitter,
   Chi, Arkane Ladungen und Essenz.
 - **15 eigene Leisten-Texturen** ohne Streifen, dazu Blizzard/Raid/Flat.
+- **Schriften** wie bei Luna: die des Spiels, sieben mitgelieferte freie Schriften und alle aus LibSharedMedia; optional mit Umriss. Texte mit X/Y-Offset.
   Übersicht: [docs/textures.png](docs/textures.png)
 - **Buffs und Debuffs** für Spieler, Begleiter, Ziel, Gruppe und Gruppen-Begleiter, auch im Kampf.
   Sie laufen über Blizzards Aura-Container, mit Tooltip, Restzeit, Stapelzahl und Debuff-Rahmen
