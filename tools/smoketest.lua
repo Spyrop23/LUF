@@ -761,6 +761,18 @@ ns.SetColor("reaction.4", 0, 0, 1)
 assert(ns.colors.reaction[4][3] == 1, "reaction colour override")
 ns.ResetColors()
 assert(ns.colors.class.WARRIOR[1] == 0.78 and ns.colors.reaction[4][1] == 0.9, "colours reset")
+-- incoming heal colours from the Colors page
+do
+    local f = ns.UF.frames.player
+    ns.SetColor("heal.own", 0.1, 0.2, 0.9)
+    ns.UF.Layout(f)
+    if f.heal then
+        assert(f.heal.own.statusColor == nil or f.heal.own.statusColor[3] == 0.9, "own heals use the chosen colour")
+    end
+    assert(ns.colors.heal.own[3] == 0.9, "own heal colour set")
+    ns.ResetColors()
+    assert(ns.colors.heal.own[3] == 0.10, "own heal colour reset")
+end
 print("colors ok")
 
 -- fonts: the client's, the shipped ones; tag texts with X/Y offset

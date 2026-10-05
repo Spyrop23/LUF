@@ -15,11 +15,7 @@ local _, ns = ...
 local HP = {}
 ns.HealPrediction = HP
 
-local COLORS = {
-    own    = { 0.10, 0.45, 0.10 },
-    others = { 0.20, 0.90, 0.20 },
-    absorb = { 0.85, 0.95, 1.00 },
-}
+-- colours: ns.colors.heal (own, others, absorb), adjustable on the Colors page
 
 local function newBar(parent)
     local b = CreateFrame("StatusBar", nil, parent)
@@ -75,7 +71,7 @@ function HP.Layout(f, barWidth)
     for _, key in ipairs({ "own", "others", "absorb" }) do
         local b = h[key]
         b:SetStatusBarTexture(texture)
-        local c = COLORS[key]
+        local c = ns.colors.heal[key]
         b:SetStatusBarColor(c[1], c[2], c[3], db.alpha)
         b:ClearAllPoints()
         b:SetPoint("TOPLEFT", previous, "TOPRIGHT")

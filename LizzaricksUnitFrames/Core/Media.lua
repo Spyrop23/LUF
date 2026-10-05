@@ -191,6 +191,12 @@ ns.colors = {
         { 0.00, 0.60, 0.10 },
         { 0.00, 0.60, 0.10 },
     },
+    -- incoming heals and absorbs on the health bar (Luna colours)
+    heal = {
+        own    = { 0.10, 0.45, 0.10 },
+        others = { 0.20, 0.90, 0.20 },
+        absorb = { 0.85, 0.95, 1.00 },
+    },
     static  = { 0.20, 0.90, 0.20 },
     cast    = { 1.00, 0.70, 0.30 },
     channel = { 0.25, 0.25, 1.00 },
