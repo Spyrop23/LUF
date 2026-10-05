@@ -67,6 +67,13 @@ local UNIT_EVENTS = {
 local BAR_KEYS = { "healthBar", "powerBar", "emptyBar", "xpBar" }
 UF.BAR_KEYS = BAR_KEYS
 
+-- Position of a bar in the stack (1 = top), unset: the usual order.
+local DEFAULT_ORDER = { healthBar = 1, powerBar = 2, emptyBar = 3, xpBar = 4 }
+function UF.BarOrder(db, key)
+    local bdb = db[key]
+    return bdb and bdb.order or DEFAULT_ORDER[key]
+end
+
 -- ------------------------------------------------------------ regions --
 
 local function createText(parent)
@@ -261,6 +268,17 @@ function UF.Layout(f)
             bar:Hide()
         end
     end
+    -- Luna's bar order: lower numbers sit higher; ties keep the usual order
+    local rank = {}
+    for i, key in ipairs(BAR_KEYS) do rank[key] = i end
+    table.sort(shown, function(a, b)
+        local oa, ob = UF.BarOrder(db, a), UF.BarOrder(db, b)
+        if oa ~= ob then return oa < ob end
+        -- same number: the bar you moved goes first
+        local ma, mb = db[a].order ~= nil, db[b].order ~= nil
+        if ma ~= mb then return ma end
+        return rank[a] < rank[b]
+    end)
     local height = db.height - 2 * BORDER - (#shown - 1) * BORDER
     local y = -BORDER
     for _, key in ipairs(shown) do

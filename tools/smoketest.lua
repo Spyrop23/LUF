@@ -779,6 +779,21 @@ htags.leftX, htags.leftY, htags.rightY = nil, nil, nil
 ns.UF.Layout(ns.UF.frames.player)
 print("fonts and tag offsets ok")
 
+-- bar order: the empty bar moved to the top of the target frame
+do
+    local tdb, tf = ns.db.units.target, ns.UF.frames.target
+    tdb.emptyBar.enabled = true
+    ns.UF.Layout(tf)
+    assert(tf.healthBar.point[5] == -1 and tf.emptyBar.point[5] < tf.powerBar.point[5], "usual order: health, power, empty")
+    tdb.emptyBar.order = 1
+    ns.UF.Layout(tf)
+    assert(tf.emptyBar.point[5] == -1, "empty bar on top")
+    assert(tf.healthBar.point[5] < -1 and tf.powerBar.point[5] < tf.healthBar.point[5], "health and power below it")
+    tdb.emptyBar.order, tdb.emptyBar.enabled = nil, false
+    ns.UF.Layout(tf)
+    print("bar order ok")
+end
+
 -- indicators: raid mark (secret index), leader (secret bool), master looter, pvp, elite
 local tgf = ns.UF.frames.target
 ns.Indicators.Update(tgf)
