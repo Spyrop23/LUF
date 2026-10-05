@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.1
 - Fonts: a text could stay empty with a font that was not loaded yet (e.g. from another addon) until the outline was toggled. Fonts are now loaded at login and set once more shortly after login and after every font change.
 - Bar order, as in Luna: every bar tab (health, power, empty, experience) has "Position (1 = top)", e.g. the empty bar above the health and power bars. Thanks to **fmjrrmg** for the idea!
 
