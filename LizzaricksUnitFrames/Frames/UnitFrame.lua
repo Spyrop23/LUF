@@ -73,7 +73,7 @@ local function createText(parent)
     local t = {}
     for _, side in ipairs({ "left", "center", "right" }) do
         local fs = parent:CreateFontString(nil, "OVERLAY")
-        fs:SetFont(ns.media.font, 10, "")
+        ns.SetFont(fs, 10, "")
         fs:SetShadowOffset(1, -1)
         fs:SetShadowColor(0, 0, 0, 1)
         fs:SetWordWrap(false)
@@ -280,18 +280,23 @@ function UF.Layout(f)
 
         local tdb = db.tags[key]
         local t = bar.text
+        -- X/Y offset per text, as Luna's tag offsets
+        local function off(side) return tdb[side .. "X"] or 0, tdb[side .. "Y"] or 0 end
+        local lx, ly = off("left")
+        local cx, cy = off("center")
+        local rx, ry = off("right")
         t.left:ClearAllPoints()
-        t.left:SetPoint("LEFT", bar, "LEFT", 2, 0)
+        t.left:SetPoint("LEFT", bar, "LEFT", 2 + lx, ly)
         t.right:ClearAllPoints()
-        t.right:SetPoint("RIGHT", bar, "RIGHT", -2, 0)
+        t.right:SetPoint("RIGHT", bar, "RIGHT", -2 + rx, ry)
         t.center:ClearAllPoints()
-        t.center:SetPoint("CENTER", bar, "CENTER", 0, 0)
+        t.center:SetPoint("CENTER", bar, "CENTER", cx, cy)
         for _, side in ipairs({ "left", "center", "right" }) do
-            t[side]:SetFont(ns.media.font, tdb.size, "")
+            ns.SetFont(t[side], tdb.size, ns.FontFlags())
             t[side]:SetHeight(h)
         end
         -- left and right share the bar; the left text gives way first
-        t.left:SetPoint("RIGHT", t.right, "LEFT", -4, 0)
+        t.left:SetPoint("RIGHT", t.right, "LEFT", -4, ly - ry)
     end
 
     if f.happiness then

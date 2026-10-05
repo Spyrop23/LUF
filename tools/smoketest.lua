@@ -204,7 +204,10 @@ local raidMode = false
 function IsInRaid() return raidMode end
 function IsInGroup() return true end   -- party1 exists
 function IsResting() return true end
-function Widget:SetAtlas(a) self.atlas = a end
+-- an atlas brings its own corners (UL, LL, UR, LR)
+function Widget:SetAtlas(a) self.atlas = a; self.tc = { 0.1, 0.2, 0.1, 0.8, 0.9, 0.2, 0.9, 0.8 } end
+function Widget:GetTexCoord() if self.tc then return unpack(self.tc) end end
+function Widget:SetTexCoord(...) self.tc = { ... } end
 function Widget:CreateAnimationGroup()
     local g = newWidget("AnimationGroup")
     function g:CreateAnimation() return newWidget("Animation") end
@@ -756,11 +759,35 @@ ns.ResetColors()
 assert(ns.colors.class.WARRIOR[1] == 0.78 and ns.colors.reaction[4][1] == 0.9, "colours reset")
 print("colors ok")
 
+-- fonts: the client's, the shipped ones; tag texts with X/Y offset
+assert(#ns.FontList() >= 12 and ns.Font() == STANDARD_TEXT_FONT or ns.Font():find("FRIZQT"), "default font")
+ns.db.font = "Bangers"
+assert(ns.Font():find("Media\\Fonts\\Bangers.ttf"), "chosen font: " .. ns.Font())
+ns.db.font = "Nope"
+assert(not ns.Font():find("Bangers"), "unknown font falls back")
+ns.db.font = "Default"
+local htags = ns.db.units.player.tags.healthBar
+htags.leftX, htags.leftY, htags.rightY = 5, 3, -2
+ns.UF.Layout(ns.UF.frames.player)
+local ht = ns.UF.frames.player.healthBar.text
+assert(ht.right.point[5] == -2, "right text Y offset")
+htags.leftX, htags.leftY, htags.rightY = nil, nil, nil
+ns.UF.Layout(ns.UF.frames.player)
+print("fonts and tag offsets ok")
+
 -- indicators: raid mark (secret index), leader (secret bool), master looter, pvp, elite
 local tgf = ns.UF.frames.target
 ns.Indicators.Update(tgf)
 assert(tgf.indicators.icons.raidTarget.shown and tgf.indicators.icons.raidTarget.cell == 8, "raid mark")
 assert(tgf.indicators.icons.elite.shown and tgf.indicators.icons.elite.atlas:find("Winged"), "elite dragon")
+local eliteTex, eliteDb = tgf.indicators.icons.elite, ns.db.units.target.indicators.elite
+assert(eliteDb.side == "RIGHT" and eliteTex.tc[1] == 0.9 and eliteTex.tc[5] == 0.1, "right side: dragon mirrored within the atlas")
+eliteDb.flip, eliteDb.x, eliteDb.y = true, 7, -3
+ns.Indicators.Layout(tgf)
+assert(eliteTex.tc[1] == 0.1, "mirror option turns it back")
+assert(eliteTex.point[4] == 7 and eliteTex.point[5] == -3, "elite offset")
+eliteDb.flip, eliteDb.x, eliteDb.y = nil, nil, nil
+ns.Indicators.Layout(tgf)
 ns.Indicators.Update(p1f)
 assert(p1f.indicators.icons.leader.alpha == 1, "party1 leads")
 ns.Indicators.Update(plf)

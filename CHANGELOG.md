@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+- Fonts, as in Luna: General → "Font" offers the game's fonts (Friz Quadrata, Arial Narrow, Skurri, Morpheus), seven free fonts that ship with the addon (Aldrich, Bangers, Faster One, Iceland, Inconsolata, Trade Winds, Vera Serif) and every font another addon registered with LibSharedMedia. "Font outline" adds an outline to the frame texts. Thanks to **LagaerthaTV** for the idea!
+- Tag offsets are back: every text (left, center, right) on every bar has an X and Y offset on the Tags tab. Thanks to **lovemefaster**!
+- Elite/rare dragon: "Mirror" turns it around, plus an X/Y position. Thanks to **lovemefaster**!
+
 ## 0.12.0
 - Class power on the player frame (new "Class power" tab): combo points (rogue, druid in cat form; in Forever on your target, as Classic does it), and in Retail holy power, soul shards, chi (Windwalker), arcane charges (Arcane) and essence, as a row of points above or below the frame. Works in combat: every point fills itself from the game's value. Height and spacing adjustable. (Death Knight runes are not included yet.) Blizzard's own class bar (holy power, combo points, soul shards, chi, arcane charges, essence) is hidden meanwhile; untick "Hide Blizzard class bar" to keep it. The row sits directly on the frame; a cast bar (and auras) on the same side move further out to make room.
 - Your own power (energy, mana, rage ...) and your pet's now run up smoothly point by point, as on Blizzard's frames, instead of jumping every few seconds.

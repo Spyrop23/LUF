@@ -42,6 +42,75 @@ function ns.Texture()
     return ns.textures[1][2]
 end
 
+-- Fonts, as in Luna: the client's own, the free ones that ship with the
+-- addon (licences in Media\Fonts\LICENSE.txt), and any font another addon
+-- registered with LibSharedMedia (not needed, only used when present).
+local FONTS = MEDIA .. "Fonts\\"
+local DEFAULT_FONT = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
+ns.fonts = {
+    { "Default", DEFAULT_FONT },
+    { "Friz Quadrata", "Fonts\\FRIZQT__.TTF" },
+    { "Arial Narrow", "Fonts\\ARIALN.TTF" },
+    { "Skurri", "Fonts\\SKURRI.TTF" },
+    { "Morpheus", "Fonts\\MORPHEUS.TTF" },
+    { "Aldrich", FONTS .. "Aldrich.ttf" },
+    { "Bangers", FONTS .. "Bangers.ttf" },
+    { "Faster One", FONTS .. "FasterOne.ttf" },
+    { "Iceland", FONTS .. "Iceland.ttf" },
+    { "Inconsolata", FONTS .. "Inconsolata.ttf" },
+    { "Trade Winds", FONTS .. "TradeWinds.ttf" },
+    { "Vera Serif", FONTS .. "VeraSerif.ttf" },
+}
+
+local function sharedMedia()
+    local stub = _G.LibStub
+    return stub and stub("LibSharedMedia-3.0", true)
+end
+
+-- Every font to choose from: { name, path }.
+function ns.FontList()
+    local list, seen = {}, {}
+    for _, f in ipairs(ns.fonts) do
+        table.insert(list, f)
+        seen[f[1]] = true
+    end
+    local lsm = sharedMedia()
+    if lsm then
+        local ok, names = pcall(lsm.List, lsm, "font")
+        for _, name in ipairs(ok and names or {}) do
+            if not seen[name] then
+                local path = lsm:Fetch("font", name, true)
+                if path then table.insert(list, { name, path }) seen[name] = true end
+            end
+        end
+    end
+    return list
+end
+
+function ns.Font()
+    local want = ns.db and ns.db.font
+    if want and want ~= "Default" then
+        for _, f in ipairs(ns.FontList()) do
+            if f[1] == want then return f[2] end
+        end
+    end
+    return DEFAULT_FONT
+end
+
+-- Outline for the frame texts (tags, cast bar), as chosen on the General page.
+function ns.FontFlags()
+    return ns.db and ns.db.fontOutline and "OUTLINE" or ""
+end
+
+-- Sets the chosen font; falls back to the client's font if the file does
+-- not load (a missing shared-media font, a client without that file).
+function ns.SetFont(fs, size, flags)
+    local ok, set = pcall(fs.SetFont, fs, ns.Font(), size, flags or "")
+    if not (ok and set) then
+        fs:SetFont(DEFAULT_FONT, size, flags or "")
+    end
+end
+
 ns.colors = {
     class = {
         HUNTER  = { 0.67, 0.83, 0.45 },

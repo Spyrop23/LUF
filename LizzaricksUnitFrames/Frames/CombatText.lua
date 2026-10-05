@@ -57,7 +57,7 @@ function CT.Show(f, event, flag, amount)
         ok = true
     end
     if not ok then return end
-    fs:SetFont(ns.media.font, crit and math.floor(db.size * 1.5) or db.size, "OUTLINE")
+    ns.SetFont(fs, crit and math.floor(db.size * 1.5) or db.size, "OUTLINE")
     fs:SetTextColor(c[1], c[2], c[3])
     fs:SetAlpha(1)
     fs:Show()
@@ -70,7 +70,7 @@ function CT.Create(f)
     holder:SetAllPoints(f)
     holder:SetFrameLevel(f:GetFrameLevel() + 13)
     holder.text = holder:CreateFontString(nil, "OVERLAY")
-    holder.text:SetFont(ns.media.font, 20, "OUTLINE")
+    ns.SetFont(holder.text, 20, "OUTLINE")
     holder.text:Hide()
     holder.age = 0
     f.combatText = holder

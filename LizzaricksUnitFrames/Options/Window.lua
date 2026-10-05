@@ -92,6 +92,13 @@ addPage("general", "General", function(b)
         for _, t in ipairs(ns.textures) do table.insert(list, { t[1], t[1] }) end
         return list
     end, function() return ns.db.texture end, function(v) ns.db.texture = v; ns:ApplyAll() end)
+    b:Dropdown("Font", function()
+        local list = {}
+        for _, f in ipairs(ns.FontList()) do table.insert(list, { f[1], f[1] }) end
+        return list
+    end, function() return ns.db.font or "Default" end, function(v) ns.db.font = v; ns:ApplyAll() end)
+    b:Check("Font outline", function() return ns.db.fontOutline end,
+        function(v) ns.db.fontOutline = v; ns:ApplyAll() end)
     b:Slider("Frame background alpha", 0, 1, 0.05, function() return ns.db.backgroundAlpha end,
         function(v) ns.db.backgroundAlpha = v; ns:ApplyAll() end)
     b:Header("Help")
@@ -350,6 +357,11 @@ local function unitTabs(key)
             b:Text("A dragon on the side of the frame for elite, rare and boss units.", 16)
             b:Check("Enabled", p("indicators.elite.enabled"))
             b:Dropdown("Side", ns.Indicators.SIDES, p("indicators.elite.side"))
+            b:Check("Mirror (turn the dragon around)", p("indicators.elite.flip"))
+            local gex, sex = p("indicators.elite.x")
+            local gey, sey = p("indicators.elite.y")
+            b:Slider("X position", -100, 100, 1, function() return gex() or 0 end, sex)
+            b:Slider("Y position", -100, 100, 1, function() return gey() or 0 end, sey)
             local ges, ses = p("indicators.elite.scale")
             b:Slider("Size (x frame height)", 0.5, 3, 0.1, ges, ses, "%.1f")
             if ns.Status and ns.Status.supported[key] then
@@ -403,9 +415,15 @@ local function unitTabs(key)
             if bar ~= "xpBar" or ns.UF.XP_SUPPORTED[key] then
                 b:Header(BAR_LABELS[bar])
                 b:Slider("Font size", 5, 24, 1, p("tags." .. bar .. ".size"))
-                b:Edit("Left", p("tags." .. bar .. ".left"))
-                b:Edit("Center", p("tags." .. bar .. ".center"))
-                b:Edit("Right", p("tags." .. bar .. ".right"))
+                for _, side in ipairs({ { "left", "Left" }, { "center", "Center" }, { "right", "Right" } }) do
+                    local base = "tags." .. bar .. "." .. side[1]
+                    b:Edit(side[2], p(base))
+                    -- offsets are unset (0) until moved
+                    local gx, sx = p(base .. "X")
+                    local gy, sy = p(base .. "Y")
+                    b:Slider(side[2] .. " X offset", -50, 50, 1, function() return gx() or 0 end, sx)
+                    b:Slider(side[2] .. " Y offset", -20, 20, 1, function() return gy() or 0 end, sy)
+                end
             end
         end
         b:Text("Texts use tags like [name] or [smarthealth]; see the Tags page.", 16)

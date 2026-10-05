@@ -111,10 +111,11 @@ function IN.Layout(f)
     local h = f.db.height * (d.scale or 1.6)
     e:ClearAllPoints()
     e:SetSize(h * 1.2, h)
+    local x, y = d.x or 0, d.y or 0
     if d.side == "LEFT" then
-        e:SetPoint("CENTER", f, "LEFT", 0, 0)
+        e:SetPoint("CENTER", f, "LEFT", x, y)
     else
-        e:SetPoint("CENTER", f, "RIGHT", 0, 0)
+        e:SetPoint("CENTER", f, "RIGHT", x, y)
     end
     IN.Update(f)
 end
@@ -232,8 +233,15 @@ local function updateElite(tex, unit, d)
     local atlas = ns.CanRead(class) and ELITE[class]
     if not atlas then tex:Hide() return end
     tex:SetAtlas(atlas)
-    -- Blizzard's art faces left; mirror it for the right side
-    if d.side == "LEFT" then tex:SetTexCoord(0, 1, 0, 1) else tex:SetTexCoord(1, 0, 0, 1) end
+    -- Blizzard's art faces left; mirror it for the right side, and once more
+    -- when "Mirror" is ticked. SetAtlas gives the atlas' own corners; swapping
+    -- left and right of those mirrors the picture without leaving the atlas.
+    local mirror = d.side ~= "LEFT"
+    if d.flip then mirror = not mirror end
+    if mirror then
+        local ulx, uly, llx, lly, urx, ury, lrx, lry = tex:GetTexCoord()
+        if urx then tex:SetTexCoord(urx, ury, lrx, lry, ulx, uly, llx, lly) end
+    end
     tex:Show()
 end
 

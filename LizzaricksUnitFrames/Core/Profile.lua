@@ -115,6 +115,8 @@ local noPortrait = { portrait = { enabled = false } }
 ns.defaults = {
     locked = true,
     texture = "Smooth",
+    font = "Default",
+    fontOutline = false,
     backgroundAlpha = 0.8,
     units = {
         player = unitDefaults({

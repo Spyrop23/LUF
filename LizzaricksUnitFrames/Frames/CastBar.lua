@@ -195,7 +195,7 @@ function CB.Create(f)
     cb.name = cb:CreateFontString(nil, "OVERLAY")
     cb.time = cb:CreateFontString(nil, "OVERLAY")
     for _, fs in ipairs({ cb.name, cb.time }) do
-        fs:SetFont(ns.media.font, 9, "")
+        ns.SetFont(fs, 9, "")
         fs:SetShadowOffset(1, -1)
         fs:SetWordWrap(false)
     end
@@ -257,6 +257,6 @@ function CB.Layout(f)
     cb.icon:SetPoint("RIGHT", cb, "LEFT", -1, 0)
 
     local size = math.max(6, math.min(14, h - 1))
-    cb.name:SetFont(ns.media.font, size, "")
-    cb.time:SetFont(ns.media.font, size, "")
+    ns.SetFont(cb.name, size, ns.FontFlags())
+    ns.SetFont(cb.time, size, ns.FontFlags())
 end

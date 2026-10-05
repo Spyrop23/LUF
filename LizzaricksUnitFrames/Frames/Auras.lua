@@ -143,7 +143,7 @@ local function initializer(db, debuffs, size)
         -- Fonts before the engine is told about the strings: an unstyled
         -- FontString errors inside the engine.
         local stacks = button:CreateFontString(nil, "OVERLAY")
-        stacks:SetFont(ns.media.font, math.max(7, math.floor(size * 0.5)), "OUTLINE")
+        ns.SetFont(stacks, math.max(7, math.floor(size * 0.5)), "OUTLINE")
         stacks:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, 0)
         try(button, "SetApplicationCount", stacks, {})
 
@@ -152,14 +152,14 @@ local function initializer(db, debuffs, size)
             local where = db.durationPosition or "BELOW"
             if where == "INSIDE" then
                 -- in the middle of the icon, a bit larger, above the swipe
-                text:SetFont(ns.media.font, math.max(7, math.floor(size * 0.5)), "OUTLINE")
+                ns.SetFont(text, math.max(7, math.floor(size * 0.5)), "OUTLINE")
                 text:SetPoint("CENTER", button, "CENTER", 0, 0)
                 text:SetDrawLayer("OVERLAY", 7)
             elseif where == "ABOVE" then
-                text:SetFont(ns.media.font, math.max(6, math.floor(size * 0.45)), "OUTLINE")
+                ns.SetFont(text, math.max(6, math.floor(size * 0.45)), "OUTLINE")
                 text:SetPoint("BOTTOM", button, "TOP", 0, -1)
             else
-                text:SetFont(ns.media.font, math.max(6, math.floor(size * 0.45)), "OUTLINE")
+                ns.SetFont(text, math.max(6, math.floor(size * 0.45)), "OUTLINE")
                 text:SetPoint("TOP", button, "BOTTOM", 0, 1)
             end
             local f = compactFormatter()
@@ -278,7 +278,7 @@ local function signature(db)
         tostring(db.buffs), tostring(db.debuffs), db.size, db.debuffSize, db.spacing, db.groupGap or 4, db.maxBuffs, db.maxDebuffs,
         db.buffFilter, db.debuffFilter, tostring(db.duration), tostring(db.swipe), tostring(db.dispelColors),
         db.buffListMode or "", db.debuffListMode or "", tostring(separate(db)),
-        db.biggerBuffs or 0, db.biggerDebuffs or 0, db.durationPosition or "BELOW",
+        db.biggerBuffs or 0, db.biggerDebuffs or 0, db.durationPosition or "BELOW", ns.Font(),
         ns.Filters and ns.Filters.Get(db.buffList) and ns.Filters.Signature(db.buffList) or "",
         ns.Filters and ns.Filters.Get(db.debuffList) and ns.Filters.Signature(db.debuffList) or "",
     }, ":")

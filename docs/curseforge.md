@@ -17,7 +17,7 @@ Luna Unit Frames can't run on WoW: Forever or Midnight. Both are modern clients 
 - Health, power and XP bars (player and pet), 3D/2D portrait, cast bars for player, target, focus and party
 - Your power runs up smoothly; in Forever a spark on the mana bar shows the five second rule
 - Class power on the player frame: combo points, and in Retail holy power, soul shards, chi, arcane charges and essence
-- 15 smooth bar textures of our own
+- 15 smooth bar textures of our own, 11 fonts (plus any from LibSharedMedia)
 - Health coloured by class, reaction, health gradient or happiness (hunter pets: red/yellow/green)
 - Incoming heals as in Luna (your own dark green, others light green) plus absorb shields
 - An empty bar for extra texts, combat text on the portrait (damage, heals, misses)
