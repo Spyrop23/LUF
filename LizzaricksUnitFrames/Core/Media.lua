@@ -104,11 +104,50 @@ end
 
 -- Sets the chosen font; falls back to the client's font if the file does
 -- not load (a missing shared-media font, a client without that file).
-function ns.SetFont(fs, size, flags)
-    local ok, set = pcall(fs.SetFont, fs, ns.Font(), size, flags or "")
+-- Every font string we gave a font, to set it again later (weak keys).
+local fontStrings = setmetatable({}, { __mode = "k" })
+
+local function apply(fs, size, flags)
+    local ok, set = pcall(fs.SetFont, fs, ns.Font(), size, flags)
     if not (ok and set) then
-        fs:SetFont(DEFAULT_FONT, size, flags or "")
+        fs:SetFont(DEFAULT_FONT, size, flags)
     end
+end
+
+function ns.SetFont(fs, size, flags)
+    flags = flags or ""
+    fontStrings[fs] = { size, flags }
+    apply(fs, size, flags)
+end
+
+-- A font file the client has not loaded yet can leave a font string empty
+-- although the font was set (seen with shared-media fonts: the text came
+-- back only once the outline was toggled). Setting the same font again is
+-- ignored, so every string gets a different font first, then its own.
+function ns.RefreshFonts()
+    for fs, s in pairs(fontStrings) do
+        pcall(fs.SetFont, fs, DEFAULT_FONT, s[1], s[2])
+        apply(fs, s[1], s[2])
+    end
+end
+
+-- Loads every font file once into a hidden string, so it is ready before
+-- the frames use it.
+local preload
+function ns.PreloadFonts()
+    preload = preload or UIParent:CreateFontString(nil, "BACKGROUND")
+    preload:Hide()
+    for _, f in ipairs(ns.FontList()) do
+        if pcall(preload.SetFont, preload, f[2], 12, "") then preload:SetText("Lizzarick") end
+    end
+end
+
+-- Right after login and after a font change: once more a little later,
+-- when the files have loaded.
+function ns.RefreshFontsSoon()
+    if not C_Timer then return end
+    C_Timer.After(0.5, ns.RefreshFonts)
+    C_Timer.After(2, ns.RefreshFonts)
 end
 
 ns.colors = {
@@ -257,3 +296,6 @@ end
 function ns.Hex(c)
     return string.format("|cff%02x%02x%02x", c[1] * 255, c[2] * 255, c[3] * 255)
 end
+
+ns:OnLogin(ns.PreloadFonts)
+ns:RegisterEvent("PLAYER_ENTERING_WORLD", function() ns.RefreshFontsSoon() end)

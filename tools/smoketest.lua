@@ -777,6 +777,20 @@ local ht = ns.UF.frames.player.healthBar.text
 assert(ht.right.point[5] == -2, "right text Y offset")
 htags.leftX, htags.leftY, htags.rightY = nil, nil, nil
 ns.UF.Layout(ns.UF.frames.player)
+-- fonts are set again later (a font file that was not loaded yet leaves the text empty)
+do
+    local fs = ns.UF.frames.player.powerBar.text.left
+    local calls = {}
+    local setFont = fs.SetFont
+    fs.SetFont = function(self, path, size, flags) table.insert(calls, path); return true end
+    ns.db.font = "Bangers"
+    ns.RefreshFonts()
+    assert(#calls == 2 and calls[1] ~= calls[2] and calls[2]:find("Bangers"), "refresh: another font first, then its own")
+    fs.SetFont = setFont
+    ns.db.font = "Default"
+    ns.RefreshFonts()
+    ns.PreloadFonts()
+end
 print("fonts and tag offsets ok")
 
 -- bar order: the empty bar moved to the top of the target frame

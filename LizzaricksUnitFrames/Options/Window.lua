@@ -96,9 +96,9 @@ addPage("general", "General", function(b)
         local list = {}
         for _, f in ipairs(ns.FontList()) do table.insert(list, { f[1], f[1] }) end
         return list
-    end, function() return ns.db.font or "Default" end, function(v) ns.db.font = v; ns:ApplyAll() end)
+    end, function() return ns.db.font or "Default" end, function(v) ns.db.font = v; ns:ApplyAll(); ns.RefreshFontsSoon() end)
     b:Check("Font outline", function() return ns.db.fontOutline end,
-        function(v) ns.db.fontOutline = v; ns:ApplyAll() end)
+        function(v) ns.db.fontOutline = v; ns:ApplyAll(); ns.RefreshFontsSoon() end)
     b:Slider("Frame background alpha", 0, 1, 0.05, function() return ns.db.backgroundAlpha end,
         function(v) ns.db.backgroundAlpha = v; ns:ApplyAll() end)
     b:Header("Help")
