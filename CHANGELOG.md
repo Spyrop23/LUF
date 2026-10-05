@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.2
 - Incoming heal colours on the Colors page: your own heals, heals from others and absorb shields, each with a colour picker (e.g. for red/green colour blindness). Thanks to **snmartino** for the idea!
 
 ## 0.13.1
