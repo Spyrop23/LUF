@@ -234,13 +234,15 @@ local function updateElite(tex, unit, d)
     if not atlas then tex:Hide() return end
     tex:SetAtlas(atlas)
     -- Blizzard's art faces left; mirror it for the right side, and once more
-    -- when "Mirror" is ticked. SetAtlas gives the atlas' own corners; swapping
-    -- left and right of those mirrors the picture without leaving the atlas.
+    -- when "Mirror" is ticked. The corners always come from the atlas data
+    -- (absolute): the client keeps the old coordinates when the same atlas
+    -- is set again, so swapping the current ones flipped it on every update.
     local mirror = d.side ~= "LEFT"
     if d.flip then mirror = not mirror end
-    if mirror then
-        local ulx, uly, llx, lly, urx, ury, lrx, lry = tex:GetTexCoord()
-        if urx then tex:SetTexCoord(urx, ury, lrx, lry, ulx, uly, llx, lly) end
+    local info = C_Texture and C_Texture.GetAtlasInfo and call(C_Texture.GetAtlasInfo, atlas)
+    if type(info) == "table" and info.leftTexCoord then
+        local l, r, t, b = info.leftTexCoord, info.rightTexCoord, info.topTexCoord, info.bottomTexCoord
+        if mirror then tex:SetTexCoord(r, l, t, b) else tex:SetTexCoord(l, r, t, b) end
     end
     tex:Show()
 end
