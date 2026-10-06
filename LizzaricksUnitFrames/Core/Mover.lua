@@ -42,8 +42,9 @@ local function dropOffsets(f)
         local gx, gy = UF.RaidGridOrigin(f.raidGroup or 1)
         return x - (gx - f.db.x), y - (gy - f.db.y)
     end
-    if f.index and f.index > 1 then
-        y = y + (f.index - 1) * (f.db.height + (f.db.spacing or 0))
+    local slot = UF.Slot(f)
+    if slot and slot > 1 then
+        y = y + (slot - 1) * (f.db.height + (f.db.spacing or 0))
     end
     return x, y
 end
@@ -108,7 +109,7 @@ end
 -- Also called by UF.Apply while config mode is on.
 function ns.UnlockFrame(f)
     UF.Unwatch(f)
-    if not f.db.enabled then
+    if not UF.IsActive(f) then
         f:Hide()
         return
     end
@@ -122,6 +123,8 @@ function ns.UnlockFrame(f)
     if f.key == "raid" then
         -- one label per group, on its first member
         label = (f.raidSlot == 1) and ("Grp " .. (f.raidGroup or 1)) or nil
+    elseif f.key == "party" and f.index == 0 then
+        label = label .. " (you)"
     elseif f.index then
         label = label .. " " .. f.index
     end

@@ -465,6 +465,26 @@ SlashCmdList.LIZUF("lock")
 
 -- party hides in raid through a state driver
 assert(ns.UF.frames.party1.driver, "party uses the hide-in-raid driver")
+-- you in the party: off by default; on, you sit on top and party1..4 move down
+do
+    local me, pdb = ns.UF.frames.partyplayer, ns.db.units.party
+    assert(me and me.unit == "player" and me.key == "party", "party 'you' frame exists")
+    assert(not me.shown and not me.driver, "off by default")
+    local y1 = ns.UF.frames.party1.point[5]
+    pdb.showPlayer = true
+    ns:ApplyKey("party")
+    assert(me.driver and me.driver:find("%[group%] show"), "shown while in a group: " .. tostring(me.driver))
+    assert(me.point[5] == y1, "you take the first place")
+    assert(ns.UF.frames.party1.point[5] == y1 - (pdb.height + pdb.spacing), "party1 one place lower")
+    SlashCmdList.LIZUF("unlock")
+    assert(me.shown and me.moverLabel.text == "Party (you)", "config mode label")
+    SlashCmdList.LIZUF("lock")
+    pdb.showPlayer = false
+    ns:ApplyKey("party")
+    assert(ns.UF.frames.party1.point[5] == y1, "party1 back on top")
+    assert(not me.shown, "hidden again")
+    print("party you ok")
+end
 -- range: party1 is out of range (secret false) -> faded to 0.4
 tick()
 assert(ns.UF.frames.party1.alpha == 0.4, "party1 faded, got " .. tostring(ns.UF.frames.party1.alpha))

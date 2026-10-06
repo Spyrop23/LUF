@@ -139,6 +139,7 @@ local function unitTabs(key)
             b:Header("Party")
             b:Slider("Space between members", 0, 200, 1, p("spacing"))
             b:Check("Hide party frames in a raid", p("hideInRaid"))
+            b:Check("Show yourself in the party (on top)", p("showPlayer"))
         elseif key == "raid" then
             b:Header("Raid groups")
             b:Dropdown("Members of a group", RAID_DIRECTIONS, p("groupDirection"))

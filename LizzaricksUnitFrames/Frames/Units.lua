@@ -90,6 +90,12 @@ local function spawnAll()
             UF.Create(targetUnit, { key = "partytarget", index = i, anchorFrame = f })
         end
     end
+    -- you in the party (Party → General → "Show yourself"), above party1
+    if UF.frames.partyplayer then
+        UF.Apply(UF.frames.partyplayer)
+    else
+        UF.Create("partyplayer", { key = "party", index = 0, unit = "player" })
+    end
     for i = 1, 40 do
         local unit = "raid" .. i
         if UF.frames[unit] then UF.Apply(UF.frames[unit]) else UF.Create(unit, { key = "raid", index = i }) end

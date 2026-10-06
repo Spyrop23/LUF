@@ -169,11 +169,27 @@ function UF.Position(f)
         f:SetPoint("TOPLEFT", f.anchorFrame, "TOPRIGHT", db.x, db.y)
     else
         local y = db.y
-        if f.index and f.index > 1 then
-            y = y - (f.index - 1) * (db.height + (db.spacing or 0))
+        local slot = UF.Slot(f)
+        if slot and slot > 1 then
+            y = y - (slot - 1) * (db.height + (db.spacing or 0))
         end
         f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", db.x, y)
     end
+end
+
+-- Place of a frame in its stack (1 = first). In the party "you" (index 0)
+-- comes first when shown, and party1..4 follow below.
+function UF.Slot(f)
+    if not f.index then return nil end
+    if f.key == "party" and f.db.showPlayer then return f.index + 1 end
+    return f.index
+end
+
+-- Whether the frame is in use at all (the "you" frame only with the option).
+function UF.IsActive(f)
+    if not f.db.enabled then return false end
+    if f.key == "party" and f.index == 0 then return f.db.showPlayer and true or false end
+    return true
 end
 
 -- Raid geometry. A group is a block of five members, either a column
@@ -606,12 +622,15 @@ end
 
 -- opts: key (settings key, default unit), index (position in a group),
 -- anchorFrame (frame this one is placed relative to).
-function UF.Create(unit, opts)
-    if UF.frames[unit] then return UF.frames[unit] end
+-- `id` names the frame (UF.frames[id], LizUF_<id>); opts.unit gives it a
+-- different unit (the "you" frame in the party: id partyplayer, unit player).
+function UF.Create(id, opts)
+    if UF.frames[id] then return UF.frames[id] end
     assert(not InCombatLockdown(), "Lizzarick's Unit Frames: unit frames are created out of combat")
     opts = opts or {}
+    local unit = opts.unit or id
 
-    local f = CreateFrame("Button", "LizUF_" .. unit, UIParent, "SecureUnitButtonTemplate")
+    local f = CreateFrame("Button", "LizUF_" .. id, UIParent, "SecureUnitButtonTemplate")
     f.unit = unit
     f.key = opts.key or unit
     f.index = opts.index
@@ -641,7 +660,7 @@ function UF.Create(unit, opts)
     end)
     f:HookScript("OnLeave", function() GameTooltip:Hide() end)
 
-    UF.frames[unit] = f
+    UF.frames[id] = f
     UF.byKey[f.key] = UF.byKey[f.key] or {}
     table.insert(UF.byKey[f.key], f)
     UF.Apply(f)
@@ -653,7 +672,7 @@ end
 function UF.Watch(f)
     UnregisterUnitWatch(f)
     if UnregisterStateDriver then UnregisterStateDriver(f, "visibility") end
-    if not f.db.enabled then
+    if not UF.IsActive(f) then
         f:Hide()
         return
     end
@@ -661,6 +680,13 @@ function UF.Watch(f)
     local isParty = f.key == "party" or f.key == "partypet" or f.key == "partytarget"
     -- party frames step aside while the raid frames show the party
     local hideParty = isParty and raid.enabled and raid.showInParty and raid.hidePartyFrames
+    -- "you" in the party: only while in a group, like the other members
+    if f.key == "party" and f.index == 0 and RegisterStateDriver then
+        local rule = (party.hideInRaid and "[group:raid] hide; " or "")
+            .. (hideParty and "[group:party,nogroup:raid] hide; " or "")
+        RegisterStateDriver(f, "visibility", rule .. "[group] show; hide")
+        return
+    end
     if isParty and (party.hideInRaid or hideParty) and RegisterStateDriver then
         local exists = "[@" .. f.unit .. ",exists] show; hide"
         local rule = party.hideInRaid and "[group:raid] hide; "

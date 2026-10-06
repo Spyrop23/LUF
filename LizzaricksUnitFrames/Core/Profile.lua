@@ -153,7 +153,7 @@ ns.defaults = {
             auras = { debuffs = true, position = "BOTTOM" },
         }, noPortrait)),
         focustarget = unitDefaults(small({ x = 720, y = -65, width = 120, enabled = false })),
-        party = unitDefaults({ y = -140, spacing = 20, hideInRaid = true,
+        party = unitDefaults({ y = -140, spacing = 20, hideInRaid = true, showPlayer = false,
             auras = { debuffs = true, position = "RIGHT", perRow = 4 } }),
         partypet = unitDefaults(small({
             x = 5, y = -20, height = 20,
