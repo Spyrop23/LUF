@@ -639,6 +639,23 @@ UnitClass, UnitPowerMax, UnitPower = unitClass, powerMax, unitPower
 ns.ClassPower.Update(ns.UF.frames.player)
 assert(not cpf.shown, "back to warrior")
 assert(ns:IsBlizzardHidden("classpower") and PaladinPowerBarFrame.shown == false, "Blizzard's class bar hidden")
+-- shaman: the class power row shows four totem timers that run down by themselves
+do
+    local pf = ns.UF.frames.player
+    local unitClass = UnitClass
+    UnitClass = function(u) if u == "player" then return "Shaman", "SHAMAN" end return unitClass(u) end
+    GetTotemInfo = function(slot) return secret(slot == 2), "Totem", 0, 0, 136098 end
+    GetTotemDuration = function(slot) return { slot = slot } end
+    ns.ClassPower.Update(pf)
+    local holder = pf.classPower
+    assert(holder.shown and holder.count == 4, "four totem bars")
+    assert(holder.points[2].duration and holder.points[2].duration.slot == 2, "earth totem timer runs")
+    assert(holder.points[2].fill.alpha == 1 and holder.points[1].fill.alpha == 0, "fill only where a totem is")
+    UnitClass, GetTotemInfo, GetTotemDuration = unitClass, nil, nil
+    ns.ClassPower.Update(pf)
+    assert(not holder.shown, "warrior again: no row")
+    print("totems ok")
+end
 print("class power ok")
 
 -- five second rule: a mana drop starts the spark, it runs 5 s along the bar (Forever only)

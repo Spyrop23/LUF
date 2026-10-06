@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Totem timers, as in Luna: for shamans the class power row (Player → Class power) shows four bars for fire, earth, water and air that run down while the totem stands. Works in combat. Thanks to **Twiz777** for the idea!
 - Druid mana bar, as in Luna: in bear and cat form your mana shows as an extra bar below the power bar (Player → Power bar → "Druid mana bar"; height, position, own texts on the Tags tab). Comes and goes with the form, also in combat. New tags `[mana]` and `[maxmana]`. Thanks to **spudster90** for the idea!
 - Show yourself in the party frames, as in Luna: Party → General → "Show yourself in the party (on top)". You take the first place, party 1-4 follow below. Off by default. Thanks to **spudster90** for the idea!
 - Fix: the elite/rare dragon did not show any more since 0.13.0. It shows again, and "Mirror" turns it around reliably. In config mode (/luf unlock) the dragon is shown on the frame, so it can be placed without an elite target.

@@ -205,8 +205,8 @@ local function unitTabs(key)
         tab("classpower", "Class power", function(b)
             b:Header("Class power")
             b:Text("Combo points (rogue, druid in cat form), holy power, soul shards, chi (Windwalker), " ..
-                "arcane charges (Arcane) and essence as a row of points. Shows only for classes that " ..
-                "have one.", 44)
+                "arcane charges (Arcane) and essence as a row of points; for shamans the totem timers " ..
+                "(fire, earth, water, air). Shows only for classes that have one.", 44)
             b:Check("Enabled", p("classPower.enabled"))
             b:Dropdown("Position", ns.ClassPower.POSITIONS, p("classPower.position"))
             b:Slider("Height", 3, 20, 1, p("classPower.height"))

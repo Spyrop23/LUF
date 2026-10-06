@@ -13,6 +13,10 @@
 -- Forever keeps Classic's combo points on the target (Blizzard's own combo
 -- frame reads GetComboPoints("player", "target") there); everything else
 -- reads UnitPower("player", type).
+--
+-- Shamans get Luna's totem bar instead: four timer bars (fire, earth, water,
+-- air) that run down by themselves (SetTimerDuration with the slot's
+-- duration object), the fill hidden while the slot has no totem.
 local _, ns = ...
 
 local CP = {}
@@ -23,6 +27,15 @@ CP.POSITIONS = { { "ABOVE", "Above the frame" }, { "BELOW", "Below the frame" } 
 
 local MAX_POINTS = 10
 local PT = Enum and Enum.PowerType or {}
+local TOTEMS = "TOTEMS"
+local TOTEM_COLORS = {
+    { 0.95, 0.35, 0.10 },   -- fire
+    { 0.55, 0.75, 0.25 },   -- earth
+    { 0.20, 0.55, 1.00 },   -- water
+    { 0.75, 0.85, 1.00 },   -- air
+}
+local IMMEDIATE = Enum and Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.Immediate or 0
+local REMAINING = Enum and Enum.StatusBarTimerDirection and Enum.StatusBarTimerDirection.RemainingTime or 1
 
 -- Point colours by power type.
 local COLORS = {
@@ -47,6 +60,7 @@ local function powerType()
     local _, class = call(UnitClass, "player")
     class = readable(class)
     if class == "ROGUE" then return PT.ComboPoints or 4 end
+    if class == "SHAMAN" then return TOTEMS end
     if class == "DRUID" then
         -- combo points only in cat form (energy is the shown power then)
         local _, token = call(UnitPowerType, "player")
@@ -64,8 +78,9 @@ end
 -- Classes that can have points at all (druids: in cat form); in Forever
 -- only combo points exist.
 local CLASSES = ns.isRetail
-    and { ROGUE = true, DRUID = true, PALADIN = true, WARLOCK = true, MONK = true, MAGE = true, EVOKER = true }
-    or { ROGUE = true, DRUID = true }
+    and { ROGUE = true, DRUID = true, PALADIN = true, WARLOCK = true, MONK = true, MAGE = true, EVOKER = true,
+        SHAMAN = true }
+    or { ROGUE = true, DRUID = true, SHAMAN = true }
 
 -- Space the row takes next to the frame on `side` ("ABOVE"/"BELOW"), so the
 -- cast bar and the auras can make room. Kept for the class even while a
@@ -80,6 +95,7 @@ function CP.Reserved(f, side)
 end
 
 local function maxPoints(ptype)
+    if ptype == TOTEMS then return (GetTotemDuration or GetTotemInfo) and 4 or 0 end
     local max = readable(call(UnitPowerMax, "player", ptype))
     if type(max) ~= "number" or max <= 0 then return 0 end
     return math.min(max, MAX_POINTS)
@@ -167,6 +183,11 @@ function CP.Update(f)
         return
     end
     if holder.count ~= count then arrange(f, count) end
+    if ptype == TOTEMS then
+        CP.UpdateTotems(holder)
+        holder:Show()
+        return
+    end
     local c = COLORS[ptype] or COLORS[PT.ComboPoints or 4]
     local value = ns.unlocked and 3 or currentValue(ptype)
     for i = 1, count do
@@ -174,9 +195,37 @@ function CP.Update(f)
         bar:SetStatusBarColor(c[1], c[2], c[3])
         bar.bg:SetVertexColor(c[1] * 0.25, c[2] * 0.25, c[3] * 0.25, 0.8)
         -- each point fills itself once the (secret) value reaches it
+        bar:SetMinMaxValues(i - 1, i)
+        bar:GetStatusBarTexture():SetAlpha(1)
         if type(value) == "nil" or not pcall(bar.SetValue, bar, value) then bar:SetValue(0) end
     end
     holder:Show()
+end
+
+-- Totem timers: every slot's bar runs down on its own; the fill shows only
+-- while the slot holds a totem (haveTotem may be secret: alpha from it).
+function CP.UpdateTotems(holder)
+    for i = 1, 4 do
+        local bar = holder.points[i]
+        local c = TOTEM_COLORS[i]
+        bar:SetStatusBarColor(c[1], c[2], c[3])
+        bar.bg:SetVertexColor(c[1] * 0.25, c[2] * 0.25, c[3] * 0.25, 0.8)
+        local fill = bar:GetStatusBarTexture()
+        if ns.unlocked then
+            bar:SetMinMaxValues(0, 1)          -- config mode: show where it goes
+            bar:SetValue(1 - i * 0.2)
+            fill:SetAlpha(1)
+        else
+            local have = call(GetTotemInfo, i)
+            local dur = GetTotemDuration and call(GetTotemDuration, i)
+            if type(dur) ~= "nil" and pcall(bar.SetTimerDuration, bar, dur, IMMEDIATE, REMAINING) then
+                if not pcall(fill.SetAlphaFromBoolean, fill, have, 1, 0) then fill:SetAlpha((ns.CanRead(have) and have) and 1 or 0) end
+            else
+                bar:SetMinMaxValues(0, 1)
+                bar:SetValue(0)
+            end
+        end
+    end
 end
 
 CP.Refresh = CP.Update
@@ -195,6 +244,6 @@ for _, event in ipairs({ "UNIT_POWER_FREQUENT", "UNIT_POWER_UPDATE", "UNIT_MAXPO
     ns:RegisterEvent(event, onPower)
 end
 for _, event in ipairs({ "PLAYER_TARGET_CHANGED", "PLAYER_ENTERING_WORLD", "PLAYER_SPECIALIZATION_CHANGED",
-    "UPDATE_SHAPESHIFT_FORM" }) do
+    "UPDATE_SHAPESHIFT_FORM", "PLAYER_TOTEM_UPDATE" }) do
     ns:RegisterEvent(event, updateAll)
 end
