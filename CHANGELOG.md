@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Fix: the elite/rare dragon did not show any more since 0.13.0. It shows again, and "Mirror" turns it around reliably. In config mode (/luf unlock) the dragon is shown on the frame, so it can be placed without an elite target.
+
 ## 0.13.2
 - Incoming heal colours on the Colors page: your own heals, heals from others and absorb shields, each with a colour picker (e.g. for red/green colour blindness). Thanks to **snmartino** for the idea!
 

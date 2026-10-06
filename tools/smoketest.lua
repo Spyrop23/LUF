@@ -204,14 +204,11 @@ local raidMode = false
 function IsInRaid() return raidMode end
 function IsInGroup() return true end   -- party1 exists
 function IsResting() return true end
--- like the client, setting the same atlas again keeps the old coordinates
-function Widget:SetAtlas(a) if self.atlas ~= a then self.tc = { 0.1, 0.9, 0.2, 0.8 } end; self.atlas = a end
+-- like the client, setting the same atlas again keeps the old coordinates;
+-- on an atlas texture they count within the atlas' piece (0..1)
+function Widget:SetAtlas(a) if self.atlas ~= a then self.tc = { 0, 1, 0, 1 } end; self.atlas = a end
 function Widget:GetTexCoord() if self.tc then return unpack(self.tc) end end
 function Widget:SetTexCoord(...) self.tc = { ... } end
-C_Texture = C_Texture or {}
-C_Texture.GetAtlasInfo = C_Texture.GetAtlasInfo or function(a)
-    return { leftTexCoord = 0.1, rightTexCoord = 0.9, topTexCoord = 0.2, bottomTexCoord = 0.8 }
-end
 function Widget:CreateAnimationGroup()
     local g = newWidget("AnimationGroup")
     function g:CreateAnimation() return newWidget("Animation") end
@@ -826,15 +823,28 @@ ns.Indicators.Update(tgf)
 assert(tgf.indicators.icons.raidTarget.shown and tgf.indicators.icons.raidTarget.cell == 8, "raid mark")
 assert(tgf.indicators.icons.elite.shown and tgf.indicators.icons.elite.atlas:find("Winged"), "elite dragon")
 local eliteTex, eliteDb = tgf.indicators.icons.elite, ns.db.units.target.indicators.elite
-assert(eliteDb.side == "RIGHT" and eliteTex.tc[1] == 0.9 and eliteTex.tc[2] == 0.1, "right side: dragon mirrored within the atlas")
+assert(eliteDb.side == "RIGHT" and eliteTex.tc[1] == 1 and eliteTex.tc[2] == 0, "right side: dragon mirrored within the atlas piece")
 eliteDb.flip, eliteDb.x, eliteDb.y = true, 7, -3
 for _ = 1, 3 do ns.Indicators.Update(tgf) end
-assert(eliteTex.tc[1] == 0.1, "mirror option turns it back, and it stays on every update")
+assert(eliteTex.tc[1] == 0 and eliteTex.tc[2] == 1, "mirror option turns it back, and it stays on every update")
 ns.Indicators.Layout(tgf)
-assert(eliteTex.tc[1] == 0.1, "still turned after a layout")
+assert(eliteTex.tc[1] == 0, "still turned after a layout")
 eliteDb.flip = false
 for _ = 1, 3 do ns.Indicators.Update(tgf) end
-assert(eliteTex.tc[1] == 0.9, "unticking mirror turns it back")
+assert(eliteTex.tc[1] == 1, "unticking mirror turns it back")
+-- config mode: the dragon shows on any unit so it can be placed
+do
+    local classify = UnitClassification
+    UnitClassification = function() return "normal" end
+    ns.Indicators.Update(tgf)
+    assert(not eliteTex.shown, "no dragon on a normal unit")
+    ns.unlocked = true
+    ns.Indicators.Update(tgf)
+    assert(eliteTex.shown and eliteTex.atlas:find("Gold"), "config mode previews the dragon")
+    ns.unlocked = false
+    UnitClassification = classify
+    ns.Indicators.Update(tgf)
+end
 eliteDb.flip = true
 assert(eliteTex.point[4] == 7 and eliteTex.point[5] == -3, "elite offset")
 eliteDb.flip, eliteDb.x, eliteDb.y = nil, nil, nil

@@ -229,21 +229,23 @@ local ELITE = {
 }
 
 local function updateElite(tex, unit, d)
-    local class = call(UnitClassification, unit)
-    local atlas = ns.CanRead(class) and ELITE[class]
+    local atlas
+    if ns.unlocked then
+        atlas = ELITE.elite   -- config mode: show where the dragon goes
+    else
+        local class = call(UnitClassification, unit)
+        atlas = ns.CanRead(class) and ELITE[class]
+    end
     if not atlas then tex:Hide() return end
     tex:SetAtlas(atlas)
     -- Blizzard's art faces left; mirror it for the right side, and once more
-    -- when "Mirror" is ticked. The corners always come from the atlas data
-    -- (absolute): the client keeps the old coordinates when the same atlas
-    -- is set again, so swapping the current ones flipped it on every update.
+    -- when "Mirror" is ticked. On an atlas texture the coordinates count
+    -- within the atlas' own piece (0..1), so they are always set to fixed
+    -- values: the atlas' absolute corners showed an empty area (0.13.0), and
+    -- swapping the current corners flipped it on every update.
     local mirror = d.side ~= "LEFT"
     if d.flip then mirror = not mirror end
-    local info = C_Texture and C_Texture.GetAtlasInfo and call(C_Texture.GetAtlasInfo, atlas)
-    if type(info) == "table" and info.leftTexCoord then
-        local l, r, t, b = info.leftTexCoord, info.rightTexCoord, info.topTexCoord, info.bottomTexCoord
-        if mirror then tex:SetTexCoord(r, l, t, b) else tex:SetTexCoord(l, r, t, b) end
-    end
+    if mirror then tex:SetTexCoord(1, 0, 0, 1) else tex:SetTexCoord(0, 1, 0, 1) end
     tex:Show()
 end
 
