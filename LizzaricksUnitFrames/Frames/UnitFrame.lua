@@ -64,11 +64,12 @@ local UNIT_EVENTS = {
 }
 
 -- emptyBar: Luna's "empty bar", no value, only a background and texts
-local BAR_KEYS = { "healthBar", "powerBar", "emptyBar", "xpBar" }
+-- druidBar: Luna's druid mana bar, the player's mana while a form shows rage/energy
+local BAR_KEYS = { "healthBar", "powerBar", "druidBar", "emptyBar", "xpBar" }
 UF.BAR_KEYS = BAR_KEYS
 
 -- Position of a bar in the stack (1 = top), unset: the usual order.
-local DEFAULT_ORDER = { healthBar = 1, powerBar = 2, emptyBar = 3, xpBar = 4 }
+local DEFAULT_ORDER = { healthBar = 1, powerBar = 2, druidBar = 2, emptyBar = 3, xpBar = 4 }
 function UF.BarOrder(db, key)
     local bdb = db[key]
     return bdb and bdb.order or DEFAULT_ORDER[key]
@@ -106,6 +107,7 @@ local function buildRegions(f)
 
     f.healthBar = createBar(f)
     f.powerBar = createBar(f)
+    f.druidBar = createBar(f)
     f.emptyBar = createBar(f)
     f.emptyBar:SetMinMaxValues(0, 1)
     f.emptyBar:SetValue(0)
@@ -235,48 +237,30 @@ end
 
 -- Applies size, position, portrait and bar geometry from the profile.
 -- Protected: out of combat only.
-function UF.Layout(f)
-    local db = f.db
-    local texture = ns.Texture()
-    f:SetScale(db.scale or 1)
-    f:SetSize(db.width, db.height)
-    UF.Position(f)
-    f.bg:SetColorTexture(0, 0, 0, ns.db.backgroundAlpha or 0.8)
+-- Druid mana bar: the player frame of a druid whose bar shows something
+-- other than mana right now (bear/cat form).
+local MANA = Enum and Enum.PowerType and Enum.PowerType.Mana or 0
+function UF.DruidBarWanted(f)
+    if f.unit ~= "player" or not f.db.druidBar or not f.db.druidBar.enabled then return false end
+    local _, class = UnitClass("player")
+    if not (ns.CanRead(class) and class == "DRUID") then return false end
+    local ptype = UnitPowerType("player")
+    return ns.CanRead(ptype) and ptype ~= MANA
+end
 
-    local inner = db.width - 2 * BORDER
-    local left, right = BORDER, BORDER
-
-    -- portrait
-    local p = db.portrait
-    f.portrait3D:Hide()
-    f.portrait2D:Hide()
-    f.portrait = nil
-    if p.enabled then
-        local pw = math.floor(inner * p.width + 0.5)
-        local region = p.type == "2D" and f.portrait2D or f.portrait3D
-        region:ClearAllPoints()
-        if p.side == "RIGHT" then
-            region:SetPoint("TOPRIGHT", f, "TOPRIGHT", -BORDER, -BORDER)
-            region:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -BORDER, BORDER)
-            right = right + pw + BORDER
-        else
-            region:SetPoint("TOPLEFT", f, "TOPLEFT", BORDER, -BORDER)
-            region:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", BORDER, BORDER)
-            left = left + pw + BORDER
-        end
-        region:SetWidth(pw)
-        region:Show()
-        f.portrait = region
-    end
-
-    -- bars, top to bottom, heights by weight
+-- Places the bars (top to bottom, heights by weight) and their texts. Not
+-- protected: runs again in combat when a druid changes form.
+function UF.StackBars(f)
+    local db, texture = f.db, ns.Texture()
+    local left, right = f.barLeft or 0, f.barRight or 0
     local shown, total = {}, 0
     for _, key in ipairs(BAR_KEYS) do
         local bdb = db[key]
         local bar = f[key]
         bar:SetStatusBarTexture(texture)
         bar.bg:SetTexture(texture)
-        local allowed = key ~= "xpBar" or UF.XP_SUPPORTED[f.key]
+        local allowed = (key ~= "xpBar" or UF.XP_SUPPORTED[f.key])
+            and (key ~= "druidBar" or UF.DruidBarWanted(f))
         if bdb and allowed and bdb.enabled ~= false then
             table.insert(shown, key)
             total = total + bdb.weight
@@ -332,6 +316,44 @@ function UF.Layout(f)
         -- left and right share the bar; the left text gives way first
         t.left:SetPoint("RIGHT", t.right, "LEFT", -4, ly - ry)
     end
+    f.druidShown = UF.DruidBarWanted(f)
+end
+
+function UF.Layout(f)
+    local db = f.db
+    f:SetScale(db.scale or 1)
+    f:SetSize(db.width, db.height)
+    UF.Position(f)
+    f.bg:SetColorTexture(0, 0, 0, ns.db.backgroundAlpha or 0.8)
+
+    local inner = db.width - 2 * BORDER
+    local left, right = BORDER, BORDER
+
+    -- portrait
+    local p = db.portrait
+    f.portrait3D:Hide()
+    f.portrait2D:Hide()
+    f.portrait = nil
+    if p.enabled then
+        local pw = math.floor(inner * p.width + 0.5)
+        local region = p.type == "2D" and f.portrait2D or f.portrait3D
+        region:ClearAllPoints()
+        if p.side == "RIGHT" then
+            region:SetPoint("TOPRIGHT", f, "TOPRIGHT", -BORDER, -BORDER)
+            region:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -BORDER, BORDER)
+            right = right + pw + BORDER
+        else
+            region:SetPoint("TOPLEFT", f, "TOPLEFT", BORDER, -BORDER)
+            region:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", BORDER, BORDER)
+            left = left + pw + BORDER
+        end
+        region:SetWidth(pw)
+        region:Show()
+        f.portrait = region
+    end
+
+    f.barLeft, f.barRight = left, right
+    UF.StackBars(f)
 
     if f.happiness then
         local size = db.happiness and db.happiness.size or 14
@@ -407,6 +429,15 @@ function UF.UpdateHealth(f)
 end
 
 function UF.UpdatePower(f)
+    -- a druid changed form: the mana bar comes or goes (bars only, no
+    -- protected frame is touched, so this works in combat)
+    if f.druidBar and UF.DruidBarWanted(f) ~= (f.druidShown or false) then UF.StackBars(f) end
+    if f.druidShown then
+        local bar = f.druidBar
+        bar:SetMinMaxValues(0, UnitPowerMax("player", MANA))
+        bar:SetValue(UnitPower("player", MANA))
+        applyColor(bar, ns.colors.power.MANA, f.db.druidBar.backgroundAlpha)
+    end
     if f.db.powerBar.enabled == false then return end
     local unit, bar = f.unit, f.powerBar
     ns.SetPowerFill(bar, unit)

@@ -13,6 +13,7 @@ local Tags = {}
 ns.Tags = Tags
 
 local EMPTY = ""
+local MANA = Enum and Enum.PowerType and Enum.PowerType.Mana or 0
 
 local function readable(v)
     return ns.CanRead(v)
@@ -151,6 +152,9 @@ Tags.methods = {
     spp = function(u) return "%s", short(UnitPower(u)) end,
     smaxpp = function(u) return "%s", short(UnitPowerMax(u)) end,
     missingpp = function(u) return "%s", full(UnitPowerMissing(u)) end,
+    -- mana whatever the shown power is (druids in forms)
+    mana = function(u) return "%s", full(UnitPower(u, MANA)) end,
+    maxmana = function(u) return "%s", full(UnitPowerMax(u, MANA)) end,
     perpp = function(u)
         if not ns.ScaleTo100 then return EMPTY end
         return "%.0f%%", UnitPowerPercent(u, nil, false, ns.ScaleTo100)
@@ -297,6 +301,8 @@ Tags.help = {
     { "spp", "Current power, short" },
     { "smaxpp", "Maximum power, short" },
     { "missingpp", "Missing power" },
+    { "mana", "Current mana, also in a druid form" },
+    { "maxmana", "Maximum mana, also in a druid form" },
     { "perpp", "Power in percent" },
     { "happiness", "Pet happiness (Happy / Content / Unhappy, coloured)" },
     { "loyalty", "Pet loyalty level" },

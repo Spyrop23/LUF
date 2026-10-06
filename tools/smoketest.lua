@@ -837,6 +837,24 @@ do
     print("bar order ok")
 end
 
+-- druid mana bar: shown in cat form (energy), gone in caster form, even in combat
+do
+    local pf = ns.UF.frames.player
+    local unitClass, powerType = UnitClass, UnitPowerType
+    UnitClass = function(u) if u == "player" then return "Druid", "DRUID" end return unitClass(u) end
+    UnitPowerType = function() return 3, "ENERGY" end
+    ns.UF.UpdatePower(pf)
+    assert(pf.druidShown and pf.druidBar.shown, "cat form: mana bar shown")
+    assert(pf.druidBar.point[5] < pf.powerBar.point[5], "below the power bar")
+    UnitPowerType = function() return 0, "MANA" end
+    ns.UF.UpdatePower(pf)
+    assert(not pf.druidShown and not pf.druidBar.shown, "caster form: gone")
+    UnitClass, UnitPowerType = unitClass, powerType
+    ns.UF.Layout(pf)
+    assert(not pf.druidBar.shown, "warrior: no druid bar")
+    print("druid bar ok")
+end
+
 -- indicators: raid mark (secret index), leader (secret bool), master looter, pvp, elite
 local tgf = ns.UF.frames.target
 ns.Indicators.Update(tgf)

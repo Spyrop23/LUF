@@ -49,6 +49,8 @@ local function unitDefaults(o)
         hideBlizzard = true,
         healthBar = { weight = 6, colorType = "class", background = true, backgroundAlpha = 0.2 },
         powerBar  = { enabled = true, weight = 4.5, background = true, backgroundAlpha = 0.2, fiveSecond = true },
+        -- player only: a druid's mana while a form shows rage/energy
+        druidBar  = { enabled = false, weight = 2.5, background = true, backgroundAlpha = 0.2 },
         portrait  = { enabled = true, type = "3D", side = "LEFT", width = 0.22 },
         castBar   = { enabled = false, height = 10, position = "BELOW", icon = true, hideBlizzard = true },
         healPrediction = { enabled = true, overflow = 1.05, alpha = 0.8, absorbs = true },
@@ -92,6 +94,7 @@ local function unitDefaults(o)
             healthBar = { size = 10, left = "[name]", center = "", right = "[smarthealth]" },
             powerBar  = { size = 10, left = "[levelcolor][level][shortclassification] [classcolor][smartclass]", center = "", right = "[pp]/[maxpp]" },
             xpBar     = { size = 8, left = "", center = "[xp] [percxp]", right = "" },
+            druidBar  = { size = 8, left = "", center = "[mana]/[maxmana]", right = "" },
             emptyBar  = { size = 10, left = "", center = "[name]", right = "" },
         },
     }
@@ -121,6 +124,7 @@ ns.defaults = {
     units = {
         player = unitDefaults({
             castBar = { enabled = true },
+            druidBar = { enabled = true },
             status = { enabled = true, size = 16, point = "BOTTOMLEFT" },   -- Luna's default
             combatText = { enabled = true },
             -- combo points, holy power, soul shards ... as a row of points

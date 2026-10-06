@@ -54,7 +54,7 @@ local COLOR_TYPES = {
 local PORTRAIT_TYPES = { { "3D", "3D model" }, { "2D", "2D picture" } }
 local SIDES = { { "LEFT", "Left" }, { "RIGHT", "Right" } }
 local CAST_POS = { { "BELOW", "Below the frame" }, { "ABOVE", "Above the frame" } }
-local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", xpBar = "Experience bar", emptyBar = "Empty bar" }
+local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", druidBar = "Druid mana bar", xpBar = "Experience bar", emptyBar = "Empty bar" }
 local RAID_DIRECTIONS = { { "DOWN", "Below each other (columns)" }, { "RIGHT", "Next to each other (rows)" } }
 local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
@@ -169,7 +169,7 @@ local function unitTabs(key)
         local ghw, shw = p("healthBar.weight")
         b:Slider("Height (weight)", 1, 10, 0.5, ghw, shw, "%.1f")
         local _, sohealthBar = p("healthBar.order")
-        b:Slider("Position (1 = top)", 1, 4, 1, function() return ns.UF.BarOrder(ns.db.units[key], "healthBar") end, sohealthBar)
+        b:Slider("Position (1 = top)", 1, 5, 1, function() return ns.UF.BarOrder(ns.db.units[key], "healthBar") end, sohealthBar)
         b:Check("Background", p("healthBar.background"))
         b:Slider("Background alpha", 0, 1, 0.05, p("healthBar.backgroundAlpha"))
     end)
@@ -180,13 +180,24 @@ local function unitTabs(key)
         local gpw, spw = p("powerBar.weight")
         b:Slider("Height (weight)", 1, 10, 0.5, gpw, spw, "%.1f")
         local _, sopowerBar = p("powerBar.order")
-        b:Slider("Position (1 = top)", 1, 4, 1, function() return ns.UF.BarOrder(ns.db.units[key], "powerBar") end, sopowerBar)
+        b:Slider("Position (1 = top)", 1, 5, 1, function() return ns.UF.BarOrder(ns.db.units[key], "powerBar") end, sopowerBar)
         b:Check("Background", p("powerBar.background"))
         b:Slider("Background alpha", 0, 1, 0.05, p("powerBar.backgroundAlpha"))
         if key == "player" and not ns.isRetail then
             b:Check("Five second rule", p("powerBar.fiveSecond"))
             b:Text("After you spend mana, a spark runs along the mana bar for 5 seconds: the time until " ..
                 "your mana regenerates again.", 30)
+        end
+        if key == "player" then
+            b:Header("Druid mana bar")
+            b:Text("Druids: your mana as an extra bar while bear or cat form shows rage or energy.", 16)
+            b:Check("Enabled", p("druidBar.enabled"))
+            local gdw, sdw = p("druidBar.weight")
+            b:Slider("Height (weight)", 1, 10, 0.5, gdw, sdw, "%.1f")
+            local _, sodruidBar = p("druidBar.order")
+            b:Slider("Position (1 = top)", 1, 5, 1, function() return ns.UF.BarOrder(ns.db.units[key], "druidBar") end, sodruidBar)
+            b:Check("Background", p("druidBar.background"))
+            b:Slider("Background alpha", 0, 1, 0.05, p("druidBar.backgroundAlpha"))
         end
     end)
 
@@ -213,7 +224,7 @@ local function unitTabs(key)
         local gew, sew = p("emptyBar.weight")
         b:Slider("Height (weight)", 1, 10, 0.5, gew, sew, "%.1f")
         local _, soemptyBar = p("emptyBar.order")
-        b:Slider("Position (1 = top)", 1, 4, 1, function() return ns.UF.BarOrder(ns.db.units[key], "emptyBar") end, soemptyBar)
+        b:Slider("Position (1 = top)", 1, 5, 1, function() return ns.UF.BarOrder(ns.db.units[key], "emptyBar") end, soemptyBar)
         b:Check("Background", p("emptyBar.background"))
         local gec = p("emptyBar.color")   -- only the getter: the setter below builds the table
         b:Color("Background colour", gec, function(r, g, bl)
@@ -244,7 +255,7 @@ local function unitTabs(key)
             local gxw, sxw = p("xpBar.weight")
             b:Slider("Height (weight)", 1, 10, 0.5, gxw, sxw, "%.1f")
             local _, soxpBar = p("xpBar.order")
-            b:Slider("Position (1 = top)", 1, 4, 1, function() return ns.UF.BarOrder(ns.db.units[key], "xpBar") end, soxpBar)
+            b:Slider("Position (1 = top)", 1, 5, 1, function() return ns.UF.BarOrder(ns.db.units[key], "xpBar") end, soxpBar)
         end)
     end
 
@@ -421,7 +432,7 @@ local function unitTabs(key)
 
     tab("tags", "Tags", function(b)
         for _, bar in ipairs(ns.UF.BAR_KEYS) do
-            if bar ~= "xpBar" or ns.UF.XP_SUPPORTED[key] then
+            if (bar ~= "xpBar" or ns.UF.XP_SUPPORTED[key]) and (bar ~= "druidBar" or key == "player") then
                 b:Header(BAR_LABELS[bar])
                 b:Slider("Font size", 5, 24, 1, p("tags." .. bar .. ".size"))
                 for _, side in ipairs({ { "left", "Left" }, { "center", "Center" }, { "right", "Right" } }) do
