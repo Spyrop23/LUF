@@ -3,7 +3,7 @@
 ## Notes: Luna-style unit frames for World of Warcraft: Forever and Retail (Midnight), by Lizzarick.
 ## Notes-deDE: Unit Frames im Stil von Luna für World of Warcraft: Forever und Retail (Midnight).
 ## Author: Spyrop23
-## Version: 0.13.2
+## Version: 0.14.0
 ## SavedVariables: LizzaricksUFDB
 ## IconTexture: Interface\Icons\Spell_Nature_StarFall
 ## AddonCompartmentFunc: LizUF_OnAddonCompartmentClick
