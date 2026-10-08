@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- `/luf debug`: errors the addon catches (in event handlers, tags, timers) are collected instead of getting lost; the first one prints a hint in the chat. `/luf debug` opens a report to copy (version, game, every error with how often it happened), handy for bug reports. `/luf debug clear` empties the list.
+- Faster: the fast power update (smooth energy/mana) now redraws only texts with power tags ([pp], [mana] ...) instead of every text on the frame; power events do the same. The chosen font is looked up once instead of for every text.
+
 ## 0.14.0
 - Totem timers, as in Luna: for shamans the class power row (Player → Class power) shows four bars for fire, earth, water and air that run down while the totem stands. Works in combat. Thanks to **Twiz777** for the idea!
 - Druid mana bar, as in Luna: in bear and cat form your mana shows as an extra bar below the power bar (Player → Power bar → "Druid mana bar"; height, position, own texts on the Tags tab). Comes and goes with the form, also in combat. New tags `[mana]` and `[maxmana]`. Thanks to **spudster90** for the idea!

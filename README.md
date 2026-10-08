@@ -49,6 +49,7 @@ tools/      Smoke-Test und Paket-Skript
 | `/luf lock` | Config-Mode beenden (passiert beim Kampfbeginn automatisch) |
 | `/luf profile [name]` | Profil anzeigen oder wechseln (neue Namen werden angelegt) |
 | `/luf reset` | aktuelles Profil auf Standard zurücksetzen |
+| `/luf debug` | abgefangene Fehler als Bericht zum Kopieren (`/luf debug clear` leert die Liste) |
 | `/luf tags` | Tag-Übersicht im Menü |
 
 ## Stand (0.14.0)

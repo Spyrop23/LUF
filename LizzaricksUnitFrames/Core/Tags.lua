@@ -351,6 +351,24 @@ function Tags.Compile(line)
     return parts
 end
 
+-- Tags whose value follows the power (the fast power ticker redraws only
+-- texts that use one of them).
+local POWER_TAGS = { pp = true, maxpp = true, spp = true, smaxpp = true, missingpp = true,
+    mana = true, maxmana = true, perpp = true }
+local usesPower = {}
+
+function Tags.UsesPower(line)
+    local v = usesPower[line]
+    if v == nil then
+        v = false
+        for tag in line:gmatch("%[([%w:]+)%]") do
+            if POWER_TAGS[tag] then v = true break end
+        end
+        usesPower[line] = v
+    end
+    return v
+end
+
 -- ------------------------------------------------------------- render --
 
 local fmtBuf, args = {}, {}
@@ -359,7 +377,11 @@ local fmtBuf, args = {}, {}
 -- and returns the new count and the tag's format piece. The piece is always
 -- our own plain string, so testing it is safe; the values are never tested.
 local function append(n, ok, piece, ...)
-    if not ok or not piece then return n, EMPTY end
+    if not ok then
+        if ns.LogError then ns.LogError("tag", piece) end
+        return n, EMPTY
+    end
+    if not piece then return n, EMPTY end
     local count = select("#", ...)
     for i = 1, count do
         args[n + i] = (select(i, ...))

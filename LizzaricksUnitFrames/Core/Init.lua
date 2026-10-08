@@ -63,18 +63,28 @@ function ns:RunOutOfCombat(fn)
     end
 end
 
+-- A failing handler must not stop the others; the error goes to the debug
+-- log (Core/Debug.lua, /luf debug).
+local function report(where, err)
+    if ns.LogError then ns.LogError(where, err) end
+end
+
 eventFrame:SetScript("OnEvent", function(_, event, ...)
     local list = handlers[event]
     if not list then return end
     for i = 1, #list do
-        list[i](event, ...)
+        local ok, err = pcall(list[i], event, ...)
+        if not ok then report(event, err) end
     end
 end)
 
 ns:RegisterEvent("PLAYER_REGEN_ENABLED", function()
     local queue = afterCombat
     afterCombat = {}
-    for i = 1, #queue do queue[i]() end
+    for i = 1, #queue do
+        local ok, err = pcall(queue[i])
+        if not ok then report("after combat", err) end
+    end
 end)
 
 -- -------------------------------------------------------------- load --
@@ -89,7 +99,8 @@ end
 ns:RegisterEvent("PLAYER_LOGIN", function()
     ns:InitDB()
     for i = 1, #ns.onLogin do
-        ns.onLogin[i]()
+        local ok, err = pcall(ns.onLogin[i])
+        if not ok then report("login", err) end
     end
     if not (ns.isForever or ns.isRetail) then
         ns:Print("This addon is built for WoW: Forever and Retail (Midnight).")

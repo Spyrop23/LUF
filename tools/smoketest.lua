@@ -1118,5 +1118,52 @@ C_UnitAuras = { GetAuraDataByIndex = function(unit, i, filter)
     if i == 2 and filter == "HELPFUL" then return { spellId = 1459, name = "Arcane Intellect" } end
 end }
 SlashCmdList.LIZUF("buffs")
+
+-- debug log: a failing handler is caught and reported, the others still run
+do
+    ns.ClearErrors()
+    local ran = false
+    ns:RegisterEvent("LUF_TEST_EVENT", function() error("boom") end)
+    ns:RegisterEvent("LUF_TEST_EVENT", function() ran = true end)
+    fire("LUF_TEST_EVENT")
+    fire("LUF_TEST_EVENT")
+    assert(ran, "the next handler still runs")
+    local errs = ns.Errors()
+    assert(#errs == 1 and errs[1].count == 2 and errs[1].msg:find("boom"), "error logged once, counted twice")
+    -- a broken tag is logged too, the text stays empty
+    ns.Tags.methods.broken = function() error("bad tag") end
+    local fs = ns.UF.frames.player.healthBar.text.center
+    ns.Tags.Render(fs, "[broken]", "player")
+    assert(#ns.Errors() == 2 and ns.Errors()[2].where == "tag", "tag error logged")
+    local report = ns.DebugReport()
+    assert(report:find("Lizzarick's Unit Frames") and report:find("boom") and report:find("x2"), "report")
+    SlashCmdList.LIZUF("debug")
+    assert(LizUFDebugWindow and LizUFDebugWindow.shown, "debug window")
+    SlashCmdList.LIZUF("debug clear")
+    assert(#ns.Errors() == 0, "cleared")
+    ns.Tags.methods.broken = nil
+    print("debug log ok")
+end
+
+-- fast power ticker: only texts with power tags are redrawn
+do
+    assert(ns.Tags.UsesPower("[pp]/[maxpp]") and ns.Tags.UsesPower("[mana]") and not ns.Tags.UsesPower("[name]"), "power tags")
+    local pf = ns.UF.frames.player
+    local hl, pr = pf.healthBar.text.left, pf.powerBar.text.right
+    hl.text, pr.text = "untouched", "untouched"
+    ns.UF.UpdatePowerTexts(pf)
+    assert(hl.text == "untouched", "name text not redrawn")
+    assert(pr.text ~= "untouched", "power text redrawn")
+    -- the chosen font is remembered, not looked up for every string
+    local list = ns.FontList
+    local lookups = 0
+    ns.FontList = function() lookups = lookups + 1 return list() end
+    ns.db.font = "Iceland"
+    for _ = 1, 10 do ns.Font() end
+    assert(lookups == 1 and ns.Font():find("Iceland"), "font looked up once: " .. lookups)
+    ns.db.font = "Default"
+    ns.FontList = list
+    print("power texts and font cache ok")
+end
 assert(ns.Texture():find("LizzaricksUnitFrames\\Media\\Smooth"), "default texture")
 print("OK")

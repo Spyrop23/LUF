@@ -16,6 +16,7 @@ local function help()
     print("  /luf reset - reset the current profile")
     print("  /luf pet - show what the game reports about your pet's happiness")
     print("  /luf buffs - your buffs: which count as \"mine\" and \"castable\" (out of combat)")
+    print("  /luf debug - errors caught this session, as a report to copy (/luf debug clear)")
 end
 
 -- Spell IDs of the player's buffs that pass `filter` (out of combat only:
@@ -51,6 +52,16 @@ local commands = {
         ns:Print("Profile %s reset.", ns:CurrentProfile())
     end,
     tags = function() ns.Options:Open("tags") end,
+    debug = function(arg)
+        if arg == "clear" then
+            ns.ClearErrors()
+            ns:Print("Error log cleared.")
+            return
+        end
+        local n = #ns.Errors()
+        ns:Print(n == 0 and "No errors caught this session." or ("%d error(s) caught, see the window."):format(n))
+        ns.ShowDebug()
+    end,
     -- Diagnosis for the "My buffs" / "Castable buffs" squares: what the
     -- client's filters HELPFUL|PLAYER and HELPFUL|RAID let through.
     buffs = function()

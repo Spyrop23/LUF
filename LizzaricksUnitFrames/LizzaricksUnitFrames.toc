@@ -13,6 +13,7 @@
 # The folder must be named LizzaricksUnitFrames (same as this file) or the client ignores it.
 
 Core\Init.lua
+Core\Debug.lua
 Core\Secret.lua
 Core\Media.lua
 Core\Profile.lua

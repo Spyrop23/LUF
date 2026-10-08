@@ -67,6 +67,7 @@ local UNIT_EVENTS = {
 -- druidBar: Luna's druid mana bar, the player's mana while a form shows rage/energy
 local BAR_KEYS = { "healthBar", "powerBar", "druidBar", "emptyBar", "xpBar" }
 UF.BAR_KEYS = BAR_KEYS
+local SIDES = { "left", "center", "right" }
 
 -- Position of a bar in the stack (1 = top), unset: the usual order.
 local DEFAULT_ORDER = { healthBar = 1, powerBar = 2, druidBar = 2, emptyBar = 3, xpBar = 4 }
@@ -502,11 +503,33 @@ function UF.UpdateTexts(f)
         local bar = f[key]
         if bar:IsShown() and tags[key] then
             local tdb = tags[key]
-            for _, side in ipairs({ "left", "center", "right" }) do
+            for _, side in ipairs(SIDES) do
                 ns.Tags.Render(bar.text[side], tdb[side] or "", unit)
             end
         end
     end
+end
+
+-- Only the texts that show power (the fast power ticker: everything else
+-- stays as the last event drew it).
+function UF.UpdatePowerTexts(f)
+    local unit, tags = f.unit, f.db.tags
+    for _, key in ipairs(BAR_KEYS) do
+        local bar, tdb = f[key], tags[key]
+        if tdb and bar:IsShown() then
+            for _, side in ipairs(SIDES) do
+                local line = tdb[side]
+                if line and line ~= "" and ns.Tags.UsesPower(line) then
+                    ns.Tags.Render(bar.text[side], line, unit)
+                end
+            end
+        end
+    end
+end
+
+local function updatePowerFast(f)
+    UF.UpdatePower(f)
+    UF.UpdatePowerTexts(f)
 end
 
 function UF.Update(f)
@@ -556,7 +579,7 @@ local EVENT_PARTS = {
     UNIT_PORTRAIT_UPDATE = "portrait", UNIT_MODEL_CHANGED = "portrait",
 }
 
-local function onUnitEvent(ev, event)
+local function handleUnitEvent(ev, event)
     local f = ev.frame
     if not f:IsVisible() then return end
     local part = EVENT_PARTS[event]
@@ -565,7 +588,7 @@ local function onUnitEvent(ev, event)
         UF.UpdateTexts(f)
     elseif part == "power" then
         UF.UpdatePower(f)
-        UF.UpdateTexts(f)
+        UF.UpdatePowerTexts(f)
     elseif part == "portrait" then
         UF.UpdatePortrait(f)
     else
@@ -573,16 +596,23 @@ local function onUnitEvent(ev, event)
     end
 end
 
-local function onGlobalEvent(ev)
+local function onUnitEvent(ev, event)
+    local ok, err = pcall(handleUnitEvent, ev, event)
+    if not ok then ns.LogError(event, err) end
+end
+
+local function onGlobalEvent(ev, event)
     local f = ev.frame
-    if f:IsVisible() then UF.UnitChanged(f) end
+    if not f:IsVisible() then return end
+    local ok, err = pcall(UF.UnitChanged, f)
+    if not ok then ns.LogError(event or "unit changed", err) end
 end
 
 local function onPoll(ev, elapsed)
     ev.wait = (ev.wait or 0) + elapsed
     if ev.wait < POLL_EVERY then return end
     ev.wait = 0
-    if ev.frame:IsVisible() then updateBarsAndTexts(ev.frame) end
+    if ev.frame:IsVisible() then ns.Try("poll " .. ev.frame.unit, updateBarsAndTexts, ev.frame) end
 end
 
 -- Your own (and your pet's) power regenerates on the client between the
@@ -599,8 +629,7 @@ powerTicker:SetScript("OnUpdate", function(_, elapsed)
     for _, list in pairs(UF.byKey) do
         for _, f in ipairs(list) do
             if POWER_UNITS[f.unit] and not f.realUnit and f:IsVisible() and f.powerBar and f.powerBar:IsShown() then
-                UF.UpdatePower(f)
-                UF.UpdateTexts(f)
+                ns.Try("power ticker", updatePowerFast, f)
             end
         end
     end

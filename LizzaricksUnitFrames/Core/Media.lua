@@ -87,11 +87,19 @@ function ns.FontList()
     return list
 end
 
+-- The chosen font's file. Remembered per name: building the list walks
+-- every shared-media font, and a layout sets hundreds of font strings. A
+-- name that is not found yet (a shared-media font registered later) is
+-- looked up again next time.
+local fontName, fontPath
 function ns.Font()
     local want = ns.db and ns.db.font
-    if want and want ~= "Default" then
-        for _, f in ipairs(ns.FontList()) do
-            if f[1] == want then return f[2] end
+    if not want or want == "Default" then return DEFAULT_FONT end
+    if want == fontName then return fontPath end
+    for _, f in ipairs(ns.FontList()) do
+        if f[1] == want then
+            fontName, fontPath = want, f[2]
+            return fontPath
         end
     end
     return DEFAULT_FONT
