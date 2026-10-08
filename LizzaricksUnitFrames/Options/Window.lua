@@ -211,6 +211,7 @@ local function unitTabs(key)
             b:Dropdown("Position", ns.ClassPower.POSITIONS, p("classPower.position"))
             b:Slider("Height", 3, 20, 1, p("classPower.height"))
             b:Slider("Space between points", 0, 10, 1, p("classPower.spacing"))
+            b:Check("Shamans: time left on the totem bars", p("classPower.totemTimer"))
             local ghc, shc = p("classPower.hideBlizzard")
             b:Check("Hide Blizzard class bar (holy power, combo points ...)",
                 blizzardToggle(ghc, shc, "classpower", "Blizzard's class bar"))

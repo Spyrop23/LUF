@@ -128,7 +128,8 @@ ns.defaults = {
             status = { enabled = true, size = 16, point = "BOTTOMLEFT" },   -- Luna's default
             combatText = { enabled = true },
             -- combo points, holy power, soul shards ... as a row of points
-            classPower = { enabled = true, height = 7, spacing = 2, position = "ABOVE", hideBlizzard = true },
+            classPower = { enabled = true, height = 7, spacing = 2, position = "ABOVE", hideBlizzard = true,
+                totemTimer = true },
         }),
         pet = unitDefaults({
             y = -72, height = 30,

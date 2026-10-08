@@ -649,12 +649,24 @@ do
     local unitClass = UnitClass
     UnitClass = function(u) if u == "player" then return "Shaman", "SHAMAN" end return unitClass(u) end
     GetTotemInfo = function(slot) return secret(slot == 2), "Totem", 0, 0, 136098 end
-    GetTotemDuration = function(slot) return { slot = slot } end
+    GetTotemDuration = function(slot)
+        return { slot = slot, GetRemainingDuration = function() return slot == 2 and secret(83.4) or 0 end }
+    end
     ns.ClassPower.Update(pf)
     local holder = pf.classPower
     assert(holder.shown and holder.count == 4, "four totem bars")
     assert(holder.points[2].duration and holder.points[2].duration.slot == 2, "earth totem timer runs")
     assert(holder.points[2].fill.alpha == 1 and holder.points[1].fill.alpha == 0, "fill only where a totem is")
+    -- time left: the secret seconds go straight into the text, empty slots stay invisible
+    local t2 = holder.points[2].time
+    assert(t2.shown and t2.text == "83" and t2.alpha == 1, "earth totem time left: " .. tostring(t2.text))
+    assert(holder.points[1].time.alpha == 0, "no time on an empty slot")
+    tick()
+    assert(t2.text == "83", "ticker keeps the time")
+    ns.db.units.player.classPower.totemTimer = false
+    ns.ClassPower.Update(pf)
+    assert(not t2.shown, "option off: no time")
+    ns.db.units.player.classPower.totemTimer = true
     UnitClass, GetTotemInfo, GetTotemDuration = unitClass, nil, nil
     ns.ClassPower.Update(pf)
     assert(not holder.shown, "warrior again: no row")

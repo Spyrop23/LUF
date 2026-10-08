@@ -122,6 +122,10 @@ function CP.Create(f)
         bar.bg:SetAllPoints()
         bar:SetMinMaxValues(i - 1, i)
         bar:SetValue(0)
+        -- time left on a totem bar (option); the bar's own level, above the fill
+        bar.time = bar:CreateFontString(nil, "OVERLAY")
+        bar.time:SetPoint("CENTER", bar, "CENTER", 0, 0)
+        bar.time:Hide()
         bar:Hide()
         holder.points[i] = bar
     end
@@ -144,6 +148,7 @@ local function arrange(f, count)
             bar:SetSize(pointW, db.height)
             bar:SetStatusBarTexture(texture)
             bar.bg:SetTexture(texture)
+            ns.SetFont(bar.time, math.max(7, math.min(14, db.height + 3)), "OUTLINE")
             bar:Show()
         else
             bar:Hide()
@@ -179,15 +184,17 @@ function CP.Update(f)
         count, ptype = 5, PT.ComboPoints or 4   -- config mode: show where it goes
     end
     if count == 0 then
+        CP.ClearTotemTimes(holder)
         holder:Hide()
         return
     end
     if holder.count ~= count then arrange(f, count) end
     if ptype == TOTEMS then
-        CP.UpdateTotems(holder)
+        CP.UpdateTotems(holder, db)
         holder:Show()
         return
     end
+    CP.ClearTotemTimes(holder)
     local c = COLORS[ptype] or COLORS[PT.ComboPoints or 4]
     local value = ns.unlocked and 3 or currentValue(ptype)
     for i = 1, count do
@@ -204,7 +211,60 @@ end
 
 -- Totem timers: every slot's bar runs down on its own; the fill shows only
 -- while the slot holds a totem (haveTotem may be secret: alpha from it).
-function CP.UpdateTotems(holder)
+-- Time left as text: the duration object's own getter goes straight into
+-- SetFormattedText (it may be secret); readable values over a minute as m:ss.
+local timed = {}
+local timerFrame = CreateFrame("Frame")
+local timerWait = 0
+
+local function showTime(bar)
+    local ok, left = pcall(bar.totemDur.GetRemainingDuration, bar.totemDur)
+    if not ok then return end
+    if ns.CanRead(left) then
+        if left <= 0 then bar.time:SetText("") return end
+        if left >= 60 then
+            bar.time:SetFormattedText("%d:%02d", math.floor(left / 60), math.floor(left % 60))
+            return
+        end
+    end
+    pcall(bar.time.SetFormattedText, bar.time, "%.0f", left)
+end
+
+local function tickTimers(_, elapsed)
+    timerWait = timerWait + elapsed
+    if timerWait < 0.1 then return end
+    timerWait = 0
+    local any = false
+    for bar in pairs(timed) do
+        any = true
+        showTime(bar)
+    end
+    if not any then timerFrame:SetScript("OnUpdate", nil) end
+end
+
+local function timeText(bar, dur, have, on)
+    if on and type(dur) ~= "nil" and dur.GetRemainingDuration then
+        bar.totemDur = dur
+        if not pcall(bar.time.SetAlphaFromBoolean, bar.time, have, 1, 0) then
+            bar.time:SetAlpha((ns.CanRead(have) and have) and 1 or 0)
+        end
+        bar.time:Show()
+        showTime(bar)
+        timed[bar] = true
+        timerFrame:SetScript("OnUpdate", tickTimers)
+    else
+        bar.totemDur = nil
+        timed[bar] = nil
+        bar.time:Hide()
+    end
+end
+
+function CP.ClearTotemTimes(holder)
+    for _, bar in ipairs(holder.points) do timeText(bar, nil) end
+end
+
+function CP.UpdateTotems(holder, db)
+    local showTimer = not db or db.totemTimer ~= false
     for i = 1, 4 do
         local bar = holder.points[i]
         local c = TOTEM_COLORS[i]
@@ -215,14 +275,22 @@ function CP.UpdateTotems(holder)
             bar:SetMinMaxValues(0, 1)          -- config mode: show where it goes
             bar:SetValue(1 - i * 0.2)
             fill:SetAlpha(1)
+            timeText(bar, nil)
+            if showTimer then
+                bar.time:SetAlpha(1)
+                bar.time:SetText(tostring(60 - i * 12))
+                bar.time:Show()
+            end
         else
             local have = call(GetTotemInfo, i)
             local dur = GetTotemDuration and call(GetTotemDuration, i)
             if type(dur) ~= "nil" and pcall(bar.SetTimerDuration, bar, dur, IMMEDIATE, REMAINING) then
                 if not pcall(fill.SetAlphaFromBoolean, fill, have, 1, 0) then fill:SetAlpha((ns.CanRead(have) and have) and 1 or 0) end
+                timeText(bar, dur, have, showTimer)
             else
                 bar:SetMinMaxValues(0, 1)
                 bar:SetValue(0)
+                timeText(bar, nil)
             end
         end
     end
