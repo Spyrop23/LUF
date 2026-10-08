@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- The options window (and the debug window) can be closed with the X in combat too: the button hides the window itself instead of going through Blizzard's panel manager, which is locked in combat.
 - `/luf debug`: errors the addon catches (in event handlers, tags, timers) are collected instead of getting lost; the first one prints a hint in the chat. `/luf debug` opens a report to copy (version, game, every error with how often it happened), handy for bug reports. `/luf debug clear` empties the list.
 - Faster: the fast power update (smooth energy/mana) now redraws only texts with power tags ([pp], [mana] ...) instead of every text on the frame; power events do the same. The chosen font is looked up once instead of for every text.
 

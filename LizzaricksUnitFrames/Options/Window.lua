@@ -793,6 +793,9 @@ local function build()
 
     local close = CreateFrame("Button", nil, w, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -2, -2)
+    -- Blizzard's close button hides through the UI panel manager, which is
+    -- locked in combat; our window is a plain frame and may simply hide.
+    close:SetScript("OnClick", function() w:Hide() end)
 
     -- navigation
     local nav = CreateFrame("Frame", nil, w, "BackdropTemplate")

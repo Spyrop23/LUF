@@ -110,7 +110,11 @@ function Widget:AddAuraSlot(key, filterString, opts)
     self.slots[key] = { filter = filterString, ids = opts.candidateFilters and opts.candidateFilters.includeSpellIDs, button = b }
     return b
 end
-function CreateFrame(kind, name) return newWidget(kind, name) end
+function CreateFrame(kind, name, parent, template)
+    local w = newWidget(kind, name)
+    w.parentFrame, w.template = parent, template
+    return w
+end
 UIParent = newWidget("Frame", "UIParent")
 Minimap = newWidget("Frame", "Minimap")
 GameTooltip = newWidget("GameTooltip", "GameTooltip")
@@ -1142,6 +1146,16 @@ do
     SlashCmdList.LIZUF("debug clear")
     assert(#ns.Errors() == 0, "cleared")
     ns.Tags.methods.broken = nil
+    -- the close buttons hide the windows directly (Blizzard's panel manager is locked in combat)
+    ns.Options:Open()
+    assert(LizUFOptionsFrame.shown, "options open")
+    local closeBtn
+    for _, w in ipairs(frames) do
+        if w.kind == "Button" and w.parentFrame == LizUFOptionsFrame and w.template == "UIPanelCloseButton" then closeBtn = w end
+    end
+    assert(closeBtn and closeBtn.scripts.OnClick, "options close button")
+    closeBtn.scripts.OnClick(closeBtn)
+    assert(not LizUFOptionsFrame.shown, "close button hides the options")
     print("debug log ok")
 end
 

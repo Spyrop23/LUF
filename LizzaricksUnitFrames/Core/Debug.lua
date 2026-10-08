@@ -87,6 +87,7 @@ function ns.ShowDebug()
         title:SetText("Lizzarick's Unit Frames: debug report (Ctrl+A, Ctrl+C to copy)")
         local close = CreateFrame("Button", nil, window, "UIPanelCloseButton")
         close:SetPoint("TOPRIGHT", 2, 2)
+        close:SetScript("OnClick", function() window:Hide() end)   -- also in combat
         local scroll = CreateFrame("ScrollFrame", "LizUFDebugScroll", window, "UIPanelScrollFrameTemplate")
         scroll:SetPoint("TOPLEFT", 12, -32)
         scroll:SetPoint("BOTTOMRIGHT", -32, 12)
