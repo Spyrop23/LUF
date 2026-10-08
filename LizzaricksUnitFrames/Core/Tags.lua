@@ -42,6 +42,12 @@ local function classification(u)
     if readable(c) then return c end
 end
 
+-- A literal piece of a format string: % escaped. (Defined before
+-- smartHealth, which uses it for "Dead" / "Offline".)
+local function lit(s)
+    return (s:gsub("%%", "%%%%"))
+end
+
 local function percent(fn, u)
     if not ns.ScaleTo100 then return EMPTY end
     return "%.0f%%", fn(u, true, ns.ScaleTo100)
@@ -70,10 +76,6 @@ end
 --
 -- Each entry: function(unit) -> formatPiece, values...
 -- A tag without values returns only its literal piece (with % escaped).
-
-local function lit(s)
-    return (s:gsub("%%", "%%%%"))
-end
 
 Tags.methods = {
     -- identity

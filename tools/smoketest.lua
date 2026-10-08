@@ -1157,6 +1157,13 @@ do
     closeBtn.scripts.OnClick(closeBtn)
     assert(not LizUFOptionsFrame.shown, "close button hides the options")
     print("debug log ok")
+
+-- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
+do
+    local fs = ns.UF.frames.player.healthBar.text.center
+    ns.Tags.Render(fs, "[smarthealth]", "targettarget")
+    assert(fs.text == "Dead" and #ns.Errors() == 0, "smarthealth on a dead unit: " .. tostring(fs.text))
+end
 end
 
 -- fast power ticker: only texts with power tags are redrawn
@@ -1180,4 +1187,7 @@ do
     print("power texts and font cache ok")
 end
 assert(ns.Texture():find("LizzaricksUnitFrames\\Media\\Smooth"), "default texture")
+-- nothing the addon caught along the way (errors would vanish into /luf debug)
+for _, e in ipairs(ns.Errors()) do print("caught: [" .. e.where .. "] " .. e.msg) end
+assert(#ns.Errors() == 0, "errors caught during the run")
 print("OK")
