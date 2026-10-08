@@ -1170,6 +1170,26 @@ do
     assert(not LizUFOptionsFrame.shown, "close button hides the options")
     print("debug log ok")
 
+-- surname (Forever): UnitName's second value; Retail keeps the plain name
+do
+    local unitName = UnitName
+    UnitName = function(u) if u == "player" then return "Lizzarick", "Shamtest" end return unitName(u) end
+    local fs = ns.UF.frames.player.healthBar.text.center
+    ns.Tags.Render(fs, "[fullname]", "player")
+    if RETAIL then
+        assert(fs.text == "Lizzarick", "Retail: fullname is the name: " .. tostring(fs.text))
+    else
+        assert(fs.text == "Lizzarick Shamtest", "fullname: " .. tostring(fs.text))
+        ns.Tags.Render(fs, "[surname]", "player")
+        assert(fs.text == "Shamtest", "surname")
+    end
+    UnitName = unitName
+    ns.Tags.Render(fs, "[fullname]", "player")
+    assert(fs.text == "Thrall", "no surname: just the name")
+    ns.Tags.Render(fs, "[fullname]", "target")
+    assert(fs.text == "Name-target", "secret name still shown")
+end
+
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
     local fs = ns.UF.frames.player.healthBar.text.center

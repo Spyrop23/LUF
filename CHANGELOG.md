@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- New tags for WoW: Forever surnames: `[fullname]` (name and surname, e.g. "Lizzarick Shamtest") and `[surname]`. Put them in any text on the Tags tab, e.g. `[fullname]` instead of `[name]`.
+
 ## 0.14.1
 - Totem timers: the time left now shows as a number on each totem bar (over a minute as m:ss). Player → Class power → "Shamans: time left on the totem bars" (on by default).
 - Fix: `[smarthealth]` (and the other smart health tags) showed nothing on dead, ghost and offline units instead of "Dead" / "Ghost" / "Offline". Found with the new `/luf debug`.

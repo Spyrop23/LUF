@@ -48,6 +48,13 @@ local function lit(s)
     return (s:gsub("%%", "%%%%"))
 end
 
+-- Between first name and surname, as Blizzard joins them (Forever).
+local function surnameSeparator()
+    local c = Constants and Constants.CharacterNameSeparatorConsts
+    local sep = c and c.CHARACTERNAME_SURNAME_SEPARATOR
+    return type(sep) == "string" and sep or " "
+end
+
 local function percent(fn, u)
     if not ns.ScaleTo100 then return EMPTY end
     return "%.0f%%", fn(u, true, ns.ScaleTo100)
@@ -83,6 +90,20 @@ Tags.methods = {
         local n = UnitName(u)
         if readable(n) and not n then return EMPTY end
         return "%s", n
+    end,
+    -- WoW: Forever: every character has a surname, UnitName's second value
+    -- (in Retail that value is the realm, so these stay plain names there)
+    surname = function(u)
+        if not ns.isForever then return EMPTY end
+        local _, s = UnitName(u)
+        if type(s) == "nil" or (readable(s) and s == "") then return EMPTY end
+        return "%s", s
+    end,
+    fullname = function(u)
+        local n, s = UnitName(u)
+        if readable(n) and not n then return EMPTY end
+        if not ns.isForever or type(s) == "nil" or (readable(s) and s == "") then return "%s", n end
+        return "%s" .. lit(surnameSeparator()) .. "%s", n, s
     end,
     level = function(u)
         local l = UnitLevel(u)
@@ -274,6 +295,8 @@ Tags.argMethods = {
 -- For the tag help in the options window.
 Tags.help = {
     { "name", "Name" },
+    { "surname", "Surname (WoW: Forever)" },
+    { "fullname", "Name and surname (WoW: Forever)" },
     { "shortname:x", "First x letters of the name" },
     { "nameafk", "Name, or (AFK)" },
     { "afk", "(AFK) when away" },
