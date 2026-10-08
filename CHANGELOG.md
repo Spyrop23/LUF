@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.1
 - Totem timers: the time left now shows as a number on each totem bar (over a minute as m:ss). Player → Class power → "Shamans: time left on the totem bars" (on by default).
 - Fix: `[smarthealth]` (and the other smart health tags) showed nothing on dead, ghost and offline units instead of "Dead" / "Ghost" / "Offline". Found with the new `/luf debug`.
 - The options window (and the debug window) can be closed with the X in combat too: the button hides the window itself instead of going through Blizzard's panel manager, which is locked in combat.
