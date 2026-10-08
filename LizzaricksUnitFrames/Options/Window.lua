@@ -140,6 +140,11 @@ local function unitTabs(key)
             b:Slider("Space between members", 0, 200, 1, p("spacing"))
             b:Check("Hide party frames in a raid", p("hideInRaid"))
             b:Check("Show yourself in the party (on top)", p("showPlayer"))
+        elseif key == "raidpet" then
+            b:Header("Raid pets")
+            b:Text("The pets in the raid, packed without gaps (re-sorted out of combat). Off by default.", 16)
+            b:Slider("Pets per column", 1, 40, 1, p("perColumn"))
+            b:Slider("Space between pets", 0, 50, 1, p("spacing"))
         elseif key == "raid" then
             b:Header("Raid groups")
             b:Dropdown("Members of a group", RAID_DIRECTIONS, p("groupDirection"))
@@ -822,8 +827,8 @@ local function build()
         fs:SetText(page.label)
         btn:SetScript("OnClick", function() showPage(page.id) end)
         navButtons[page.id] = btn
-        y = y - 21   -- 22 pages: 21 px each keeps them inside the window
-        if page.id == "general" or page.id == "raid" or page.id == "mainassisttarget" then y = y - 6 end
+        y = y - 21   -- 23 pages: 21 px each keeps them inside the window
+        if page.id == "general" or page.id == "raidpet" or page.id == "mainassisttarget" then y = y - 6 end
     end
 
     -- tab bar (unit pages) above the scrolling page area

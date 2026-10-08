@@ -11,7 +11,7 @@ local _, ns = ...
 ns.unitKeys = {
     "player", "pet", "pettarget", "target", "targettarget", "targettargettarget",
     "focus", "focustarget",
-    "party", "partypet", "partytarget", "raid",
+    "party", "partypet", "partytarget", "raid", "raidpet",
     "maintank", "maintanktarget", "mainassist", "mainassisttarget",
 }
 
@@ -28,6 +28,7 @@ ns.unitLabels = {
     partypet = "Party Pets",
     partytarget = "Party Targets",
     raid = "Raid",
+    raidpet = "Raid Pets",
     maintank = "Main Tank",
     maintanktarget = "Main Tank Target",
     mainassist = "Main Assist",
@@ -101,6 +102,11 @@ local function spawnAll()
         if UF.frames[unit] then UF.Apply(UF.frames[unit]) else UF.Create(unit, { key = "raid", index = i }) end
     end
     UF.ArrangeRaid()
+    for i = 1, 40 do
+        local unit = "raidpet" .. i
+        if UF.frames[unit] then UF.Apply(UF.frames[unit]) else UF.Create(unit, { key = "raidpet", index = i }) end
+    end
+    UF.ArrangeRaidPets()
     -- main tanks / assists: fixed frames that follow the raid roles
     for _, rf in ipairs(ROLE_FRAMES) do
         for i = 1, rf.count do
@@ -122,8 +128,13 @@ local function spawnAll()
 end
 
 -- Who is in which subgroup changes with the roster; frames move out of combat.
+ns:RegisterEvent("UNIT_PET", function()
+    if ns.UF.byKey.raidpet then ns:RunOutOfCombat(ns.UF.ArrangeRaidPets) end
+end)
+
 ns:RegisterEvent("GROUP_ROSTER_UPDATE", function()
     if ns.UF.byKey.raid then ns:RunOutOfCombat(ns.UF.ArrangeRaid) end
+    if ns.UF.byKey.raidpet then ns:RunOutOfCombat(ns.UF.ArrangeRaidPets) end
     if ns.UF.byKey.maintank then ns:RunOutOfCombat(ns.AssignRaidRoles) end
 end)
 

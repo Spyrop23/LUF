@@ -14,7 +14,8 @@ local _, ns = ...
 local HL = {}
 ns.Highlight = HL
 
-HL.debuffSupported = { player = true, pet = true, target = true, focus = true, party = true, partypet = true, raid = true }
+HL.debuffSupported = { player = true, pet = true, target = true, focus = true, party = true, partypet = true, raid = true,
+    raidpet = true }
 HL.DEBUFF_MODES = { { "off", "Off" }, { "own", "Your own (ones you can dispel)" }, { "all", "All" } }
 
 local DISPEL_COLORS = {

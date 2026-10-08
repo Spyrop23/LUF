@@ -16,7 +16,8 @@ local BO = {}
 ns.Borders = BO
 
 -- Units that get aura events (the debuff border needs them).
-BO.debuffSupported = { player = true, pet = true, target = true, focus = true, party = true, partypet = true, raid = true }
+BO.debuffSupported = { player = true, pet = true, target = true, focus = true, party = true, partypet = true, raid = true,
+    raidpet = true }
 
 BO.DEBUFF_MODES = { { "off", "Off" }, { "own", "Your own (ones you can dispel)" }, { "all", "All" } }
 

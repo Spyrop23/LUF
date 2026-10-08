@@ -197,6 +197,15 @@ ns.defaults = {
                 powerBar  = { size = 7, left = "", center = "", right = "" },
             },
         })),
+        -- Luna's raid pets: the pets in the raid, packed into columns
+        raidpet = unitDefaults(small({
+            enabled = false,
+            x = 10, y = -620, width = 60, height = 24, spacing = 2, perColumn = 5,
+            healthBar = { weight = 8 },
+            tags = {
+                healthBar = { size = 8, left = "", center = "[name]", right = "" },
+            },
+        })),
     },
 }
 

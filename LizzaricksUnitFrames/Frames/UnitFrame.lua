@@ -46,6 +46,7 @@ local GLOBAL_EVENTS = {
     maintanktarget = { "GROUP_ROSTER_UPDATE", "UNIT_TARGET" },
     mainassisttarget = { "GROUP_ROSTER_UPDATE", "UNIT_TARGET" },
     raid = { "GROUP_ROSTER_UPDATE" },
+    raidpet = { "GROUP_ROSTER_UPDATE", "UNIT_PET" },
 }
 
 -- Experience events (only for frames with an XP bar).
@@ -164,7 +165,10 @@ end
 function UF.Position(f)
     local db = f.db
     f:ClearAllPoints()
-    if f.key == "raid" then
+    if f.key == "raidpet" then
+        local dx, dy = UF.RaidPetOffset(ns.unlocked and f.index or (f.raidSlot or f.index))
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", db.x + dx, db.y + dy)
+    elseif f.key == "raid" then
         local gx, gy = UF.RaidGroupOrigin(f.raidGroup or math.ceil(f.index / 5))
         local mx, my = UF.RaidMemberOffset(f.raidSlot or ((f.index - 1) % 5 + 1))
         f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", gx + mx, gy + my)
@@ -188,9 +192,19 @@ function UF.Slot(f)
     return f.index
 end
 
+-- Raid pets fill columns of `perColumn`, columns to the right.
+function UF.RaidPetOffset(slot)
+    local db = ns.db.units.raidpet
+    local per = math.max(1, db.perColumn or 5)
+    local col, row = math.floor((slot - 1) / per), (slot - 1) % per
+    return col * (db.width + db.spacing), -row * (db.height + db.spacing)
+end
+
 -- Whether the frame is in use at all (the "you" frame only with the option).
 function UF.IsActive(f)
     if not f.db.enabled then return false end
+    -- config mode shows ten raid pets to place, not forty
+    if f.key == "raidpet" and ns.unlocked and f.index > 10 then return false end
     if f.key == "party" and f.index == 0 then return f.db.showPlayer and true or false end
     return true
 end
@@ -312,7 +326,9 @@ function UF.StackBars(f)
         t.center:SetPoint("CENTER", bar, "CENTER", cx, cy)
         for _, side in ipairs({ "left", "center", "right" }) do
             ns.SetFont(t[side], tdb.size, ns.FontFlags())
-            t[side]:SetHeight(h)
+            -- [br] makes more lines: room for all of them, centred on the bar
+            local lines = 1 + select(2, (tdb[side] or ""):gsub("%[br%]", ""))
+            t[side]:SetHeight(lines > 1 and math.ceil(lines * tdb.size * 1.15) or h)
         end
         -- left and right share the bar; the left text gives way first
         t.left:SetPoint("RIGHT", t.right, "LEFT", -4, ly - ry)
@@ -830,6 +846,28 @@ end
 
 -- Raid frames keep their unit (raidN); out of combat they are moved into the
 -- column of the member's subgroup, as Luna's group headers would do.
+-- Raid pets that exist take the first places, in raid order, so the block
+-- has no gaps; the others queue up behind them (a pet summoned in combat
+-- shows there until the next arrangement). Out of combat only.
+function UF.ArrangeRaidPets()
+    local frames = UF.byKey.raidpet
+    if not frames then return end
+    local slot = 0
+    for pass = 1, 2 do
+        for i = 1, 40 do
+            local f = UF.frames["raidpet" .. i]
+            if f then
+                local has = not ns.unlocked and UnitExists(f.realUnit or f.unit)
+                if (pass == 1) == (has and true or false) then
+                    slot = slot + 1
+                    f.raidSlot = ns.unlocked and i or slot
+                    UF.Position(f)
+                end
+            end
+        end
+    end
+end
+
 function UF.ArrangeRaid()
     local frames = UF.byKey.raid
     if not frames then return end

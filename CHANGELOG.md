@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- `[br]` tag: a line break in any text, as in Luna, e.g. `[nameafk][br][perhp]` on the raid frames. Thanks to **spudster90**!
+- Raid pets, as in Luna (new page "Raid Pets", off by default): the pets in the raid as small frames, packed into columns without gaps (re-sorted out of combat), with squares, borders, highlight and range fading like the raid frames. Pets per column and spacing adjustable. Thanks to **spudster90** for the idea!
 - New tags for WoW: Forever surnames: `[fullname]` (name and surname, e.g. "Lizzarick Shamtest") and `[surname]`. Put them in any text on the Tags tab, e.g. `[fullname]` instead of `[name]`.
 
 ## 0.14.1

@@ -153,6 +153,7 @@ Tags.methods = {
         return EMPTY
     end,
     nocolor = function() return "|r" end,
+    br = function() return "\n" end,   -- line break, as in Luna
 
     -- health
     -- Full numbers with thousands separators, as in Luna; the s-variants
@@ -342,6 +343,7 @@ Tags.help = {
     { "statuscolor", "Starts red in combat, green while resting (player)" },
     { "color:rrggbb", "Starts your own colour, e.g. [color:ff8000]" },
     { "nocolor", "Ends a colour" },
+    { "br", "Line break, e.g. [name][br][perhp]" },
 }
 
 -- ------------------------------------------------------------ compile --

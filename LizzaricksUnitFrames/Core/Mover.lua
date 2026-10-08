@@ -42,6 +42,10 @@ local function dropOffsets(f)
         local gx, gy = UF.RaidGridOrigin(f.raidGroup or 1)
         return x - (gx - f.db.x), y - (gy - f.db.y)
     end
+    if f.key == "raidpet" then
+        local dx, dy = UF.RaidPetOffset(f.index)   -- config mode: slot = index
+        return x - dx, y - dy
+    end
     local slot = UF.Slot(f)
     if slot and slot > 1 then
         y = y + (slot - 1) * (f.db.height + (f.db.spacing or 0))
@@ -53,7 +57,8 @@ end
 -- f's raid group when groups are moved separately.
 local function siblings(f)
     local list = {}
-    if f.key ~= "party" and f.key ~= "raid" and f.key ~= "maintank" and f.key ~= "mainassist" then return list end
+    if f.key ~= "party" and f.key ~= "raid" and f.key ~= "raidpet" and f.key ~= "maintank"
+        and f.key ~= "mainassist" then return list end
     for _, s in ipairs(UF.byKey[f.key] or {}) do
         if s ~= f and s:IsShown() then
             if f.key ~= "raid" or not f.db.separateGroups or s.raidGroup == f.raidGroup then

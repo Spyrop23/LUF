@@ -14,7 +14,7 @@ ns.Range = RG
 -- Settings keys that fade. UnitInRange answers for group members (and their
 -- pets); for the player's own pet it reports "out of range" even next to
 -- you, as a secret we cannot catch, so the pet frame never fades.
-RG.supported = { party = true, partypet = true, raid = true }
+RG.supported = { party = true, partypet = true, raid = true, raidpet = true }
 
 local POLL_EVERY = 0.25
 

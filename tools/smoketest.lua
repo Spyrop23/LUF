@@ -1190,6 +1190,45 @@ do
     assert(fs.text == "Name-target", "secret name still shown")
 end
 
+-- [br]: a line break; the text gets room for its lines
+do
+    local pf = ns.UF.frames.player
+    local fs = pf.healthBar.text.center
+    ns.Tags.Render(fs, "[name][br][perhp]", "player")
+    assert(fs.text and fs.text:find("^Thrall\n"), "line break: " .. tostring(fs.text))
+    local tdb = ns.db.units.player.tags.healthBar
+    local old = tdb.center
+    tdb.center = "[name][br][perhp]"
+    ns.UF.Layout(pf)
+    assert(fs.h > pf.healthBar.h or fs.h >= 2 * tdb.size, "two lines of room")
+    tdb.center = old
+    ns.UF.Layout(pf)
+end
+
+-- raid pets: off by default; on, the pets that exist fill the first places
+do
+    local rdb = ns.db.units.raidpet
+    local p1 = ns.UF.frames.raidpet1
+    assert(p1 and p1.key == "raidpet" and not p1.shown, "raid pets exist, off by default")
+    local unitExists = UnitExists
+    UnitExists = function(u) if u == "raidpet3" or u == "raidpet7" then return true end return unitExists(u) end
+    rdb.enabled = true
+    ns:ApplyKey("raidpet")
+    ns.UF.ArrangeRaidPets()
+    local f3, f7 = ns.UF.frames.raidpet3, ns.UF.frames.raidpet7
+    assert(f3.raidSlot == 1 and f7.raidSlot == 2, "existing pets packed: " .. tostring(f3.raidSlot) .. "," .. tostring(f7.raidSlot))
+    assert(f3.point[4] == rdb.x and f7.point[5] == rdb.y - (rdb.height + rdb.spacing), "second pet below the first")
+    assert(ns.UF.frames.raidpet1.raidSlot == 3, "missing pets queue behind")
+    SlashCmdList.LIZUF("unlock")
+    assert(ns.UF.frames.raidpet10.shown and not ns.UF.frames.raidpet11.shown, "config mode shows ten")
+    SlashCmdList.LIZUF("lock")
+    UnitExists = unitExists
+    rdb.enabled = false
+    ns:ApplyKey("raidpet")
+    assert(not f3.shown, "off again")
+    print("raid pets ok")
+end
+
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
     local fs = ns.UF.frames.player.healthBar.text.center
