@@ -207,7 +207,17 @@ local function unitTabs(key)
     end)
 
     if ns.ClassPower and ns.ClassPower.supported[key] then
-        tab("classpower", "Class power", function(b)
+        tab("classpower", key == "target" and "Combo points" or "Class power", function(b)
+            if key == "target" then
+                b:Header("Combo points")
+                b:Text("Your combo points on this target (rogue, druid in cat form), as in Luna. Only while " ..
+                    "\"Combo points on the target frame\" is on (Player -> Class power).", 30)
+                b:Check("Enabled", p("classPower.enabled"))
+                b:Dropdown("Position", ns.ClassPower.POSITIONS, p("classPower.position"))
+                b:Slider("Height", 3, 20, 1, p("classPower.height"))
+                b:Slider("Space between points", 0, 10, 1, p("classPower.spacing"))
+                return
+            end
             b:Header("Class power")
             b:Text("Combo points (rogue, druid in cat form), holy power, soul shards, chi (Windwalker), " ..
                 "arcane charges (Arcane) and essence as a row of points; for shamans the totem timers " ..
@@ -217,6 +227,13 @@ local function unitTabs(key)
             b:Slider("Height", 3, 20, 1, p("classPower.height"))
             b:Slider("Space between points", 0, 10, 1, p("classPower.spacing"))
             b:Check("Shamans: time left on the totem bars", p("classPower.totemTimer"))
+            if ns.isForever then
+                -- moves the combo points between two frames: re-layout both
+                local gco = p("classPower.comboOnTarget")
+                b:Check("Combo points on the target frame (they belong to the target, as in Luna)",
+                    function() return gco() ~= false end,
+                    function(v) ns.db.units.player.classPower.comboOnTarget = v; ns:ApplyAll() end)
+            end
             local ghc, shc = p("classPower.hideBlizzard")
             b:Check("Hide Blizzard class bar (holy power, combo points ...)",
                 blizzardToggle(ghc, shc, "classpower", "Blizzard's class bar"))

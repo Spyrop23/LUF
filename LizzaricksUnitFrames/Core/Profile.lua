@@ -129,7 +129,7 @@ ns.defaults = {
             combatText = { enabled = true },
             -- combo points, holy power, soul shards ... as a row of points
             classPower = { enabled = true, height = 7, spacing = 2, position = "ABOVE", hideBlizzard = true,
-                totemTimer = true },
+                totemTimer = true, comboOnTarget = true },
         }),
         pet = unitDefaults({
             y = -72, height = 30,
@@ -146,6 +146,8 @@ ns.defaults = {
             indicators = { elite = { enabled = true } },
             combatText = { enabled = true },
             castBar = { enabled = true },
+            -- Forever: your combo points on the target, as in Luna
+            classPower = { enabled = true, height = 7, spacing = 2, position = "ABOVE" },
             auras = { buffs = true, debuffs = true },
             tags = { healthBar = { right = "[smarthealthp]" } },
         }),

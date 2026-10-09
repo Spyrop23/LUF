@@ -22,7 +22,9 @@ local _, ns = ...
 local CP = {}
 ns.ClassPower = CP
 
-CP.supported = { player = true }
+-- Forever: combo points sit on the target (Classic), so the target frame
+-- can show them, as Luna does in vanilla.
+CP.supported = { player = true, target = ns.isForever }
 CP.POSITIONS = { { "ABOVE", "Above the frame" }, { "BELOW", "Below the frame" } }
 
 local MAX_POINTS = 10
@@ -81,6 +83,34 @@ local CLASSES = ns.isRetail
     and { ROGUE = true, DRUID = true, PALADIN = true, WARLOCK = true, MONK = true, MAGE = true, EVOKER = true,
         SHAMAN = true }
     or { ROGUE = true, DRUID = true, SHAMAN = true }
+local COMBO = PT.ComboPoints or 4
+local COMBO_CLASSES = { ROGUE = true, DRUID = true }
+
+-- Forever: combo points on the target frame (Player -> Class power option,
+-- on by default) instead of the player frame.
+function CP.CombosOnTarget()
+    if not ns.isForever then return false end
+    local db = ns.db and ns.db.units.player.classPower
+    return not db or db.comboOnTarget ~= false
+end
+
+-- What this frame's row shows right now: the player frame everything but
+-- combo points that moved to the target, the target frame only those.
+local function frameType(f)
+    local ptype = powerType()
+    if f.key == "target" then
+        return (ptype == COMBO and CP.CombosOnTarget()) and ptype or nil
+    end
+    if ptype == COMBO and CP.CombosOnTarget() then return nil end
+    return ptype
+end
+
+-- Whether the class can have points on this frame at all.
+local function classFits(f, class)
+    if f.key == "target" then return CP.CombosOnTarget() and COMBO_CLASSES[class] or false end
+    if CP.CombosOnTarget() and COMBO_CLASSES[class] then return false end
+    return CLASSES[class]
+end
 
 -- Space the row takes next to the frame on `side` ("ABOVE"/"BELOW"), so the
 -- cast bar and the auras can make room. Kept for the class even while a
@@ -90,7 +120,8 @@ function CP.Reserved(f, side)
     local db = f.db.classPower
     if not (db and db.enabled) or (db.position or "ABOVE") ~= side then return 0 end
     local _, class = call(UnitClass, "player")
-    if not (ns.unlocked or CLASSES[readable(class)]) then return 0 end
+    if f.key == "target" and not CP.CombosOnTarget() then return 0 end
+    if not (ns.unlocked or classFits(f, readable(class))) then return 0 end
     return db.height + 1
 end
 
@@ -178,9 +209,11 @@ function CP.Update(f)
     local holder = f.classPower
     if not holder then return end
     local db = f.db.classPower
-    local ptype = db.enabled and powerType()
+    if not db then return end
+    local ptype = db.enabled and frameType(f)
     local count = ptype and maxPoints(ptype) or 0
-    if ns.unlocked and db.enabled and count == 0 then
+    local preview = f.key ~= "target" or CP.CombosOnTarget()
+    if ns.unlocked and db.enabled and count == 0 and preview then
         count, ptype = 5, PT.ComboPoints or 4   -- config mode: show where it goes
     end
     if count == 0 then

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Combo points on the target frame (WoW: Forever), as in Luna for vanilla: they belong to the target there, so the row now sits on the target frame (Target → Combo points: position, height, spacing). Player → Class power → "Combo points on the target frame" (on by default) moves them back to the player frame. Retail keeps them on the player. Thanks to **carnage0975** for the idea!
 - `[br]` tag: a line break in any text, as in Luna, e.g. `[nameafk][br][perhp]` on the raid frames. Thanks to **spudster90**!
 - Raid pets, as in Luna (new page "Raid Pets", off by default): the pets in the raid as small frames, packed into columns without gaps (re-sorted out of combat), with squares, borders, highlight and range fading like the raid frames. Pets per column and spacing adjustable. Thanks to **spudster90** for the idea!
 - New tags for WoW: Forever surnames: `[fullname]` (name and surname, e.g. "Lizzarick Shamtest") and `[surname]`. Put them in any text on the Tags tab, e.g. `[fullname]` instead of `[name]`.

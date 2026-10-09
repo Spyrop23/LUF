@@ -617,6 +617,21 @@ UnitClass = function(u) if u == "player" then return "Rogue", "ROGUE" end return
 UnitPowerMax = function(u, pt) if u == "player" and pt == 4 then return 5 end return powerMax(u, pt) end
 UnitPower = function(u, pt) if pt == 4 then return secret(3) end return unitPower(u, pt) end
 GetComboPoints = function(u, t) return secret(3) end   -- Forever: combo points on the target
+if not RETAIL then
+    -- Forever: combo points belong to the target, so they sit on the target frame (as in Luna)
+    ns.ClassPower.Update(ns.UF.frames.player)
+    assert(not cpf.shown, "Forever: no combo points on the player frame")
+    local tcp = ns.UF.frames.target.classPower
+    ns.UF.Layout(ns.UF.frames.target)
+    assert(tcp and tcp.shown and tcp.count == 5 and tcp.points[3].value == 3, "combo points on the target frame")
+    assert(ns.ClassPower.Reserved(ns.UF.frames.player, "ABOVE") == 0, "player frame keeps no room for them")
+    -- the option puts them back on the player frame
+    ns.db.units.player.classPower.comboOnTarget = false
+    ns.UF.Layout(ns.UF.frames.target)
+    assert(not tcp.shown, "option off: target frame row gone")
+else
+    assert(not ns.UF.frames.target.classPower, "Retail: combo points stay with the player")
+end
 ns.ClassPower.Update(ns.UF.frames.player)
 assert(cpf.shown and cpf.count == 5 and cpf.points[5].shown and not cpf.points[6].shown, "five combo points")
 local p3, p4 = cpf.points[3], cpf.points[4]
@@ -643,6 +658,8 @@ UnitClass, UnitPowerMax, UnitPower = unitClass, powerMax, unitPower
 ns.ClassPower.Update(ns.UF.frames.player)
 assert(not cpf.shown, "back to warrior")
 assert(ns:IsBlizzardHidden("classpower") and PaladinPowerBarFrame.shown == false, "Blizzard's class bar hidden")
+ns.db.units.player.classPower.comboOnTarget = true
+ns.UF.Layout(ns.UF.frames.target)
 -- shaman: the class power row shows four totem timers that run down by themselves
 do
     local pf = ns.UF.frames.player
