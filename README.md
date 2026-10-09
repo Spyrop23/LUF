@@ -52,7 +52,7 @@ tools/      Smoke-Test und Paket-Skript
 | `/luf debug` | abgefangene Fehler als Bericht zum Kopieren (`/luf debug clear` leert die Liste) |
 | `/luf tags` | Tag-Übersicht im Menü |
 
-## Stand (0.14.1)
+## Stand (0.15.0)
 
 - **Frames:** Spieler, Begleiter, Ziel des Begleiters, Ziel, Ziel des Ziels, Ziel von dessen Ziel,
   Gruppe (party1–4), die Begleiter und Ziele der Gruppenmitglieder, Main Tanks und Main Assists
