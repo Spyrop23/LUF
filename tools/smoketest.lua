@@ -52,6 +52,8 @@ function Widget:IsVisible() return self.shown end
 function Widget:SetSize(w, h) self.w, self.h = w, h end
 function Widget:SetWidth(w) self.w = w end
 function Widget:SetHeight(h) self.h = h end
+function Widget:SetWordWrap(w) self.wordWrap = w end
+function Widget:SetMaxLines(n) self.maxLines = n end
 function Widget:GetWidth() return self.w end
 function Widget:GetHeight() return self.h end
 function Widget:GetLeft() return 10 end
@@ -1218,8 +1220,10 @@ do
     tdb.center = "[name][br][perhp]"
     ns.UF.Layout(pf)
     assert(fs.h > pf.healthBar.h or fs.h >= 2 * tdb.size, "two lines of room")
+    assert(fs.wordWrap == true and fs.maxLines == 2, "font string allows two lines")
     tdb.center = old
     ns.UF.Layout(pf)
+    assert(fs.wordWrap == false and fs.maxLines == 1, "single line again")
 end
 
 -- raid pets: off by default; on, the pets that exist fill the first places

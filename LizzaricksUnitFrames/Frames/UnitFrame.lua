@@ -329,6 +329,10 @@ function UF.StackBars(f)
             -- [br] makes more lines: room for all of them, centred on the bar
             local lines = 1 + select(2, (tdb[side] or ""):gsub("%[br%]", ""))
             t[side]:SetHeight(lines > 1 and math.ceil(lines * tdb.size * 1.15) or h)
+            -- one line stays unwrapped (long names are cut, not wrapped); with
+            -- [br] the font string must allow lines, or it shows only the first
+            t[side]:SetWordWrap(lines > 1)
+            if t[side].SetMaxLines then t[side]:SetMaxLines(lines > 1 and lines or 1) end
         end
         -- left and right share the bar; the left text gives way first
         t.left:SetPoint("RIGHT", t.right, "LEFT", -4, ly - ry)

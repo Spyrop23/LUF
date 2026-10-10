@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Fix: `[br]` showed only the first line. Texts with a line break now allow more lines (single-line texts stay unwrapped as before).
+
 ## 0.15.0
 - Combo points on the target frame (WoW: Forever), as in Luna for vanilla: they belong to the target there, so the row now sits on the target frame (Target → Combo points: position, height, spacing). Player → Class power → "Combo points on the target frame" (on by default) moves them back to the player frame. Retail keeps them on the player. Thanks to **carnage0975** for the idea!
 - `[br]` tag: a line break in any text, as in Luna, e.g. `[nameafk][br][perhp]` on the raid frames. Thanks to **spudster90**!
