@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.1
 - Click casting: every frame is registered for Clique (and other click-cast addons that use the shared ClickCastFrames list), so your Clique bindings work on our frames. Thanks to **DDsareX** for the idea!
 - Fix: `[br]` showed only the first line. Texts with a line break now allow more lines (single-line texts stay unwrapped as before).
 
