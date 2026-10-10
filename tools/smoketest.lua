@@ -1248,6 +1248,9 @@ do
     ns:ApplyKey("raidpet")
     assert(not f3.shown, "off again")
     print("raid pets ok")
+    -- click casting: every frame is offered to Clique & co.
+    assert(ClickCastFrames and ClickCastFrames[ns.UF.frames.player] and ClickCastFrames[ns.UF.frames.raid5]
+        and ClickCastFrames[ns.UF.frames.partyplayer], "frames registered for click casting")
 end
 
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)

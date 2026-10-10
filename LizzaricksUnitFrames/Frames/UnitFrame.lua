@@ -740,6 +740,11 @@ function UF.Create(id, opts)
     end)
     f:HookScript("OnLeave", function() GameTooltip:Hide() end)
 
+    -- click casting (Clique and others): they pick up every frame in this
+    -- shared table, also frames added before they load
+    ClickCastFrames = ClickCastFrames or {}
+    ClickCastFrames[f] = true
+
     UF.frames[id] = f
     UF.byKey[f.key] = UF.byKey[f.key] or {}
     table.insert(UF.byKey[f.key], f)
