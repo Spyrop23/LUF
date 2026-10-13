@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.2
 - Fix: Target of Target (and other "target of ..." frames) showed a player in green instead of the class colour when your target was an NPC. The game keeps the class secret for such chains; the class colour now comes from the game's own colour then (Blizzard's class colours), for the health bar and `[classcolor]`. Thanks to **carnage0975** for the report!
 
 ## 0.15.1
