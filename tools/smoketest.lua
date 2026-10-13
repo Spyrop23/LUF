@@ -1253,6 +1253,29 @@ do
         and ClickCastFrames[ns.UF.frames.partyplayer], "frames registered for click casting")
 end
 
+-- class colour with a secret class (target of an NPC's target): the client's colour object
+do
+    local unitClass, unitIsPlayer = UnitClass, UnitIsPlayer
+    local cc = C_ClassColor
+    UnitClass = function(u) if u == "targettarget" then return secret("Mage"), secret("MAGE") end return unitClass(u) end
+    UnitIsPlayer = function(u) if u == "targettarget" then return true end return unitIsPlayer(u) end
+    C_ClassColor = { GetClassColor = function(token)
+        assert(reveal(token) == "MAGE", "secret class handed over")
+        return { GetRGB = function() return secret(0.25), secret(0.78), secret(0.92) end,
+            GenerateHexColor = function() return secret("ff3fc7eb") end }
+    end }
+    local tot = ns.UF.frames.targettarget
+    ns.db.units.targettarget.healthBar.colorType = "class"
+    ns.UF.UpdateHealth(tot)
+    local col = tot.healthBar.statusColor or tot.healthBar.color
+    assert(col and reveal(col[2]) == 0.78, "ToT health bar in the class colour: " .. tostring(col and reveal(col[2])))
+    local fs = tot.healthBar.text.center
+    ns.Tags.Render(fs, "[classcolor][name]", "targettarget")
+    assert(fs.text and fs.text:find("^|cff3fc7eb"), "classcolor tag: " .. tostring(fs.text))
+    UnitClass, UnitIsPlayer, C_ClassColor = unitClass, unitIsPlayer, cc
+    ns.UF.UpdateHealth(tot)
+end
+
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
     local fs = ns.UF.frames.player.healthBar.text.center

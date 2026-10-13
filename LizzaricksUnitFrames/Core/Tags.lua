@@ -136,7 +136,12 @@ Tags.methods = {
     -- colours: they only open a colour, [nocolor] closes it
     classcolor = function(u)
         local c = ns.ClassColor(u)
-        return c and ns.Hex(c) or "|cffffffff"
+        if c then return ns.Hex(c) end
+        -- secret class: the client's colour object writes the (secret) hex
+        local color = ns.ClassColorObject(u)
+        local ok, hex = pcall(function() return color:GenerateHexColor() end)
+        if color and ok and type(hex) ~= "nil" then return "|c%s", hex end
+        return "|cffffffff"
     end,
     reactcolor = function(u)
         local c = ns.ReactionColor(u)

@@ -426,7 +426,17 @@ local function updateHealthBar(f)
         local h = ns.PetHappiness(unit)
         c = h and ns.colors.happiness[h] or ns.ReactionColor(unit)
     elseif ct == "class" then
-        c = isPlayer and ns.ClassColor(unit) or ns.ReactionColor(unit)
+        c = isPlayer and ns.ClassColor(unit)
+        if isPlayer and not c then
+            -- secret class (target of an NPC's target): the client colours it
+            local color = ns.ClassColorObject(unit)
+            local ok, r, g, b = pcall(function() return color:GetRGB() end)
+            if color and ok and pcall(bar.SetStatusBarColor, bar, r, g, b) then
+                pcall(bar.bg.SetVertexColor, bar.bg, r, g, b, bdb.backgroundAlpha)
+                return
+            end
+        end
+        c = c or ns.ReactionColor(unit)
     elseif ct == "reaction" then
         c = ns.ReactionColor(unit)
     elseif ct == "health" then

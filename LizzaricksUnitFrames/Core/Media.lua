@@ -291,6 +291,19 @@ function ns.ClassColor(unit)
     return token and ns.colors.class[token]
 end
 
+-- The class colour when the class itself is secret (compound units such as
+-- targettarget when the target is an NPC: the whole chain becomes secret).
+-- C_ClassColor accepts the secret class and hands back a colour whose
+-- channels go straight into widget setters, never into our own code. These
+-- are Blizzard's class colours, not the ones from the Colors page.
+function ns.ClassColorObject(unit)
+    if not (C_ClassColor and C_ClassColor.GetClassColor) then return nil end
+    local _, token = UnitClass(unit)
+    if type(token) == "nil" then return nil end
+    local ok, color = pcall(C_ClassColor.GetClassColor, token)
+    if ok and type(color) ~= "nil" then return color end
+end
+
 function ns.ReactionColor(unit)
     local r = UnitReaction(unit, "player")
     if ns.CanRead(r) and r then return ns.colors.reaction[r] end

@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Fix: Target of Target (and other "target of ..." frames) showed a player in green instead of the class colour when your target was an NPC. The game keeps the class secret for such chains; the class colour now comes from the game's own colour then (Blizzard's class colours), for the health bar and `[classcolor]`. Thanks to **carnage0975** for the report!
+
 ## 0.15.1
 - Click casting: every frame is registered for Clique (and other click-cast addons that use the shared ClickCastFrames list), so your Clique bindings work on our frames. Thanks to **DDsareX** for the idea!
 - Fix: `[br]` showed only the first line. Texts with a line break now allow more lines (single-line texts stay unwrapped as before).
