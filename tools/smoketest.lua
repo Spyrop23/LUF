@@ -1276,6 +1276,20 @@ do
     ns.UF.UpdateHealth(tot)
 end
 
+-- pet cast bar (Fire Bolt, Seduction ...)
+do
+    local pet = ns.UF.frames.pet
+    assert(pet.castBar and ns.db.units.pet.castBar.enabled, "pet has a cast bar, on by default")
+    local info = UnitCastingInfo
+    UnitCastingInfo = function(u) if u == "pet" then return "Fire Bolt", "", 135809 end return info(u) end
+    for _, w in ipairs(frames) do
+        if w.events.UNIT_SPELLCAST_START == "pet" and w.scripts.OnEvent then w.scripts.OnEvent(w, "UNIT_SPELLCAST_START", "pet") end
+    end
+    assert(pet.castBar.shown and pet.castBar.name.text == "Fire Bolt", "pet cast shown")
+    UnitCastingInfo = info
+    ns.CastBar.Stop(pet)
+end
+
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
     local fs = ns.UF.frames.player.healthBar.text.center

@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Pet cast bar: the pet frame gets a cast bar (Fire Bolt, Seduction ...), on by default, slim below the frame; Pet → Cast bar for size and position. Thanks to **vbrokop** for the idea!
+
 ## 0.15.2
 - Fix: Target of Target (and other "target of ..." frames) showed a player in green instead of the class colour when your target was an NPC. The game keeps the class secret for such chains; the class colour now comes from the game's own colour then (Blizzard's class colours), for the health bar and `[classcolor]`. Thanks to **carnage0975** for the report!
 

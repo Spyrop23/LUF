@@ -138,6 +138,8 @@ ns.defaults = {
             auras = { buffs = true, debuffs = true, size = 16, debuffSize = 20 },
             xpBar = { enabled = true },
             combatText = { enabled = true },
+            -- the pet's casts (Fire Bolt, Seduction ...), slim, below the frame
+            castBar = { enabled = true, height = 8 },
             tags = { xpBar = { center = "[xppet] [percxppet]" } },
         }),
         pettarget = unitDefaults(small({ x = 260, y = -72, enabled = false })),
