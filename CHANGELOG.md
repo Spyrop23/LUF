@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.3
 - Pet cast bar: the pet frame gets a cast bar (Fire Bolt, Seduction ...), on by default, slim below the frame; Pet → Cast bar for size and position. Thanks to **vbrokop** for the idea!
 
 ## 0.15.2
