@@ -93,6 +93,8 @@ function Widget:GenerateMenu()
     self.radios = radios
     for _, r in ipairs(radios) do r.isSel() end
 end
+function Widget:SetCancelAuraButtons(v) self.cancel = v; return true end
+function Widget:SetMouseClickEnabled(v) self.clicks = v end
 function Widget:AddAuraGroup(key, filterString, opts)
     assert(type(filterString) == "string" and filterString ~= "", "filter string")
     self.groups = self.groups or {}
@@ -121,6 +123,7 @@ UIParent = newWidget("Frame", "UIParent")
 Minimap = newWidget("Frame", "Minimap")
 GameTooltip = newWidget("GameTooltip", "GameTooltip")
 PlayerFrame = newWidget("Frame", "PlayerFrame")
+BuffFrame = newWidget("Frame", "BuffFrame")
 PlayerFrame.PlayerFrameContainer = newWidget("Frame")
 TargetFrame = newWidget("Frame", "TargetFrame")
 TargetFrame.totFrame = newWidget("Frame")
@@ -1288,6 +1291,28 @@ do
     assert(pet.castBar.shown and pet.castBar.name.text == "Fire Bolt", "pet cast shown")
     UnitCastingInfo = info
     ns.CastBar.Stop(pet)
+end
+
+-- player buffs cancel on a right click (the client's secure aura button does it);
+-- Blizzard's buff frame can be hidden
+do
+    local adb = ns.db.units.player.auras
+    local oldBuffs = adb.buffs
+    adb.buffs = true
+    adb.size = adb.size + 1   -- new signature: a new container
+    ns.UF.Layout(ns.UF.frames.player)
+    local c = ns.UF.frames.player.auraContainer
+    local g = c and c.groups and c.groups.buffs
+    assert(g and g.button.cancel == "RightButtonUp" and g.button.clicks == true, "player buffs cancel on right click")
+    local tc = ns.UF.frames.target.auraContainer
+    local tg = tc and tc.groups and tc.groups.buffs
+    assert(not tg or (tg.button.cancel == nil and tg.button.clicks == false), "target buffs: clicks go to the frame")
+    adb.size, adb.buffs = adb.size - 1, oldBuffs
+    ns.UF.Layout(ns.UF.frames.player)
+    ns.db.hideBlizzardBuffs = true
+    ns:HideBlizzard("player")
+    assert(ns:IsBlizzardHidden("buffs") and BuffFrame.shown == false, "Blizzard's buff frame hidden")
+    ns.db.hideBlizzardBuffs = false
 end
 
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)

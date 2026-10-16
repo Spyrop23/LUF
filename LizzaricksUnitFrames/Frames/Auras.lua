@@ -100,7 +100,8 @@ AU.CanBuild = function() return canBuild() end
 
 -- ------------------------------------------------------------ buttons --
 
-local function initializer(db, debuffs, size)
+-- cancel: right click cancels the buff (your own buffs on the player frame)
+local function initializer(db, debuffs, size, cancel)
     return function(button)
         button:SetSize(size, size)
 
@@ -168,8 +169,15 @@ local function initializer(db, debuffs, size)
             end
         end
 
-        -- Hover shows the client's tooltip; clicks go through to the frame.
-        try(button, "SetMouseClickEnabled", false)
+        -- Hover shows the client's tooltip. Your own buffs on the player frame
+        -- cancel on a right click, as Blizzard's buff frame does: the button
+        -- does it in the client's secure code, so it works in combat too.
+        -- Everywhere else clicks go through to the frame.
+        if cancel and try(button, "SetCancelAuraButtons", "RightButtonUp") then
+            try(button, "SetMouseClickEnabled", true)
+        else
+            try(button, "SetMouseClickEnabled", false)
+        end
         try(button, "SetMouseMotionEnabled", true)
     end
 end
@@ -230,7 +238,8 @@ local function buildContainer(f, db, which)
             maxFrameCount = debuffs and (db.debuffs and db.maxDebuffs or 0) or (db.buffs and db.maxBuffs or 0),
             sortMethod = sortMethod,
             sortDirection = sortDirection,
-            initializeFrame = initializer(db, debuffs, size),
+            initializeFrame = initializer(db, debuffs, size,
+                not debuffs and f.key == "player" and db.cancelClick ~= false),
             layout = {
                 elementWidth = size,
                 -- room for the time text above or below the icon (none inside)
@@ -279,6 +288,7 @@ local function signature(db)
         db.buffFilter, db.debuffFilter, tostring(db.duration), tostring(db.swipe), tostring(db.dispelColors),
         db.buffListMode or "", db.debuffListMode or "", tostring(separate(db)),
         db.biggerBuffs or 0, db.biggerDebuffs or 0, db.durationPosition or "BELOW", ns.Font(),
+        tostring(db.cancelClick ~= false),
         ns.Filters and ns.Filters.Get(db.buffList) and ns.Filters.Signature(db.buffList) or "",
         ns.Filters and ns.Filters.Get(db.debuffList) and ns.Filters.Signature(db.debuffList) or "",
     }, ":")

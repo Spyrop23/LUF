@@ -306,6 +306,11 @@ local function unitTabs(key)
             b:Slider("Max. buffs", 1, 40, 1, p("auras.maxBuffs"))
             b:Slider("Buff icon size", 8, 50, 1, p("auras.size"))
             b:Slider("Bigger buffs (your own, + px)", 0, 20, 1, p("auras.biggerBuffs"))
+            if key == "player" then
+                local gcc, scc = p("auras.cancelClick")
+                b:Check("Right-click a buff to cancel it (also in combat)",
+                    function() return gcc() ~= false end, scc)
+            end
             b:Dropdown("Position", AURA_POS, p("auras.position"))
             b:Dropdown("Horizontal limit side", GROW_SIDES, p("auras.buffGrow"))
             b:Slider("Horizontal limit (% of frame width)", 20, 150, 5, p("auras.buffLimit"))
@@ -640,6 +645,9 @@ addPage("blizzard", "Hide Blizzard", function(b)
     local gc, sc = unitPath("player", "classPower.hideBlizzard")
     b:Check("Class bar: holy power, combo points ... (while our class power row is on)",
         blizzardToggle(gc, sc, "classpower", "Blizzard's class bar"))
+    b:Check("Buffs and debuffs at the top right (show them on the player frame: Player -> Auras)",
+        blizzardToggle(function() return ns.db.hideBlizzardBuffs end,
+            function(v) ns.db.hideBlizzardBuffs = v; ns:ApplyAll() end, "buffs", "Blizzard's buff frame"))
 end)
 
 addPage("tags", "Tags", function(b)

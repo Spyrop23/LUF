@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Right-click your own buffs on the player frame to cancel them, also in combat (as on Blizzard's buff frame). Player → Auras → "Right-click a buff to cancel it" (on by default). Thanks to **claviculastooge** for the idea!
+- Hide Blizzard's buff and debuff icons at the top right: Hide Blizzard page → "Buffs and debuffs" (off by default; show them on the player frame instead via Player → Auras). Thanks to **claviculastooge**!
+
 ## 0.15.3
 - Pet cast bar: the pet frame gets a cast bar (Fire Bolt, Seduction ...), on by default, slim below the frame; Pet → Cast bar for size and position. Thanks to **vbrokop** for the idea!
 

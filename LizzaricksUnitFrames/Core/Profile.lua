@@ -120,6 +120,7 @@ ns.defaults = {
     texture = "Smooth",
     font = "Default",
     fontOutline = false,
+    hideBlizzardBuffs = false,   -- Blizzard's buff/debuff icons at the top right
     backgroundAlpha = 0.8,
     units = {
         player = unitDefaults({

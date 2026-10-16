@@ -89,6 +89,12 @@ local SILENCER = {
             silenceWhole(_G[name])
         end
     end,
+    -- Blizzard's buff and debuff icons at the top right (and weapon enchants)
+    buffs = function()
+        for _, name in ipairs({ "BuffFrame", "DebuffFrame", "TemporaryEnchantFrame" }) do
+            silenceWhole(_G[name])
+        end
+    end,
     raid = function()
         silenceWhole(_G.CompactRaidFrameContainer)
         silenceWhole(_G.CompactRaidFrameManager)
@@ -163,4 +169,6 @@ function ns:HideBlizzard(key)
     if cp and cp.enabled and cp.hideBlizzard then
         silence("classpower")
     end
+    -- off by default: the player frame shows buffs only if you turn them on
+    if key == "player" and ns.db.hideBlizzardBuffs then silence("buffs") end
 end
