@@ -150,7 +150,7 @@ ns.defaults = {
             combatText = { enabled = true },
             castBar = { enabled = true },
             -- Forever: your combo points on the target, as in Luna
-            classPower = { enabled = true, height = 7, spacing = 2, position = "ABOVE" },
+            classPower = { enabled = true, height = 7, spacing = 2, position = "ABOVE", onlyWithPoints = true },
             auras = { buffs = true, debuffs = true },
             tags = { healthBar = { right = "[smarthealthp]" } },
         }),

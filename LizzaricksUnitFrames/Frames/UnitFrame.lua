@@ -175,13 +175,29 @@ function UF.Position(f)
     elseif f.anchorFrame then
         f:SetPoint("TOPLEFT", f.anchorFrame, "TOPRIGHT", db.x, db.y)
     else
-        local y = db.y
-        local slot = UF.Slot(f)
-        if slot and slot > 1 then
-            y = y - (slot - 1) * (db.height + (db.spacing or 0))
-        end
-        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", db.x, y)
+        local dx, dy = UF.StackOffset(f)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", db.x + dx, db.y + dy)
     end
+end
+
+-- Where a frame of a stack (party, main tanks, main assists) sits relative
+-- to the first one. Luna's growth direction: down (default), up, right or
+-- left; sideways steps leave room for the targets next to main tanks and
+-- main assists.
+UF.GROWTH = { { "DOWN", "Down" }, { "UP", "Up" }, { "RIGHT", "Right" }, { "LEFT", "Left" } }
+function UF.StackOffset(f)
+    local slot = UF.Slot(f)
+    if not slot or slot <= 1 then return 0, 0 end
+    local db, n = f.db, slot - 1
+    local growth = db.growth or "DOWN"
+    if growth == "UP" then return 0, n * (db.height + (db.spacing or 0)) end
+    if growth == "RIGHT" or growth == "LEFT" then
+        local step = db.width + (db.spacing or 0)
+        local tdb = (f.key == "maintank" or f.key == "mainassist") and ns.db.units[f.key .. "target"]
+        if tdb and tdb.enabled then step = step + tdb.x + tdb.width end
+        return (growth == "LEFT" and -n or n) * step, 0
+    end
+    return 0, -n * (db.height + (db.spacing or 0))
 end
 
 -- Place of a frame in its stack (1 = first). In the party "you" (index 0)

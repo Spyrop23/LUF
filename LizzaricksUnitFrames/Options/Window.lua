@@ -140,6 +140,12 @@ local function unitTabs(key)
             b:Slider("Space between members", 0, 200, 1, p("spacing"))
             b:Check("Hide party frames in a raid", p("hideInRaid"))
             b:Check("Show yourself in the party (on top)", p("showPlayer"))
+        elseif key == "maintank" or key == "mainassist" then
+            b:Header(label)
+            b:Dropdown("Grow direction (further frames)", ns.UF.GROWTH, function() return ns.db.units[key].growth or "DOWN" end,
+                select(2, p("growth")))
+            b:Slider("Space between frames", 0, 50, 1, p("spacing"))
+            b:Text("Up keeps them clear of frames below; sideways leaves room for their targets.", 16)
         elseif key == "raidpet" then
             b:Header("Raid pets")
             b:Text("The pets in the raid, packed without gaps (re-sorted out of combat). Off by default.", 16)
@@ -216,6 +222,9 @@ local function unitTabs(key)
                 b:Dropdown("Position", ns.ClassPower.POSITIONS, p("classPower.position"))
                 b:Slider("Height", 3, 20, 1, p("classPower.height"))
                 b:Slider("Space between points", 0, 10, 1, p("classPower.spacing"))
+                local gow, sow = p("classPower.onlyWithPoints")
+                b:Check("Only while you have combo points on the target (as in Luna)",
+                    function() return gow() ~= false end, sow)
                 return
             end
             b:Header("Class power")

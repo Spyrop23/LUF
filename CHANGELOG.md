@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Combo points on the target frame show only while you have combo points there, as in Luna (Target → Combo points → "Only while you have combo points", on by default). Thanks to **carnage0975**!
+- Grow direction for Main Tank and Main Assist frames, as in Luna: down, up, right or left (Main Tank / Main Assist → General). Sideways leaves room for their target frames. Thanks to **claviculastooge**!
+
 ## 0.16.0
 - Right-click your own buffs on the player frame to cancel them, also in combat (as on Blizzard's buff frame). Player → Auras → "Right-click a buff to cancel it" (on by default). Thanks to **claviculastooge** for the idea!
 - Hide Blizzard's buff and debuff icons at the top right: Hide Blizzard page → "Buffs and debuffs" (off by default; show them on the player frame instead via Player → Auras). Thanks to **claviculastooge**!

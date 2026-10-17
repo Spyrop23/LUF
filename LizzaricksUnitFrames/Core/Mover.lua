@@ -46,11 +46,8 @@ local function dropOffsets(f)
         local dx, dy = UF.RaidPetOffset(f.index)   -- config mode: slot = index
         return x - dx, y - dy
     end
-    local slot = UF.Slot(f)
-    if slot and slot > 1 then
-        y = y + (slot - 1) * (f.db.height + (f.db.spacing or 0))
-    end
-    return x, y
+    local dx, dy = UF.StackOffset(f)
+    return x - dx, y - dy
 end
 
 -- Frames that move together with f: the whole party, the whole raid, or

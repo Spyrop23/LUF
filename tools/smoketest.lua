@@ -83,6 +83,7 @@ function Widget:GetChecked() return self.checked end
 function Widget:SetTimerDuration(d) self.duration = d end
 function Widget:SetTexture(t) self.texture = t; return true end
 function Widget:SetStatusBarColor(r, g, b) self.color = { r, g, b } end
+function Widget:SetVertexColor(r, g, b, a) self.vertexColor = { r, g, b, a } end
 function Widget:SetupMenu(gen) self.menuGen = gen; self:GenerateMenu() end
 function Widget:GenerateMenu()
     local radios = {}
@@ -629,6 +630,18 @@ if not RETAIL then
     local tcp = ns.UF.frames.target.classPower
     ns.UF.Layout(ns.UF.frames.target)
     assert(tcp and tcp.shown and tcp.count == 5 and tcp.points[3].value == 3, "combo points on the target frame")
+    -- secret value: empty points invisible, the filled ones show
+    assert(tcp.points[5].bg.vertexColor[4] == 0, "secret: empty points hidden")
+    -- readable 0: the whole row hides; readable 2: shown with its empty points
+    local gcp = GetComboPoints
+    GetComboPoints = function() return 0 end
+    ns.ClassPower.Update(ns.UF.frames.target)
+    assert(not tcp.shown, "no combo points: no row on the target")
+    GetComboPoints = function() return 2 end
+    ns.ClassPower.Update(ns.UF.frames.target)
+    assert(tcp.shown and tcp.points[2].value == 2, "two combo points shown")
+    GetComboPoints = gcp
+    ns.ClassPower.Update(ns.UF.frames.target)
     assert(ns.ClassPower.Reserved(ns.UF.frames.player, "ABOVE") == 0, "player frame keeps no room for them")
     -- the option puts them back on the player frame
     ns.db.units.player.classPower.comboOnTarget = false
@@ -1313,6 +1326,24 @@ do
     ns:HideBlizzard("player")
     assert(ns:IsBlizzardHidden("buffs") and BuffFrame.shown == false, "Blizzard's buff frame hidden")
     ns.db.hideBlizzardBuffs = false
+end
+
+-- main tanks grow up / right (Luna's growth direction)
+do
+    local mdb = ns.db.units.maintank
+    local m1, m2 = ns.UF.frames.maintank1, ns.UF.frames.maintank2
+    ns:ApplyKey("maintank")
+    assert(m2.point[5] == mdb.y - (mdb.height + mdb.spacing), "down by default")
+    mdb.growth = "UP"
+    ns:ApplyKey("maintank")
+    assert(m2.point[5] == mdb.y + (mdb.height + mdb.spacing) and m2.point[4] == mdb.x, "grows up")
+    mdb.growth = "RIGHT"
+    ns:ApplyKey("maintank")
+    local tdb = ns.db.units.maintanktarget
+    local extra = tdb.enabled and (tdb.x + tdb.width) or 0
+    assert(m2.point[4] == mdb.x + mdb.width + mdb.spacing + extra and m2.point[5] == mdb.y, "grows right, past the target")
+    mdb.growth = nil
+    ns:ApplyKey("maintank")
 end
 
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)

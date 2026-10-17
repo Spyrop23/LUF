@@ -230,10 +230,21 @@ function CP.Update(f)
     CP.ClearTotemTimes(holder)
     local c = COLORS[ptype] or COLORS[PT.ComboPoints or 4]
     local value = ns.unlocked and 3 or currentValue(ptype)
+    -- Target frame, as Luna: the row only while you have combo points there.
+    -- A readable 0 hides it; a secret value cannot be compared, so then only
+    -- the empty points turn invisible (no points, nothing to see).
+    local emptyAlpha = 0.8
+    if f.key == "target" and db.onlyWithPoints ~= false and not ns.unlocked then
+        if type(value) == "nil" or (ns.CanRead(value) and value <= 0) then
+            holder:Hide()
+            return
+        end
+        if not ns.CanRead(value) then emptyAlpha = 0 end
+    end
     for i = 1, count do
         local bar = holder.points[i]
         bar:SetStatusBarColor(c[1], c[2], c[3])
-        bar.bg:SetVertexColor(c[1] * 0.25, c[2] * 0.25, c[3] * 0.25, 0.8)
+        bar.bg:SetVertexColor(c[1] * 0.25, c[2] * 0.25, c[3] * 0.25, emptyAlpha)
         -- each point fills itself once the (secret) value reaches it
         bar:SetMinMaxValues(i - 1, i)
         bar:GetStatusBarTexture():SetAlpha(1)
