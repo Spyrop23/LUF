@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.16.1
 - Combo points on the target frame show only while you have combo points there, as in Luna (Target → Combo points → "Only while you have combo points", on by default). Thanks to **carnage0975**!
 - Grow direction for Main Tank and Main Assist frames, as in Luna: down, up, right or left (Main Tank / Main Assist → General). Sideways leaves room for their target frames. Thanks to **claviculastooge**!
 
