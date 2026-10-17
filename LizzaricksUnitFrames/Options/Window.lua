@@ -216,14 +216,14 @@ local function unitTabs(key)
         tab("classpower", key == "target" and "Combo points" or "Class power", function(b)
             if key == "target" then
                 b:Header("Combo points")
-                b:Text("Your combo points on this target (rogue, druid in cat form), as in Luna. Only while " ..
+                b:Text("Your combo points on this target (rogue, druid in cat form). Only while " ..
                     "\"Combo points on the target frame\" is on (Player -> Class power).", 30)
                 b:Check("Enabled", p("classPower.enabled"))
                 b:Dropdown("Position", ns.ClassPower.POSITIONS, p("classPower.position"))
                 b:Slider("Height", 3, 20, 1, p("classPower.height"))
                 b:Slider("Space between points", 0, 10, 1, p("classPower.spacing"))
                 local gow, sow = p("classPower.onlyWithPoints")
-                b:Check("Only while you have combo points on the target (as in Luna)",
+                b:Check("Only while you have combo points on the target",
                     function() return gow() ~= false end, sow)
                 return
             end
@@ -239,7 +239,7 @@ local function unitTabs(key)
             if ns.isForever then
                 -- moves the combo points between two frames: re-layout both
                 local gco = p("classPower.comboOnTarget")
-                b:Check("Combo points on the target frame (they belong to the target, as in Luna)",
+                b:Check("Combo points on the target frame (they belong to the target)",
                     function() return gco() ~= false end,
                     function(v) ns.db.units.player.classPower.comboOnTarget = v; ns:ApplyAll() end)
             end
@@ -251,7 +251,7 @@ local function unitTabs(key)
 
     tab("empty", "Empty bar", function(b)
         b:Header("Empty bar")
-        b:Text("A bar without a value, only for texts (set them on the Tags tab), as in Luna.", 16)
+        b:Text("A bar without a value, only for texts (set them on the Tags tab).", 16)
         b:Check("Enabled", p("emptyBar.enabled"))
         local gew, sew = p("emptyBar.weight")
         b:Slider("Height (weight)", 1, 10, 0.5, gew, sew, "%.1f")
@@ -391,7 +391,7 @@ local function unitTabs(key)
 
     tab("combattext", "Combat text", function(b)
         b:Header("Combat text")
-        b:Text("Damage (red), heals (green) and misses of the unit flash on its portrait, as in Luna.", 16)
+        b:Text("Damage (red), heals (green) and misses of the unit flash on its portrait.", 16)
         b:Check("Enabled", p("combatText.enabled"))
         b:Slider("Font size", 8, 40, 1, p("combatText.size"))
     end)
