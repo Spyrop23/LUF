@@ -125,6 +125,9 @@ function ns.UnlockFrame(f)
     if f.key == "raid" then
         -- one label per group, on its first member
         label = (f.raidSlot == 1) and ("Grp " .. (f.raidGroup or 1)) or nil
+    elseif f.key == "raidtarget" then
+        local member = f.anchorFrame
+        label = (member and member.raidSlot == 1) and "Targets" or nil
     elseif f.key == "party" and f.index == 0 then
         label = label .. " (you)"
     elseif f.index then

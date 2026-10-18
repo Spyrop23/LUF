@@ -230,10 +230,18 @@ end
 -- (direction DOWN, as in Luna) or a row (RIGHT). Blocks sit in a grid with
 -- `groupsPerRow` blocks per row, or each at its own saved spot when groups
 -- are moved separately.
+-- Room the raid targets take right of each raid frame (0 while they are off),
+-- so groups and members leave space for them.
+function UF.RaidTargetRoom()
+    local rt = ns.db.units.raidtarget
+    if not (rt and rt.enabled) then return 0 end
+    return math.max(0, rt.x + rt.width)
+end
+
 function UF.RaidMemberOffset(slot)
     local db = ns.db.units.raid
     if db.groupDirection == "RIGHT" then
-        return (slot - 1) * (db.width + db.spacing), 0
+        return (slot - 1) * (db.width + UF.RaidTargetRoom() + db.spacing), 0
     end
     return 0, -(slot - 1) * (db.height + db.spacing)
 end
@@ -243,10 +251,11 @@ function UF.RaidGridOrigin(g)
     local perRow = math.max(1, db.groupsPerRow or 8)
     local col, row = (g - 1) % perRow, math.floor((g - 1) / perRow)
     local blockW, blockH
+    local w = db.width + UF.RaidTargetRoom()
     if db.groupDirection == "RIGHT" then
-        blockW, blockH = 5 * db.width + 4 * db.spacing, db.height
+        blockW, blockH = 5 * w + 4 * db.spacing, db.height
     else
-        blockW, blockH = db.width, 5 * db.height + 4 * db.spacing
+        blockW, blockH = w, 5 * db.height + 4 * db.spacing
     end
     return db.x + col * (blockW + db.groupSpacing), db.y - row * (blockH + db.groupSpacing)
 end
@@ -846,6 +855,8 @@ local function flush()
             end
             -- raid frames in a party: re-bind them, and the party frames
             -- may hide now
+            -- raid targets change how much room each raid frame needs
+            if key == "raidtarget" and UF.byKey.raid then UF.ArrangeRaid() end
             if key == "raid" then
                 UF.ArrangeRaid()
                 for _, k in ipairs({ "party", "partypet", "partytarget" }) do

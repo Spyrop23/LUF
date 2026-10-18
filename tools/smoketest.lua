@@ -1356,6 +1356,11 @@ do
     assert(rt.point[2] == ns.UF.frames.raid7 and rt.point[3] == "TOPRIGHT", "right of the member's frame")
     assert(rt.globalEvents.scripts.OnUpdate, "raid targets are polled")
     assert(ns.db.units.raidtarget.indicators.raidTarget.enabled, "raid marks on raid targets")
+    -- the raid groups make room for the targets
+    local rdb, tdb = ns.db.units.raid, ns.db.units.raidtarget
+    local gx1 = ns.UF.RaidGridOrigin(1)
+    local gx2 = ns.UF.RaidGridOrigin(2)
+    assert(gx2 - gx1 == rdb.width + tdb.x + tdb.width + rdb.groupSpacing, "group 2 leaves room for group 1's targets")
     ns.db.units.raidtarget.enabled = false
     ns:ApplyKey("raidtarget")
 end

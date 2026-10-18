@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-- Raid targets (new page "Raid Targets", off by default): the target of every raid member as a small frame right of the member's raid frame, with the raid mark (skull, cross ...) on it. Make room with Raid → General → "Space between groups". Thanks to **maTzeprei** for the idea!
+- Raid targets (new page "Raid Targets", off by default): the target of every raid member as a small frame right of the member's raid frame, with the raid mark (skull, cross ...) on it. The raid groups make room for them on their own; "Space between groups" now goes up to 200. Thanks to **maTzeprei** for the idea!
 
 ## 0.16.1
 - Combo points on the target frame show only while you have combo points there, as in Luna (Target → Combo points → "Only while you have combo points", on by default). Thanks to **carnage0975**!

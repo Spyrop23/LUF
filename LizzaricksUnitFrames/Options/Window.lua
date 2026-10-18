@@ -131,7 +131,7 @@ local function unitTabs(key)
             b:Text("Position is relative to the party member's frame.")
         elseif key == "raidtarget" then
             b:Text("The target of every raid member, next to the member's raid frame; position is relative " ..
-                "to it. Make room with Raid -> General -> \"Space between groups\". Raid target marks (skull, " ..
+                "to it; the raid groups make room for them. Raid target marks (skull, " ..
                 "cross ...) show on these frames too (Indicators tab).", 44)
         end
         -- p() returns getter and setter; spelled out where more arguments follow
@@ -160,7 +160,7 @@ local function unitTabs(key)
             b:Dropdown("Members of a group", RAID_DIRECTIONS, p("groupDirection"))
             b:Slider("Groups per row", 1, 8, 1, p("groupsPerRow"))
             b:Slider("Space between members", 0, 50, 1, p("spacing"))
-            b:Slider("Space between groups", 0, 50, 1, p("groupSpacing"))
+            b:Slider("Space between groups", 0, 200, 1, p("groupSpacing"))
             b:Check("Move each group on its own", p("separateGroups"))
             b:Header("In a party")
             b:Check("Use the raid frames in a party too (you and party 1-4 in group 1)", p("showInParty"))
