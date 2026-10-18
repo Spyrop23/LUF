@@ -202,6 +202,16 @@ ns.defaults = {
                 powerBar  = { size = 7, left = "", center = "", right = "" },
             },
         })),
+        -- the target of every raid member, right of its frame (raid lead)
+        raidtarget = unitDefaults(small({
+            enabled = false, x = 2, y = 0, width = 60, height = 30,
+            healthBar = { weight = 8 },
+            -- the raid mark (skull, cross ...) at the left edge, next to the name
+            indicators = { raidTarget = { size = 14, point = "LEFT", x = 8 } },
+            tags = {
+                healthBar = { size = 8, left = "", center = "[name]", right = "" },
+            },
+        })),
         -- Luna's raid pets: the pets in the raid, packed into columns
         raidpet = unitDefaults(small({
             enabled = false,

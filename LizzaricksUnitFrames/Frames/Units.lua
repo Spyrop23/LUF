@@ -11,7 +11,7 @@ local _, ns = ...
 ns.unitKeys = {
     "player", "pet", "pettarget", "target", "targettarget", "targettargettarget",
     "focus", "focustarget",
-    "party", "partypet", "partytarget", "raid", "raidpet",
+    "party", "partypet", "partytarget", "raid", "raidpet", "raidtarget",
     "maintank", "maintanktarget", "mainassist", "mainassisttarget",
 }
 
@@ -29,6 +29,7 @@ ns.unitLabels = {
     partytarget = "Party Targets",
     raid = "Raid",
     raidpet = "Raid Pets",
+    raidtarget = "Raid Targets",
     maintank = "Main Tank",
     maintanktarget = "Main Tank Target",
     mainassist = "Main Assist",
@@ -102,6 +103,15 @@ local function spawnAll()
         if UF.frames[unit] then UF.Apply(UF.frames[unit]) else UF.Create(unit, { key = "raid", index = i }) end
     end
     UF.ArrangeRaid()
+    -- the target of every raid member, next to the member's frame
+    for i = 1, 40 do
+        local unit = "raid" .. i .. "target"
+        if UF.frames[unit] then
+            UF.Apply(UF.frames[unit])
+        else
+            UF.Create(unit, { key = "raidtarget", index = i, anchorFrame = UF.frames["raid" .. i] })
+        end
+    end
     for i = 1, 40 do
         local unit = "raidpet" .. i
         if UF.frames[unit] then UF.Apply(UF.frames[unit]) else UF.Create(unit, { key = "raidpet", index = i }) end

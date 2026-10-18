@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Raid targets (new page "Raid Targets", off by default): the target of every raid member as a small frame right of the member's raid frame, with the raid mark (skull, cross ...) on it. Make room with Raid → General → "Space between groups". Thanks to **maTzeprei** for the idea!
+
 ## 0.16.1
 - Combo points on the target frame show only while you have combo points there, as in Luna (Target → Combo points → "Only while you have combo points", on by default). Thanks to **carnage0975**!
 - Grow direction for Main Tank and Main Assist frames, as in Luna: down, up, right or left (Main Tank / Main Assist → General). Sideways leaves room for their target frames. Thanks to **claviculastooge**!

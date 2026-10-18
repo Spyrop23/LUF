@@ -27,7 +27,7 @@ local POLL_EVERY = 0.2
 local POLLED = { targettarget = true, targettargettarget = true, pettarget = true, focustarget = true,
     party1target = true, party2target = true, party3target = true, party4target = true }
 -- Settings keys whose units change with the raid roster (raidNtarget ...).
-local POLLED_KEYS = { maintanktarget = true, mainassisttarget = true }
+local POLLED_KEYS = { maintanktarget = true, mainassisttarget = true, raidtarget = true }
 
 -- Global events that change which unit a frame shows, by settings key.
 local GLOBAL_EVENTS = {
@@ -47,6 +47,7 @@ local GLOBAL_EVENTS = {
     mainassisttarget = { "GROUP_ROSTER_UPDATE", "UNIT_TARGET" },
     raid = { "GROUP_ROSTER_UPDATE" },
     raidpet = { "GROUP_ROSTER_UPDATE", "UNIT_PET" },
+    raidtarget = { "GROUP_ROSTER_UPDATE", "UNIT_TARGET" },
 }
 
 -- Experience events (only for frames with an XP bar).

@@ -129,6 +129,10 @@ local function unitTabs(key)
         b:Slider("Scale", 0.5, 3, 0.05, p("scale"))
         if key == "partypet" or key == "partytarget" then
             b:Text("Position is relative to the party member's frame.")
+        elseif key == "raidtarget" then
+            b:Text("The target of every raid member, next to the member's raid frame; position is relative " ..
+                "to it. Make room with Raid -> General -> \"Space between groups\". Raid target marks (skull, " ..
+                "cross ...) show on these frames too (Indicators tab).", 44)
         end
         -- p() returns getter and setter; spelled out where more arguments follow
         local gx, sx = p("x")
@@ -861,8 +865,8 @@ local function build()
         fs:SetText(page.label)
         btn:SetScript("OnClick", function() showPage(page.id) end)
         navButtons[page.id] = btn
-        y = y - 21   -- 23 pages: 21 px each keeps them inside the window
-        if page.id == "general" or page.id == "raidpet" or page.id == "mainassisttarget" then y = y - 6 end
+        y = y - 21   -- 24 pages: 21 px each keeps them inside the window
+        if page.id == "general" or page.id == "raidtarget" or page.id == "mainassisttarget" then y = y - 6 end
     end
 
     -- tab bar (unit pages) above the scrolling page area

@@ -1346,6 +1346,20 @@ do
     ns:ApplyKey("maintank")
 end
 
+-- raid targets: the target of every raid member, next to the member's frame (polled)
+do
+    local rt = ns.UF.frames.raid7target
+    assert(rt and rt.key == "raidtarget" and rt.anchorFrame == ns.UF.frames.raid7, "raid target frames exist")
+    assert(not ns.db.units.raidtarget.enabled and not rt.shown, "off by default")
+    ns.db.units.raidtarget.enabled = true
+    ns:ApplyKey("raidtarget")
+    assert(rt.point[2] == ns.UF.frames.raid7 and rt.point[3] == "TOPRIGHT", "right of the member's frame")
+    assert(rt.globalEvents.scripts.OnUpdate, "raid targets are polled")
+    assert(ns.db.units.raidtarget.indicators.raidTarget.enabled, "raid marks on raid targets")
+    ns.db.units.raidtarget.enabled = false
+    ns:ApplyKey("raidtarget")
+end
+
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
     local fs = ns.UF.frames.player.healthBar.text.center
