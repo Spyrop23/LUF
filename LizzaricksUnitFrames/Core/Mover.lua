@@ -139,6 +139,7 @@ function ns.UnlockFrame(f)
     f:SetAlpha(1)
     UF.Update(f)
     if ns.CastBar then ns.CastBar.Preview(f, true) end
+    if ns.Auras then ns.Auras.SetPreview(f, true) end
     if ns.Squares then ns.Squares.Update(f) end
 end
 
@@ -153,6 +154,7 @@ local function lockFrame(f)
     end
     standIn(f, false)
     if ns.CastBar then ns.CastBar.Preview(f, false) end
+    if ns.Auras then ns.Auras.SetPreview(f, false) end
     UF.Watch(f)
     if f.db.enabled then UF.UnitChanged(f) end
 end

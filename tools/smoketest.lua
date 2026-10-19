@@ -1365,6 +1365,27 @@ do
     ns:ApplyKey("raidtarget")
 end
 
+-- config mode: placeholder auras up to the max. counts, the real rows step aside
+do
+    local tf, adb = ns.UF.frames.target, ns.db.units.target.auras
+    SlashCmdList.LIZUF("unlock")
+    local p = tf.auraPreview
+    assert(p and p.buffs.shown and p.buffs.icons and #p.buffs.icons >= adb.maxBuffs, "buff placeholders")
+    local shown = 0
+    for _, t in ipairs(p.debuffs.icons or {}) do if t.shown then shown = shown + 1 end end
+    assert(shown == adb.maxDebuffs, "debuff placeholders: " .. shown)
+    assert(not tf.auraContainer.shown, "real rows hidden meanwhile")
+    adb.maxBuffs = 3
+    ns:ApplyKey("target")
+    shown = 0
+    for _, t in ipairs(p.buffs.icons) do if t.shown then shown = shown + 1 end end
+    assert(shown == 3, "preview follows the max. count: " .. shown)
+    SlashCmdList.LIZUF("lock")
+    assert(not p.buffs.shown and tf.auraContainer.shown, "locked: real rows back")
+    adb.maxBuffs = 16
+    ns:ApplyKey("target")
+end
+
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
     local fs = ns.UF.frames.player.healthBar.text.center

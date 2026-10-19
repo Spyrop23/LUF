@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Config mode (/luf unlock) shows placeholder buffs and debuffs up to the max. counts you set, laid out like the real rows (size, position, grow side, limit, offsets), so you can place everything around them. The real auras come back when you lock the frames. Thanks to **claviculastooge**!
+
 ## 0.17.0
 - Raid targets (new page "Raid Targets", off by default): the target of every raid member as a small frame right of the member's raid frame, with the raid mark (skull, cross ...) on it. The raid groups make room for them on their own; "Space between groups" now goes up to 200. Thanks to **maTzeprei** for the idea!
 

@@ -192,28 +192,30 @@ local DIR = AnchorUtil and AnchorUtil.FlowDirection
 -- limit: row width in % of the frame width (Luna's "horizontal limit");
 -- gap: space to keep free next to the frame (e.g. for the cast bar).
 -- dx/dy: the user's offset (moves the whole block).
-local function place(c, f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
+-- Where a block of auras starts and how it flows: anchor point on the
+-- block, point on the frame, offset, horizontal/vertical growth, line length.
+local function geometry(f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
     local spacing = db.spacing
     local width = f.db.width * (limit or 100) / 100
     local fromRight = grow == "LEFT"
     dx, dy = dx or 0, dy or 0
-    c:ClearAllPoints()
-    local anchor, h, v, line
     if pos == "TOP" then
-        anchor = fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT"
-        c:SetPoint(anchor, f, fromRight and "TOPRIGHT" or "TOPLEFT", dx, 2 + gapAbove + dy)
-        h, v, line = fromRight and "Left" or "Right", "Up", width
+        return fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT", fromRight and "TOPRIGHT" or "TOPLEFT",
+            dx, 2 + gapAbove + dy, fromRight and "Left" or "Right", "Up", width
     elseif pos == "RIGHT" then
-        c:SetPoint("TOPLEFT", f, "TOPRIGHT", 2 + dx, dy)
-        anchor, h, v, line = "TOPLEFT", "Right", "Down", db.perRow * (size + spacing)
+        return "TOPLEFT", "TOPRIGHT", 2 + dx, dy, "Right", "Down", db.perRow * (size + spacing)
     elseif pos == "LEFT" then
-        c:SetPoint("TOPRIGHT", f, "TOPLEFT", -2 + dx, dy)
-        anchor, h, v, line = "TOPRIGHT", "Left", "Down", db.perRow * (size + spacing)
-    else -- BOTTOM
-        anchor = fromRight and "TOPRIGHT" or "TOPLEFT"
-        c:SetPoint(anchor, f, fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT", dx, -2 - gapBelow + dy)
-        h, v, line = fromRight and "Left" or "Right", "Down", width
+        return "TOPRIGHT", "TOPLEFT", -2 + dx, dy, "Left", "Down", db.perRow * (size + spacing)
     end
+    -- BOTTOM
+    return fromRight and "TOPRIGHT" or "TOPLEFT", fromRight and "BOTTOMRIGHT" or "BOTTOMLEFT",
+        dx, -2 - gapBelow + dy, fromRight and "Left" or "Right", "Down", width
+end
+
+local function place(c, f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
+    local anchor, rel, x, y, h, v, line = geometry(f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
+    c:ClearAllPoints()
+    c:SetPoint(anchor, f, rel, x, y)
     try(c, "SetFlowLayoutPadding", 0, 0, 0, 0)
     if DIR then try(c, "SetFlowLayoutGrowthDirection", DIR[h], DIR[v]) end
     try(c, "SetFlowLayoutAnchorPoint", anchor)
@@ -294,12 +296,89 @@ local function signature(db)
     }, ":")
 end
 
+-- ------------------------------------------------------------ preview --
+
+-- Config mode: placeholder icons up to the max. counts, laid out like the
+-- real rows (the client's containers only show auras that exist).
+local BUFF_ICON = "Interface\\Icons\\Spell_Holy_WordFortitude"
+local DEBUFF_ICON = "Interface\\Icons\\Spell_Shadow_ShadowWordPain"
+
+-- startRow/gap: debuffs after the buffs in a shared row block (rows, extra px)
+local function previewBlock(f, holder, db, geo, size, count, debuffs, startRow, gap)
+    local anchor, rel, x, y, h, v, line = unpack(geo)
+    holder:ClearAllPoints()
+    holder:SetPoint(anchor, f, rel, x, y)
+    holder:SetSize(1, 1)
+    local step = size + db.spacing
+    local rowH = size + ((db.duration and db.durationPosition ~= "INSIDE") and 8 or 0) + db.spacing
+    local perLine = math.max(1, math.floor((line + db.spacing) / step))
+    holder.icons = holder.icons or {}
+    for i = 1, math.max(count, #holder.icons) do
+        local t = holder.icons[i]
+        if i <= count then
+            if not t then
+                t = holder:CreateTexture(nil, "ARTWORK")
+                t:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+                t.border = holder:CreateTexture(nil, "BACKGROUND")
+                holder.icons[i] = t
+            end
+            local col, row = (i - 1) % perLine, startRow + math.floor((i - 1) / perLine)
+            local px = (h == "Left" and -1 or 1) * col * step
+            local py = (v == "Up" and 1 or -1) * (row * rowH + (gap or 0))
+            t:ClearAllPoints()
+            t:SetPoint(anchor, holder, anchor, px, py)
+            t:SetSize(size - 2, size - 2)
+            t:SetTexture(debuffs and DEBUFF_ICON or BUFF_ICON)
+            t.border:ClearAllPoints()
+            t.border:SetPoint("TOPLEFT", t, "TOPLEFT", -1, 1)
+            t.border:SetPoint("BOTTOMRIGHT", t, "BOTTOMRIGHT", 1, -1)
+            if debuffs then t.border:SetColorTexture(0.8, 0, 0, 1) else t.border:SetColorTexture(0, 0, 0, 1) end
+            t:Show()
+            t.border:Show()
+        elseif t then
+            t:Hide()
+            t.border:Hide()
+        end
+    end
+    return math.ceil(count / perLine)
+end
+
+function AU.Preview(f, on, geoBuffs, geoDebuffs)
+    local db = f.db.auras
+    local p = f.auraPreview
+    if not (on and db and (db.buffs or db.debuffs) and geoBuffs) then
+        if p then p.buffs:Hide(); p.debuffs:Hide() end
+        for _, c in pairs({ buffs = f.auraContainer, debuffs = f.debuffContainer }) do c:Show() end
+        return
+    end
+    if not p then
+        p = { buffs = CreateFrame("Frame", nil, f), debuffs = CreateFrame("Frame", nil, f) }
+        f.auraPreview = p
+    end
+    -- the real rows step aside meanwhile
+    for _, c in pairs({ buffs = f.auraContainer, debuffs = f.debuffContainer }) do c:Hide() end
+    local buffSize = db.size + math.max(db.biggerBuffs or 0, 0)
+    local debuffSize = (db.debuffSize or db.size) + math.max(db.biggerDebuffs or 0, 0)
+    local rows = previewBlock(f, p.buffs, db, geoBuffs, buffSize, db.buffs and db.maxBuffs or 0, false, 0)
+    p.buffs:Show()
+    if geoDebuffs then
+        -- own place
+        previewBlock(f, p.debuffs, db, geoDebuffs, debuffSize, db.debuffs and db.maxDebuffs or 0, true, 0)
+    else
+        -- after the buffs, on a row of their own
+        previewBlock(f, p.debuffs, db, geoBuffs, debuffSize, db.debuffs and db.maxDebuffs or 0, true,
+            rows, rows > 0 and (db.groupGap or 4) or 0)
+    end
+    p.debuffs:Show()
+end
+
 -- Called from UF.Layout (out of combat).
 function AU.Layout(f)
     if not AU.supported[f.key] then return end
     local db = f.db.auras
     local wanted = db and (db.buffs or db.debuffs)
 
+    if not wanted then AU.Preview(f, false) end
     if (f.auraContainer or f.debuffContainer) and (not wanted or f.auraSignature ~= signature(db)) then
         -- retire the old ones: no unit, hidden (containers cannot be destroyed)
         for _, c in pairs({ buffs = f.auraContainer, debuffs = f.debuffContainer }) do
@@ -335,20 +414,34 @@ function AU.Layout(f)
     end
     local buffSize = db.size + math.max(db.biggerBuffs or 0, 0)
     local debuffSize = (db.debuffSize or db.size) + math.max(db.biggerDebuffs or 0, 0)
+    local geoBuffs, geoDebuffs
     if split then
         place(f.auraContainer, f, db, db.position, buffSize, db.buffGrow, db.buffLimit,
             db.buffX, db.buffY, below, above)
+        geoBuffs = { geometry(f, db, db.position, buffSize, db.buffGrow, db.buffLimit, db.buffX, db.buffY, below, above) }
         if f.debuffContainer then
             place(f.debuffContainer, f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit,
                 db.debuffX, db.debuffY, below, above)
+            geoDebuffs = { geometry(f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit,
+                db.debuffX, db.debuffY, below, above) }
             f.debuffContainer:Show()
         end
     else
         -- together: the buffs' side, width and offset count for both
-        place(f.auraContainer, f, db, db.position, math.max(buffSize, debuffSize), db.buffGrow, db.buffLimit,
+        local size = math.max(buffSize, debuffSize)
+        place(f.auraContainer, f, db, db.position, size, db.buffGrow, db.buffLimit,
             db.buffX, db.buffY, below, above)
+        geoBuffs = { geometry(f, db, db.position, size, db.buffGrow, db.buffLimit, db.buffX, db.buffY, below, above) }
     end
     f.auraContainer:Show()
+    f.auraGeometry = { geoBuffs, geoDebuffs }
+    AU.Preview(f, ns.unlocked, geoBuffs, geoDebuffs)
+end
+
+-- Config mode on/off from the mover: placeholders or the real rows.
+function AU.SetPreview(f, on)
+    local g = f.auraGeometry
+    AU.Preview(f, on and g ~= nil, g and g[1], g and g[2])
 end
 
 -- The unit behind the frame changed (new target, roster change).
