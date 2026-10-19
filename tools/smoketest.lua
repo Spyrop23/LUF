@@ -927,6 +927,10 @@ end
 local tgf = ns.UF.frames.target
 ns.Indicators.Update(tgf)
 assert(tgf.indicators.icons.raidTarget.shown and tgf.indicators.icons.raidTarget.cell == 8, "raid mark")
+-- the elite dragon is off by default (the level text shows + / R / B); on, it shows
+assert(not ns.db.units.target.indicators.elite.enabled and not tgf.indicators.icons.elite.shown, "elite dragon off by default")
+ns.db.units.target.indicators.elite.enabled = true
+ns.Indicators.Update(tgf)
 assert(tgf.indicators.icons.elite.shown and tgf.indicators.icons.elite.atlas:find("Winged"), "elite dragon")
 local eliteTex, eliteDb = tgf.indicators.icons.elite, ns.db.units.target.indicators.elite
 assert(eliteDb.side == "RIGHT" and eliteTex.tc[1] == 1 and eliteTex.tc[2] == 0, "right side: dragon mirrored within the atlas piece")

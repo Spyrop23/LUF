@@ -1,6 +1,7 @@
 # Changelog
 
-## Unreleased
+## 0.17.1
+- The elite dragon on the target frame is off by default now (also turned off once in existing profiles): the level text already shows + / R / B. Turn it back on under Target → Indicators → Elite. Thanks to **Abula3**!
 - Config mode (/luf unlock) shows placeholder buffs and debuffs up to the max. counts you set, laid out like the real rows (size, position, grow side, limit, offsets), so you can place everything around them. The real auras come back when you lock the frames. Thanks to **claviculastooge**!
 
 ## 0.17.0

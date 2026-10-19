@@ -146,7 +146,8 @@ ns.defaults = {
         pettarget = unitDefaults(small({ x = 260, y = -72, enabled = false })),
         target = unitDefaults({
             x = 260,
-            indicators = { elite = { enabled = true } },
+            -- the elite dragon is off: the level text already shows + / R / B
+            indicators = { elite = { enabled = false } },
             combatText = { enabled = true },
             castBar = { enabled = true },
             -- Forever: your combo points on the target, as in Luna
@@ -279,6 +280,12 @@ function ns:SetProfile(name)
         if self.db.units.pet.healthBar.colorType == "class" then
             self.db.units.pet.healthBar.colorType = "happiness"
         end
+    end
+    -- 0.17.1: the elite dragon on the target is off by default now
+    if not self.db.migrated0171 then
+        self.db.migrated0171 = true
+        local t = self.db.units.target
+        if t and t.indicators and t.indicators.elite then t.indicators.elite.enabled = false end
     end
     -- 0.3.1: our own smooth texture replaces Blizzard's banded one
     if not self.db.migrated031 then
