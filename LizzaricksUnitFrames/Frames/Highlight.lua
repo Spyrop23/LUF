@@ -16,7 +16,7 @@ ns.Highlight = HL
 
 HL.debuffSupported = { player = true, pet = true, target = true, focus = true, party = true, partypet = true, raid = true,
     raidpet = true }
-HL.DEBUFF_MODES = { { "off", "Off" }, { "own", "Your own (ones you can dispel)" }, { "all", "All" } }
+HL.DEBUFF_MODES = { { "off", "Off" }, { "own", "Your own (ones you can dispel, friendly units)" }, { "all", "All" } }
 
 local DISPEL_COLORS = {
     Magic = { 0.20, 0.60, 1.00 }, Curse = { 0.60, 0.00, 1.00 },
@@ -115,6 +115,7 @@ function HL.Layout(f)
         f.highlightSignature = sig
     end
     ns.UF.BindAuraContainer(f.highlightContainer, f)
+    ns.ShowOnlyOnFriends(f.highlightContainer, f.unit, db.debuff == "own")
     HL.Update(f)
 end
 
@@ -140,6 +141,7 @@ end
 function HL.Refresh(f)
     ns.UF.BindAuraContainer(f.highlightContainer, f)
     try(f.highlightContainer, "UpdateAllAuras")
+    ns.ShowOnlyOnFriends(f.highlightContainer, f.unit, f.db.highlight.debuff == "own")
     HL.Update(f)
 end
 

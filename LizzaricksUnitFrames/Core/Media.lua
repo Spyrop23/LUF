@@ -291,6 +291,20 @@ function ns.ClassColor(unit)
     return token and ns.colors.class[token]
 end
 
+-- "Your own" dispellable debuffs only mean something on units you can help:
+-- the same poison on an enemy is not yours to remove. Fades a debuff
+-- border/highlight container on others (the answer may be secret: alpha
+-- from it, never tested).
+function ns.ShowOnlyOnFriends(container, unit, on)
+    if not container then return end
+    if not on then container:SetAlpha(1) return end
+    local ok, can = pcall(UnitCanAssist, "player", unit)
+    if not ok or type(can) == "nil" then container:SetAlpha(1) return end
+    if not pcall(container.SetAlphaFromBoolean, container, can, 1, 0) then
+        container:SetAlpha((ns.CanRead(can) and can) and 1 or 0)
+    end
+end
+
 -- The class colour when the class itself is secret (compound units such as
 -- targettarget when the target is an NPC: the whole chain becomes secret).
 -- C_ClassColor accepts the secret class and hands back a colour whose

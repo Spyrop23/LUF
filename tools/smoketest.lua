@@ -1390,6 +1390,45 @@ do
     ns:ApplyKey("target")
 end
 
+-- dispellable debuff border only on units you can help (not a poison on an enemy)
+do
+    local tf = ns.UF.frames.target
+    local canAssist = UnitCanAssist
+    UnitCanAssist = function(_, u) return secret(u ~= "target") end
+    ns.Borders.Refresh(tf)
+    assert(tf.borderContainer and tf.borderContainer.alpha == 0, "no debuff border on an enemy target")
+    UnitCanAssist = function() return secret(true) end
+    ns.Borders.Refresh(tf)
+    if tf.borderContainer then assert(tf.borderContainer.alpha == 1, "debuff border on a friendly target") end
+    UnitCanAssist = canAssist
+end
+
+-- filter page: a name typed and "Create" clicked without Enter still counts
+do
+    ns.Options:Open("filters")
+    local nameBox
+    for _, w in ipairs(frames) do
+        if w.kind == "EditBox" and w.scripts.OnTextChanged and w.parentFrame and w.parentFrame.edit == w then
+            local lbl = w.parentFrame
+            if not nameBox then nameBox = w end
+        end
+    end
+    assert(nameBox, "a live edit box")
+    nameBox.text = "Typed only"
+    nameBox.scripts.OnTextChanged(nameBox, true)
+    local FL = ns.Filters
+    local created = FL.Create
+    local got
+    FL.Create = function(n) got = n return created(n) end
+    for _, w in ipairs(frames) do
+        if w.kind == "Button" and w.text == "Create" and w.scripts.OnClick then w.scripts.OnClick(w) end
+    end
+    FL.Create = created
+    assert(got == "Typed only" and FL.Get("Typed only"), "list created from the typed name: " .. tostring(got))
+    FL.Delete("Typed only")
+    ns.Options:Toggle()
+end
+
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
     local fs = ns.UF.frames.player.healthBar.text.center

@@ -520,13 +520,13 @@ addPage("filters", "Filters", function(b)
         for _, n in ipairs(FL.Names()) do table.insert(list, { n, n }) end
         return list
     end, selected, function(v) FL.selected = v; O:Refresh() end)
-    b:Edit("New filter list", function() return newListName end, function(v) newListName = v end, 200)
+    b:Edit("New filter list", function() return newListName end, function(v) newListName = v end, 200, false, 0)
     b:Button("Create", function()
         local name, err = FL.Create(newListName)
         if name then newListName = "" end
         report(name, err)
     end)
-    b:Edit("Rename to", function() return renameTo end, function(v) renameTo = v end, 200)
+    b:Edit("Rename to", function() return renameTo end, function(v) renameTo = v end, 200, false, 0)
     b:Button("Rename", function()
         local name, err = FL.Rename(selected(), renameTo)
         if name then renameTo = "" end
@@ -558,7 +558,7 @@ addPage("filters", "Filters", function(b)
         local changedQuery = v ~= searchText
         searchText = v
         if changedQuery or not FL.search then FL.Search(v) end
-    end, 200)
+    end, 200, false, 0.5)
     b:Text(function()
         local s = FL.SearchStatus()
         if not selected() then s = s .. "  |cffff5555Create a list first.|r" end
@@ -578,7 +578,7 @@ addPage("filters", "Filters", function(b)
     b:Header("Export / Import")
     local exp = b:Edit("Export (copy this)", function() return FL.Export(selected()) end, function() end, 360)
     exp.edit:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
-    b:Edit("Import string", function() return importText end, function(v) importText = v end, 360)
+    b:Edit("Import string", function() return importText end, function(v) importText = v end, 360, false, 0)
     b:Button("Import", function()
         local name, err = FL.Import(importText)
         if name then
@@ -685,7 +685,7 @@ addPage("profiles", "Profiles", function(b)
     end, function() return ns:CurrentProfile() end, function(v)
         ns:SetProfile(v)
     end)
-    b:Edit("New profile", function() return newProfileName end, function(v) newProfileName = v end, 200)
+    b:Edit("New profile", function() return newProfileName end, function(v) newProfileName = v end, 200, false, 0)
     b:Button("Create and use", function()
         if newProfileName ~= "" then
             ns:SetProfile(newProfileName)

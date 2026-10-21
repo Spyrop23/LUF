@@ -19,7 +19,7 @@ ns.Borders = BO
 BO.debuffSupported = { player = true, pet = true, target = true, focus = true, party = true, partypet = true, raid = true,
     raidpet = true }
 
-BO.DEBUFF_MODES = { { "off", "Off" }, { "own", "Your own (ones you can dispel)" }, { "all", "All" } }
+BO.DEBUFF_MODES = { { "off", "Off" }, { "own", "Your own (ones you can dispel, friendly units)" }, { "all", "All" } }
 
 local HOVER = { 1, 1, 1 }
 local DISPEL_COLORS = {
@@ -150,6 +150,7 @@ function BO.Layout(f)
         f.borderSignature = sig
     end
     ns.UF.BindAuraContainer(f.borderContainer, f)
+    ns.ShowOnlyOnFriends(f.borderContainer, f.unit, db.debuff == "own")
     BO.Update(f)
 end
 
@@ -183,6 +184,7 @@ end
 function BO.Refresh(f)
     ns.UF.BindAuraContainer(f.borderContainer, f)
     try(f.borderContainer, "UpdateAllAuras")
+    ns.ShowOnlyOnFriends(f.borderContainer, f.unit, f.db.borders.debuff == "own")
     BO.Update(f)
 end
 

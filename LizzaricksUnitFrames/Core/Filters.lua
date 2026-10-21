@@ -277,7 +277,7 @@ end
 
 function FL.SearchStatus()
     local s = FL.search
-    if not s then return "Type a spell name or ID and press Enter." end
+    if not s then return "Type a spell name or ID." end
     if not s.done then
         return string.format("Searching ... %d%%  (%d found)", math.floor(s.pos / FL.MAX_ID * 100), #s.results)
     end

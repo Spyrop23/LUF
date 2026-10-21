@@ -258,7 +258,10 @@ function Builder:Dropdown(text, options, get, set)
 end
 
 -- numeric: store numbers (invalid input is thrown away).
-function Builder:Edit(text, get, set, width, numeric)
+-- live: also take the text while typing (0 = at once, n = after n seconds of
+-- no typing), for fields a button next to them reads: a click on a button
+-- does not take the focus away, so Enter/focus loss alone would miss it.
+function Builder:Edit(text, get, set, width, numeric, live)
     local f = CreateFrame("Frame", nil, self.parent)
     f:SetSize(self.width - 16, ROW)
     local fs = label(f, text)
@@ -279,6 +282,16 @@ function Builder:Edit(text, get, set, width, numeric)
     e:SetScript("OnEnterPressed", function(self) commit(self) self:ClearFocus() end)
     e:SetScript("OnEscapePressed", function(self) f:Refresh() self:ClearFocus() end)
     e:SetScript("OnEditFocusLost", commit)
+    if live then
+        local token = 0
+        e:SetScript("OnTextChanged", function(self, userInput)
+            if not userInput then return end
+            if live <= 0 or not C_Timer then commit(self) return end
+            token = token + 1
+            local mine = token
+            C_Timer.After(live, function() if mine == token then commit(self) end end)
+        end)
+    end
     f.edit = e
     function f:Refresh()
         if e:HasFocus() then return end
