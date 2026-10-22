@@ -340,8 +340,9 @@ local function unitTabs(key)
             b:Slider("Horizontal limit (% of frame width)", 20, 150, 5, p("auras.debuffLimit"))
             b:Slider("X offset", -100, 100, 1, p("auras.debuffX"))
             b:Slider("Y offset (up / down)", -100, 100, 1, p("auras.debuffY"))
-            b:Text("Side and limit apply above/below the frame. \"With the buffs\": the buffs' side, limit " ..
-                "and offset count.", 30)
+            b:Text("Side and limit apply above/below the frame. \"With the buffs\": a row of their own after " ..
+                "the buffs; the buffs' side, limit and offset count. The buffs' position: right after the buffs, " ..
+                "with their own side, limit and offsets (Y counts from the buffs).", 44)
             b:Check("Colour debuff border by type (magic, poison ...)", p("auras.dispelColors"))
             b:Header("Filter lists")
             b:Text("Lists are made on the Filters page. WoW: Forever only checks spell IDs of buffs on " ..

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Fix: debuffs "With the buffs (own row)" could join the buff row when "Bigger debuffs" was on (your own debuffs opened the row, but debuffs on you come from enemies). All debuffs now start on a row of their own. Thanks to **user_slouyac50poxg707**!
+- Fix: debuffs set to the same position as the buffs (e.g. both "Above the frame") ignored their X/Y offsets. They now get a place of their own right after the buffs, with their own side, limit and offsets (Y counts from the buffs). Thanks to **user_slouyac50poxg707**!
+
 ## 0.17.2
 - Fix: the debuff border and highlight in "Your own" mode (debuffs you can dispel) lit up on enemies too, e.g. a poison on an enemy target for a paladin. They now only show on units you can help. Thanks to **carnage0975**!
 - Fix: on the Filters page, a list name typed and "Create" clicked right away (without Enter) was not taken, so no list was made and nothing could be added. Names (filter lists, rename, import, new profile) are now taken while typing, and the aura search starts by itself after a short pause. "Add aura" now sits right below the list settings, above the auras in the list, so it is seen without scrolling. Thanks to **user_slouyac50poxg707** for the report!

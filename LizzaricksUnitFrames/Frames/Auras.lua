@@ -212,14 +212,43 @@ local function geometry(f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbov
         dx, -2 - gapBelow + dy, fromRight and "Left" or "Right", "Down", width
 end
 
-local function place(c, f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
-    local anchor, rel, x, y, h, v, line = geometry(f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
-    c:ClearAllPoints()
-    c:SetPoint(anchor, f, rel, x, y)
+local function flow(c, anchor, h, v, line)
     try(c, "SetFlowLayoutPadding", 0, 0, 0, 0)
     if DIR then try(c, "SetFlowLayoutGrowthDirection", DIR[h], DIR[v]) end
     try(c, "SetFlowLayoutAnchorPoint", anchor)
     try(c, "SetFlowLayoutMaximumLineSize", line)
+end
+
+local function place(c, f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
+    local anchor, rel, x, y, h, v, line = geometry(f, db, pos, size, grow, limit, dx, dy, gapBelow, gapAbove)
+    c:ClearAllPoints()
+    c:SetPoint(anchor, f, rel, x, y)
+    flow(c, anchor, h, v, line)
+end
+
+-- Debuffs at the buffs' place: right after the buff block, anchored to the
+-- buff container (it sizes itself to the auras shown, 1 px when empty), with
+-- their own side, limit and X offset; their Y offset counts from the buffs.
+local function stack(c, buffs, f, db, size)
+    local pos = db.position
+    local anchor, _, _, _, h, v, line = geometry(f, db, pos, size, db.debuffGrow, db.debuffLimit, 0, 0, 0, 0)
+    local dx, dy, gap = db.debuffX or 0, db.debuffY or 0, db.groupGap or 4
+    local rel, x, y
+    if pos == "TOP" or pos == "BOTTOM" then
+        -- the corner on the side the buffs start from sits at that frame
+        -- edge + buffX; the debuffs may start from the other edge
+        local buffsRight, debuffsRight = db.buffGrow == "LEFT", db.debuffGrow == "LEFT"
+        local edges = (debuffsRight and 1 or 0) - (buffsRight and 1 or 0)
+        rel = pos .. (buffsRight and "RIGHT" or "LEFT")
+        x = edges * f.db.width + dx - (db.buffX or 0)
+        y = (pos == "TOP" and gap or -gap) + dy
+    else
+        rel = pos == "RIGHT" and "BOTTOMLEFT" or "BOTTOMRIGHT"
+        x, y = dx - (db.buffX or 0), -gap + dy
+    end
+    c:ClearAllPoints()
+    c:SetPoint(anchor, buffs, rel, x, y)
+    flow(c, anchor, h, v, line)
 end
 
 -- which: "both" (one container, debuffs on their own row after the buffs),
@@ -229,12 +258,14 @@ local function buildContainer(f, db, which)
     if not ok or not c then return nil end
     local sortMethod = _G.AuraContainerSortMethod and _G.AuraContainerSortMethod.Default
     local sortDirection = _G.AuraContainerSortDirection and _G.AuraContainerSortDirection.Normal
-    -- first: the first debuff group (in a shared container: own row, gap above)
-    local function group(debuffs, size, first)
+    -- in a shared container every debuff group starts a row of its own: with
+    -- "bigger debuffs" your own group is often empty (debuffs on you come from
+    -- enemies), and the others' group must still not join the buff row
+    local function group(debuffs, size)
         local FL = ns.Filters
         local candidate = FL and (debuffs and FL.CandidateFilters(db.debuffList, db.debuffListMode)
             or not debuffs and FL.CandidateFilters(db.buffList, db.buffListMode)) or nil
-        local newRow = first and which == "both"
+        local newRow = debuffs and which == "both"
         return {
             candidateFilters = candidate,
             maxFrameCount = debuffs and (db.debuffs and db.maxDebuffs or 0) or (db.buffs and db.maxBuffs or 0),
@@ -261,25 +292,29 @@ local function buildContainer(f, db, which)
         local size = debuffs and (db.debuffSize or db.size) or db.size
         local bigger = (debuffs and db.biggerDebuffs or db.biggerBuffs) or 0
         local ownOnly = (debuffs and db.debuffFilter or db.buffFilter) == "own"
-        -- the first debuff group opens the debuff row
         if bigger <= 0 then
-            return pcall(c.AddAuraGroup, c, key, withExtra(parts), group(debuffs, size, debuffs))
+            return pcall(c.AddAuraGroup, c, key, withExtra(parts), group(debuffs, size))
         end
         if ownOnly then   -- only your own anyway: all of them bigger
-            return pcall(c.AddAuraGroup, c, key, withExtra(parts), group(debuffs, size + bigger, debuffs))
+            return pcall(c.AddAuraGroup, c, key, withExtra(parts), group(debuffs, size + bigger))
         end
-        return pcall(c.AddAuraGroup, c, key .. "Mine", withExtra(parts, PLAYER), group(debuffs, size + bigger, debuffs))
-            and pcall(c.AddAuraGroup, c, key, withExtra(parts, "!" .. PLAYER), group(debuffs, size, false))
+        return pcall(c.AddAuraGroup, c, key .. "Mine", withExtra(parts, PLAYER), group(debuffs, size + bigger))
+            and pcall(c.AddAuraGroup, c, key, withExtra(parts, "!" .. PLAYER), group(debuffs, size))
     end
     if which ~= "debuffs" and not add(false) then return nil end
     if which ~= "buffs" and not add(true) then return nil end
     return c
 end
 
--- Debuffs at their own place (not "with the buffs" and not where the buffs are).
+-- Debuffs in a container of their own (any position but "with the buffs").
 local function separate(db)
     local p = db.debuffPosition
-    return p ~= nil and p ~= "SAME" and p ~= db.position
+    return p ~= nil and p ~= "SAME"
+end
+
+-- ... at the same place as the buffs: then they follow the buff block.
+local function stacked(db)
+    return separate(db) and db.debuffPosition == db.position
 end
 
 -- A fingerprint of everything the container was built with; a change
@@ -340,10 +375,11 @@ local function previewBlock(f, holder, db, geo, size, count, debuffs, startRow, 
             t.border:Hide()
         end
     end
-    return math.ceil(count / perLine)
+    return math.ceil(count / perLine), rowH
 end
 
-function AU.Preview(f, on, geoBuffs, geoDebuffs)
+-- stacked: geoDebuffs is the debuffs' own place after the buff block
+function AU.Preview(f, on, geoBuffs, geoDebuffs, stacked)
     local db = f.db.auras
     local p = f.auraPreview
     if not (on and db and (db.buffs or db.debuffs) and geoBuffs) then
@@ -359,9 +395,14 @@ function AU.Preview(f, on, geoBuffs, geoDebuffs)
     for _, c in pairs({ buffs = f.auraContainer, debuffs = f.debuffContainer }) do c:Hide() end
     local buffSize = db.size + math.max(db.biggerBuffs or 0, 0)
     local debuffSize = (db.debuffSize or db.size) + math.max(db.biggerDebuffs or 0, 0)
-    local rows = previewBlock(f, p.buffs, db, geoBuffs, buffSize, db.buffs and db.maxBuffs or 0, false, 0)
+    local rows, rowH = previewBlock(f, p.buffs, db, geoBuffs, buffSize, db.buffs and db.maxBuffs or 0, false, 0)
     p.buffs:Show()
-    if geoDebuffs then
+    if geoDebuffs and stacked then
+        -- the buffs' place, past the buff block (1 px when empty, as the container)
+        local block = rows > 0 and (rows * rowH - db.spacing) or 1
+        previewBlock(f, p.debuffs, db, geoDebuffs, debuffSize, db.debuffs and db.maxDebuffs or 0, true,
+            0, block + (db.groupGap or 4))
+    elseif geoDebuffs then
         -- own place
         previewBlock(f, p.debuffs, db, geoDebuffs, debuffSize, db.debuffs and db.maxDebuffs or 0, true, 0)
     else
@@ -389,7 +430,7 @@ function AU.Layout(f)
     end
     if not wanted or not canBuild() then return end
 
-    local split = separate(db)
+    local split, isStacked = separate(db), stacked(db)
     if not f.auraContainer then
         -- one container for both, or buffs here and debuffs in a second one
         f.auraContainer = buildContainer(f, db, split and "buffs" or "both")
@@ -420,10 +461,17 @@ function AU.Layout(f)
             db.buffX, db.buffY, below, above)
         geoBuffs = { geometry(f, db, db.position, buffSize, db.buffGrow, db.buffLimit, db.buffX, db.buffY, below, above) }
         if f.debuffContainer then
-            place(f.debuffContainer, f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit,
-                db.debuffX, db.debuffY, below, above)
-            geoDebuffs = { geometry(f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit,
-                db.debuffX, db.debuffY, below, above) }
+            if isStacked then
+                stack(f.debuffContainer, f.auraContainer, f, db, debuffSize)
+                -- for the preview: own side and X, Y counted from the buffs
+                geoDebuffs = { geometry(f, db, db.position, debuffSize, db.debuffGrow, db.debuffLimit,
+                    db.debuffX, (db.buffY or 0) + (db.debuffY or 0), below, above) }
+            else
+                place(f.debuffContainer, f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit,
+                    db.debuffX, db.debuffY, below, above)
+                geoDebuffs = { geometry(f, db, db.debuffPosition, debuffSize, db.debuffGrow, db.debuffLimit,
+                    db.debuffX, db.debuffY, below, above) }
+            end
             f.debuffContainer:Show()
         end
     else
@@ -434,14 +482,14 @@ function AU.Layout(f)
         geoBuffs = { geometry(f, db, db.position, size, db.buffGrow, db.buffLimit, db.buffX, db.buffY, below, above) }
     end
     f.auraContainer:Show()
-    f.auraGeometry = { geoBuffs, geoDebuffs }
-    AU.Preview(f, ns.unlocked, geoBuffs, geoDebuffs)
+    f.auraGeometry = { geoBuffs, geoDebuffs, isStacked }
+    AU.Preview(f, ns.unlocked, geoBuffs, geoDebuffs, isStacked)
 end
 
 -- Config mode on/off from the mover: placeholders or the real rows.
 function AU.SetPreview(f, on)
     local g = f.auraGeometry
-    AU.Preview(f, on and g ~= nil, g and g[1], g and g[2])
+    AU.Preview(f, on and g ~= nil, g and g[1], g and g[2], g and g[3])
 end
 
 -- The unit behind the frame changed (new target, roster change).

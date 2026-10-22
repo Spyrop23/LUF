@@ -411,6 +411,25 @@ tau.debuffPosition = "SAME"
 ns:ApplyKey("target")
 assert(tfa.auraContainer.groups.debuffs and not tfa.debuffContainer, "back to one container")
 assert(tfa.auraContainer.groups.debuffs.newLine and not tfa.auraContainer.groups.buffs.newLine, "debuffs on their own row")
+-- debuffs at the buffs' place: a container of their own after the buff block,
+-- their offsets work (X from the frame edge, Y from the buffs)
+tau.position, tau.debuffPosition, tau.buffGrow, tau.debuffGrow = "TOP", "TOP", "RIGHT", "RIGHT"
+tau.buffX, tau.debuffX, tau.debuffY = 5, 12, 3
+ns:ApplyKey("target")
+local sp = tfa.debuffContainer and tfa.debuffContainer.point
+assert(sp and sp[1] == "BOTTOMLEFT" and sp[2] == tfa.auraContainer and sp[3] == "TOPLEFT"
+    and sp[4] == 12 - 5 and sp[5] == (tau.groupGap or 4) + 3, "debuffs stacked above the buffs")
+tau.debuffGrow = "LEFT"   -- debuffs from the right edge, buffs from the left
+ns:ApplyKey("target")
+sp = tfa.debuffContainer.point
+assert(sp[1] == "BOTTOMRIGHT" and sp[3] == "TOPLEFT" and sp[4] == tfa.db.width + 12 - 5, "stacked, other side")
+tau.position, tau.debuffPosition = "BOTTOM", "BOTTOM"
+ns:ApplyKey("target")
+sp = tfa.debuffContainer.point
+assert(sp[1] == "TOPRIGHT" and sp[3] == "BOTTOMLEFT" and sp[5] == -(tau.groupGap or 4) + 3, "stacked below the buffs")
+tau.debuffPosition, tau.debuffGrow, tau.buffX, tau.debuffX, tau.debuffY = "SAME", "RIGHT", 0, 0, 0
+ns:ApplyKey("target")
+assert(not tfa.debuffContainer, "with the buffs again: one container")
 -- bigger buffs: your own in a larger group of their own, the rest via "!PLAYER"
 tau.biggerBuffs = 4
 ns:ApplyKey("target")
@@ -421,7 +440,8 @@ assert(tg.debuffs.newLine and not tg.debuffsMine, "debuffs unchanged, still on t
 tau.biggerDebuffs = 6
 ns:ApplyKey("target")
 tg = tfa.auraContainer.groups
-assert(tg.debuffsMine.newLine and not tg.debuffs.newLine, "own debuffs open the debuff row")
+-- both debuff groups break the line: your own group is often empty
+assert(tg.debuffsMine.newLine and tg.debuffs.newLine, "own and others' debuffs never join the buff row")
 assert(tg.debuffsMine.button.w == tau.debuffSize + 6, "own debuffs bigger")
 tau.buffFilter = "own"
 ns:ApplyKey("target")
