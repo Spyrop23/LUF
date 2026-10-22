@@ -3,6 +3,7 @@
 ## Unreleased
 - Fix: the debuff border and highlight in "Your own" mode (debuffs you can dispel) lit up on enemies too, e.g. a poison on an enemy target for a paladin. They now only show on units you can help. Thanks to **carnage0975**!
 - Fix: on the Filters page, a list name typed and "Create" clicked right away (without Enter) was not taken, so no list was made and nothing could be added. Names (filter lists, rename, import, new profile) are now taken while typing, and the aura search starts by itself after a short pause. Thanks to **user_slouyac50poxg707** for the report!
+- Range fading for targets: Target, Target of Target, Focus, Focus Target, Party Targets and Raid Targets now fade out of range too, measured with one of your spells (about 30-40 yards; a heal or buff on friends, an attack spell on enemies). Classes without such a spell keep these frames opaque. Thanks to **user_slouyac50poxg707** for the idea!
 
 ## 0.17.1
 - The elite dragon on the target frame is off by default now (also turned off once in existing profiles): the level text already shows + / R / B. Turn it back on under Target → Indicators → Elite. Thanks to **Abula3**!

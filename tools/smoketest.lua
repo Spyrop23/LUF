@@ -1429,6 +1429,28 @@ do
     ns.Options:Toggle()
 end
 
+-- range for targets: measured with one of your spells (also enemies)
+do
+    local tf = ns.UF.frames.target
+    local cls, known, inr, canAttack = UnitClass, IsPlayerSpell, C_Spell and C_Spell.IsSpellInRange, UnitCanAttack
+    C_Spell = C_Spell or {}
+    UnitClass = function(u) if u == "player" then return "Mage", "MAGE" end return cls(u) end
+    IsPlayerSpell = function(id) return id == 133 or id == 1459 end
+    UnitCanAttack = function() return true end
+    local asked
+    C_Spell.IsSpellInRange = function(spell, unit) asked = spell; return secret(false) end
+    fire("SPELLS_CHANGED")
+    ns.db.units.target.range.enabled = true
+    ns.Range.Update(tf)
+    assert(asked ~= nil and tf.alpha == ns.db.units.target.range.alpha, "enemy target out of range fades: " .. tostring(tf.alpha))
+    C_Spell.IsSpellInRange = function() return true end
+    ns.Range.Update(tf)
+    assert(tf.alpha == 1, "in range: opaque")
+    UnitClass, IsPlayerSpell, C_Spell.IsSpellInRange, UnitCanAttack = cls, known, inr, canAttack
+    fire("SPELLS_CHANGED")
+    tf:SetAlpha(1)
+end
+
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
     local fs = ns.UF.frames.player.healthBar.text.center

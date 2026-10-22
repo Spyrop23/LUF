@@ -14,7 +14,63 @@ ns.Range = RG
 -- Settings keys that fade. UnitInRange answers for group members (and their
 -- pets); for the player's own pet it reports "out of range" even next to
 -- you, as a secret we cannot catch, so the pet frame never fades.
-RG.supported = { party = true, partypet = true, raid = true, raidpet = true }
+-- Targets (yours, your party's and raid's, focus) can be anyone, also enemies:
+-- they are measured with one of your own spells (C_Spell.IsSpellInRange).
+RG.supported = { party = true, partypet = true, raid = true, raidpet = true,
+    target = true, targettarget = true, focus = true, focustarget = true, partytarget = true, raidtarget = true }
+local BY_SPELL = { target = true, targettarget = true, focus = true, focustarget = true, partytarget = true,
+    raidtarget = true }
+
+-- Rank 1 spell IDs with about 30-40 yards range, per class: one list for
+-- enemies (harm), one for friends (help). The first one you know is used
+-- (by name, so the highest rank counts).
+local SPELLS = {
+    harm = {
+        MAGE = { 133, 116 }, PRIEST = { 585, 589 }, WARLOCK = { 686, 348 }, DRUID = { 5176 },
+        SHAMAN = { 403 }, HUNTER = { 75, 3044 }, PALADIN = { 24275 }, ROGUE = { 2764 }, WARRIOR = { 2764 },
+    },
+    help = {
+        MAGE = { 1459 }, PRIEST = { 2050, 1243 }, WARLOCK = { 5697 }, DRUID = { 5185, 1126 },
+        SHAMAN = { 331 }, PALADIN = { 635, 19740 },
+    },
+}
+
+local spellCache = {}
+local function rangeSpell(kind)
+    local cached = spellCache[kind]
+    if cached ~= nil then return cached or nil end
+    local _, class = UnitClass("player")
+    local found = false
+    for _, id in ipairs(ns.CanRead(class) and SPELLS[kind][class] or {}) do
+        local known = IsPlayerSpell and IsPlayerSpell(id)
+        if known or (IsSpellKnown and IsSpellKnown(id)) then
+            local info = C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(id)
+            found = (info and info.name) or (GetSpellInfo and GetSpellInfo(id)) or id
+            break
+        end
+    end
+    spellCache[kind] = found
+    return found or nil
+end
+-- new spells, new ranks
+ns:RegisterEvent("SPELLS_CHANGED", function() spellCache = {} end)
+ns:RegisterEvent("LEARNED_SPELL_IN_TAB", function() spellCache = {} end)
+
+-- In range of one of your spells (true/false/secret), or nil when no spell fits.
+local function spellRange(unit)
+    if not (C_Spell and C_Spell.IsSpellInRange) then return nil end
+    local ok, hostile = pcall(UnitCanAttack, "player", unit)
+    local kinds
+    if ok and ns.CanRead(hostile) then kinds = { hostile and "harm" or "help" } else kinds = { "harm", "help" } end
+    for _, kind in ipairs(kinds) do
+        local spell = rangeSpell(kind)
+        if spell then
+            local okR, inRange = pcall(C_Spell.IsSpellInRange, spell, unit)
+            if okR and type(inRange) ~= "nil" then return inRange end
+        end
+    end
+    return nil
+end
 
 local POLL_EVERY = 0.25
 
@@ -35,9 +91,22 @@ function RG.Update(f)
         f:SetAlpha(1)
         return
     end
-    local inRange, checked = UnitInRange(unit)
+    local inRange, checked
+    if BY_SPELL[f.key] then
+        inRange = spellRange(unit)
+        if type(inRange) == "nil" then
+            -- no spell for it: group members still answer UnitInRange
+            inRange, checked = UnitInRange(unit)
+        end
+    else
+        inRange, checked = UnitInRange(unit)
+    end
     -- a readable "not checked" means: no range information, stay opaque
-    if ns.CanRead(checked) and not checked then
+    if ns.CanRead(checked) and checked == false then
+        f:SetAlpha(1)
+        return
+    end
+    if type(inRange) == "nil" then
         f:SetAlpha(1)
         return
     end

@@ -366,6 +366,10 @@ local function unitTabs(key)
             b:Header("Range")
             b:Check("Fade out of range", p("range.enabled"))
             b:Slider("Alpha out of range", 0, 1, 0.05, p("range.alpha"))
+            if key:find("target") or key == "focus" then
+                b:Text("Measured with one of your spells (about 30-40 yards: a heal or buff on friends, an " ..
+                    "attack spell on enemies). Without such a spell only group members fade.", 30)
+            end
         end)
     end
 
