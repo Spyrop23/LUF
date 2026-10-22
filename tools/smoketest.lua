@@ -1133,7 +1133,7 @@ for _ = 1, 5 do tick() end
 local lists = {}
 for _, w in ipairs(frames) do if w.rows then table.insert(lists, w) end end
 assert(#lists == 2, "two spell lists on the filters page")
-lists[1], lists[2] = lists[2], lists[1]   -- the page shows the list's auras first, the results below
+-- the page shows the search results first ("Add aura"), the list's auras below
 lists[1]:Refresh()
 assert(lists[1].rows[1].shown and lists[1].rows[1].item.id == 1454, "search result row")
 lists[1].rows[1].button.scripts.OnClick(lists[1].rows[1].button)
