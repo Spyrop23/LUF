@@ -519,29 +519,17 @@ addPage("filters", "Filters", function(b)
 
     b:Header("Filter lists")
     b:Text("Lists of auras for the Auras and Squares tabs of each frame. Shared by all characters.", 16)
-    b:Dropdown("Filter list", function()
+    local pick = b:Dropdown("Filter list", function()
         local list = {}
         for _, n in ipairs(FL.Names()) do table.insert(list, { n, n }) end
         return list
     end, selected, function(v) FL.selected = v; O:Refresh() end)
-    b:Edit("New filter list", function() return newListName end, function(v) newListName = v end, 200, false, 0)
-    b:Button("Create", function()
-        local name, err = FL.Create(newListName)
-        if name then newListName = "" end
-        report(name, err)
-    end)
-    b:Edit("Rename to", function() return renameTo end, function(v) renameTo = v end, 200, false, 0)
-    b:Button("Rename", function()
-        local name, err = FL.Rename(selected(), renameTo)
-        if name then renameTo = "" end
-        report(name, err)
-    end)
     local del
-    del = b:Button("Delete list", function()
+    del = b:ButtonBeside(pick, "Delete list", function()
         if not selected() then return end
         if not deleteArmed then
             deleteArmed = true
-            del:SetText("Click again to delete")
+            del:SetText("Sure? Click again")
             C_Timer.After(3, function() deleteArmed = false; del:SetText("Delete list") end)
             return
         end
@@ -549,7 +537,19 @@ addPage("filters", "Filters", function(b)
         del:SetText("Delete list")
         FL.Delete(selected())
         O:Refresh()
-    end, 180)
+    end, 130)
+    local new = b:Edit("New filter list", function() return newListName end, function(v) newListName = v end, 200, false, 0)
+    b:ButtonBeside(new, "Create", function()
+        local name, err = FL.Create(newListName)
+        if name then newListName = "" end
+        report(name, err)
+    end)
+    local rename = b:Edit("Rename to", function() return renameTo end, function(v) renameTo = v end, 200, false, 0)
+    b:ButtonBeside(rename, "Rename", function()
+        local name, err = FL.Rename(selected(), renameTo)
+        if name then renameTo = "" end
+        report(name, err)
+    end)
 
     b:Header("Add aura")
     b:Edit("Search name or ID", function() return searchText end, function(v)
@@ -562,7 +562,7 @@ addPage("filters", "Filters", function(b)
         if not selected() then s = s .. "  |cffff5555Create a list first.|r" end
         return s
     end, 16)
-    b:List(10, function()
+    b:List(8, function()
         local items, list = FL.SearchItems(), FL.Get(selected())
         for _, item in ipairs(items) do
             if list and list[item.id] then item.actionText, item.disabled = "Added", true end

@@ -345,3 +345,14 @@ function Builder:Button(text, fn, width)
     b:SetScript("OnClick", fn)
     return self:Add(b, ROW + 2)
 end
+
+-- A button on the same row, right of an Edit's box or a Dropdown (takes no
+-- row of its own, so a page of short forms stays compact).
+function Builder:ButtonBeside(row, text, fn, width)
+    local b = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+    b:SetSize(width or 110, 22)
+    b:SetPoint("LEFT", row.edit or row.dropdown, "RIGHT", 8, 0)
+    b:SetText(text)
+    b:SetScript("OnClick", fn)
+    return b
+end
