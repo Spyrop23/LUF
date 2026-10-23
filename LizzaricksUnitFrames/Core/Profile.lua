@@ -56,7 +56,7 @@ local function unitDefaults(o)
         healPrediction = { enabled = true, overflow = 1.05, alpha = 0.8, absorbs = true },
         xpBar     = { enabled = false, weight = 2, background = true, backgroundAlpha = 0.2 },
         emptyBar  = { enabled = false, weight = 3, background = true, backgroundAlpha = 0.5, color = { 0, 0, 0 } },
-        range     = { enabled = true, alpha = 0.4 },
+        range     = { enabled = true, alpha = 0.4, measure = "auto" },
         squares   = squareDefaults(),
         borders   = { mouseover = true, aggro = false, debuff = "own", size = 2, onTop = false },   -- Luna's defaults
         highlight = { mouseover = false, target = false, debuff = "off", alpha = 0.25 },

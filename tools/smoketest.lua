@@ -1466,6 +1466,47 @@ do
     C_Spell.IsSpellInRange = function() return true end
     ns.Range.Update(tf)
     assert(tf.alpha == 1, "in range: opaque")
+    -- a warrior: no spell, so the follow distance (28 yards) counts; not
+    -- UnitInRange, which calls everyone outside the group out of range
+    UnitClass = function(u) if u == "player" then return "Warrior", "WARRIOR" end return cls(u) end
+    IsPlayerSpell = function(id) return id == 100 or id == 2764 end   -- Charge, Throw: min. range, not used
+    fire("SPELLS_CHANGED")
+    local cid, uir, combat = CheckInteractDistance, UnitInRange, InCombatLockdown
+    local dist
+    CheckInteractDistance = function(unit, index) dist = index; return true end
+    UnitInRange = function() return secret(false), secret(false) end
+    UnitCanAttack = function() return false end   -- a friend
+    asked = nil
+    C_Spell.IsSpellInRange = function(spell) asked = spell; return false end
+    ns.Range.Update(tf)
+    assert(asked == nil and dist == 4 and tf.alpha == 1, "warrior, friend in 28 yards: opaque")
+    CheckInteractDistance = function() return false end
+    ns.Range.Update(tf)
+    assert(tf.alpha == ns.db.units.target.range.alpha, "warrior, friend beyond 28 yards: faded")
+    -- enemies in combat: the game does not answer, the frame stays visible
+    UnitCanAttack = function() return true end
+    InCombatLockdown = function() return true end
+    dist = nil
+    CheckInteractDistance = function(unit, index) dist = index; return false end
+    ns.Range.Update(tf)
+    assert(dist == nil and tf.alpha == 1, "enemy in combat, no spell: not asked, opaque")
+    InCombatLockdown = combat
+    ns.Range.Update(tf)
+    assert(dist == 4 and tf.alpha == ns.db.units.target.range.alpha, "enemy out of combat: follow distance")
+    -- "Your spell only": a warrior has none, so no fading
+    ns.db.units.target.range.measure = "spell"
+    ns.Range.Update(tf)
+    assert(tf.alpha == 1, "spell only, no spell: opaque")
+    -- "28 yards" even with a spell
+    UnitClass = function(u) if u == "player" then return "Mage", "MAGE" end return cls(u) end
+    IsPlayerSpell = function(id) return id == 133 or id == 1459 end
+    fire("SPELLS_CHANGED")
+    ns.db.units.target.range.measure = "28"
+    asked = nil
+    ns.Range.Update(tf)
+    assert(asked == nil and tf.alpha == ns.db.units.target.range.alpha, "28 yards: no spell asked")
+    ns.db.units.target.range.measure = "auto"
+    CheckInteractDistance, UnitInRange = cid, uir
     UnitClass, IsPlayerSpell, C_Spell.IsSpellInRange, UnitCanAttack = cls, known, inr, canAttack
     fire("SPELLS_CHANGED")
     tf:SetAlpha(1)

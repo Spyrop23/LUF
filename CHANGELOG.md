@@ -3,6 +3,7 @@
 ## Unreleased
 - Fix: debuffs "With the buffs (own row)" could join the buff row when "Bigger debuffs" was on (your own debuffs opened the row, but debuffs on you come from enemies). All debuffs now start on a row of their own. Thanks to **user_slouyac50poxg707**!
 - Fix: debuffs set to the same position as the buffs (e.g. both "Above the frame") ignored their X/Y offsets. They now get a place of their own right after the buffs, with their own side, limit and offsets (Y counts from the buffs). Thanks to **user_slouyac50poxg707**!
+- Fix: range fading of target frames for classes without a fitting spell (warriors, rogues, hunters): friendly targets were always faded, enemies already at about 8 yards (Throw and Charge have a minimum range). These classes now use the follow distance (about 28 yards); spells with a minimum range are no longer used. New option on the Range tab of target frames, "Measure with": your spell, else 28 yards (default) / 28 yards / your spell only. In combat the game answers the 28 yards only for friends, so enemies then stay visible. Thanks to **user_slouyac50poxg707**!
 
 ## 0.17.2
 - Fix: the debuff border and highlight in "Your own" mode (debuffs you can dispel) lit up on enemies too, e.g. a poison on an enemy target for a paladin. They now only show on units you can help. Thanks to **carnage0975**!

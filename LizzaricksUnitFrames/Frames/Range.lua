@@ -15,19 +15,23 @@ ns.Range = RG
 -- pets); for the player's own pet it reports "out of range" even next to
 -- you, as a secret we cannot catch, so the pet frame never fades.
 -- Targets (yours, your party's and raid's, focus) can be anyone, also enemies:
--- they are measured with one of your own spells (C_Spell.IsSpellInRange).
+-- they are measured with one of your own spells (C_Spell.IsSpellInRange) or
+-- the follow distance (CheckInteractDistance, about 28 yards); range.measure
+-- picks: "auto" (spell, else 28 yards), "spell" or "28".
 RG.supported = { party = true, partypet = true, raid = true, raidpet = true,
     target = true, targettarget = true, focus = true, focustarget = true, partytarget = true, raidtarget = true }
 local BY_SPELL = { target = true, targettarget = true, focus = true, focustarget = true, partytarget = true,
     raidtarget = true }
+RG.BY_SPELL = BY_SPELL
 
 -- Rank 1 spell IDs with about 30-40 yards range, per class: one list for
 -- enemies (harm), one for friends (help). The first one you know is used
--- (by name, so the highest rank counts).
+-- (by name, so the highest rank counts). No spells with a minimum range
+-- (Throw, Shoot, Auto Shot, Charge): they report "out of range" up close.
 local SPELLS = {
     harm = {
         MAGE = { 133, 116 }, PRIEST = { 585, 589 }, WARLOCK = { 686, 348 }, DRUID = { 5176 },
-        SHAMAN = { 403 }, HUNTER = { 75, 3044 }, PALADIN = { 24275 }, ROGUE = { 2764 }, WARRIOR = { 2764 },
+        SHAMAN = { 403 }, PALADIN = { 24275 },
     },
     help = {
         MAGE = { 1459 }, PRIEST = { 2050, 1243 }, WARLOCK = { 5697 }, DRUID = { 5185, 1126 },
@@ -72,6 +76,28 @@ local function spellRange(unit)
     return nil
 end
 
+-- Within follow distance (about 28 yards), or nil when unknown. In combat
+-- the client allows it on friends only, so enemies are not asked then.
+local FOLLOW = 4
+local function followRange(unit, hostile)
+    if not CheckInteractDistance then return nil end
+    if InCombatLockdown() and hostile ~= false then return nil end
+    local ok, inRange = pcall(CheckInteractDistance, unit, FOLLOW)
+    if ok then return inRange end
+    return nil
+end
+
+local function targetRange(unit, measure)
+    local ok, canAttack = pcall(UnitCanAttack, "player", unit)
+    local hostile   -- nil: unknown (secret)
+    if ok and ns.CanRead(canAttack) then hostile = canAttack and true or false end
+    if measure ~= "28" then
+        local inRange = spellRange(unit)
+        if type(inRange) ~= "nil" or measure == "spell" then return inRange end
+    end
+    return followRange(unit, hostile)
+end
+
 local POLL_EVERY = 0.25
 
 local function isPlayer(unit)
@@ -93,11 +119,8 @@ function RG.Update(f)
     end
     local inRange, checked
     if BY_SPELL[f.key] then
-        inRange = spellRange(unit)
-        if type(inRange) == "nil" then
-            -- no spell for it: group members still answer UnitInRange
-            inRange, checked = UnitInRange(unit)
-        end
+        -- not UnitInRange: it says "out of range" for anyone outside the group
+        inRange = targetRange(unit, db.measure or "auto")
     else
         inRange, checked = UnitInRange(unit)
     end

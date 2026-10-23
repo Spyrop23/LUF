@@ -60,6 +60,8 @@ local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" }
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
 local TIME_POS = { { "BELOW", "Below the icon" }, { "INSIDE", "In the icon" }, { "ABOVE", "Above the icon" } }
 local GROW_SIDES = { { "RIGHT", "Left edge, grow right" }, { "LEFT", "Right edge, grow left" } }
+-- How target frames measure range (Frames/Range.lua).
+local RANGE_MEASURES = { { "auto", "Your spell, else 28 yards" }, { "28", "28 yards" }, { "spell", "Your spell only" } }
 local DEBUFF_POS = { { "SAME", "With the buffs (own row)" } }
 for _, pos in ipairs(AURA_POS) do table.insert(DEBUFF_POS, pos) end
 local BUFF_FILTERS = { { "all", "All" }, { "own", "Only mine" }, { "raid", "Ones I can cast" } }
@@ -367,9 +369,11 @@ local function unitTabs(key)
             b:Header("Range")
             b:Check("Fade out of range", p("range.enabled"))
             b:Slider("Alpha out of range", 0, 1, 0.05, p("range.alpha"))
-            if key:find("target") or key == "focus" then
-                b:Text("Measured with one of your spells (about 30-40 yards: a heal or buff on friends, an " ..
-                    "attack spell on enemies). Without such a spell only group members fade.", 30)
+            if ns.Range.BY_SPELL[key] then
+                b:Dropdown("Measure with", RANGE_MEASURES, p("range.measure"))
+                b:Text("Your spell: a heal or buff on friends, an attack spell on enemies (about 30-40 yards). " ..
+                    "28 yards: the follow distance; in combat the game only answers it for friends, so " ..
+                    "enemies stay visible then.", 44)
             end
         end)
     end
