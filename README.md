@@ -1,7 +1,7 @@
 # Lizzarick's Unit Frames
 
 Unit Frames im Stil von **Luna Unit Frames** für **World of Warcraft: Forever**
-(Client 1.60.1, `## Interface: 16001`) und **Retail / Midnight** (12.x, `120000`–`120100`).
+(Client 1.60.1, `## Interface: 16001`) und **Retail / Midnight** (12.x, `120000`–`120107`).
 Ein Addon für beide Spiele, ohne fremde Libraries. In Retail fehlen nur die Classic-Funktionen
 (Begleiter-Zufriedenheit, Begleiter-XP, Plündermeister); dafür kennt es die Retail-Klassen und
 -Ressourcen.

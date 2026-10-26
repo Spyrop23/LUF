@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Retail patch 12.1.5 (and the 12.1.7 PTR): the addon is no longer listed as "Out of date".
+
 ## 0.17.3
 - Fix: debuffs "With the buffs (own row)" could join the buff row when "Bigger debuffs" was on (your own debuffs opened the row, but debuffs on you come from enemies). All debuffs now start on a row of their own. Thanks to **user_slouyac50poxg707**!
 - Fix: debuffs set to the same position as the buffs (e.g. both "Above the frame") ignored their X/Y offsets. They now get a place of their own right after the buffs, with their own side, limit and offsets (Y counts from the buffs). Thanks to **user_slouyac50poxg707**!
