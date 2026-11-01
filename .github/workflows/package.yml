@@ -25,12 +25,20 @@ jobs:
       # A release is only made on request: Actions -> package -> "Run workflow".
       # Pushes to main just check and build. The zip unzips straight into
       # Interface/AddOns with the right folder name.
-      - name: Publish release "latest"
+      # Each release gets its own tag v<version> (addon managers like WowUp
+      # compare tags to see an update; older releases stay for a roll back).
+      # Running it again for the same version replaces that release.
+      - name: Publish release v<version>
         if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete latest --yes --cleanup-tag || true
-          gh release create latest "${{ steps.pkg.outputs.zip }}" --title "Lizzarick's Unit Frames (latest)" \
-            --notes "Newest build of main ($GITHUB_SHA). For WoW: Forever and Retail (Midnight). Unzip the zip into the game's Interface/AddOns folder (Forever: World of Warcraft/_classic_beta_/Interface/AddOns, Retail: World of Warcraft/_retail_/Interface/AddOns)." \
-            --target "$GITHUB_SHA" --latest
+          VERSION=$(sed -n 's/^## Version: *//p' LizzaricksUnitFrames/LizzaricksUnitFrames.toc | tr -d '\r')
+          TAG="v$VERSION"
+          # this version's part of the changelog, then where to unzip it
+          awk -v head="## $VERSION" '$0 == head { on = 1; next } on && /^## / { exit } on' CHANGELOG.md > notes.md
+          printf '\nFor WoW: Forever and Retail (Midnight). Unzip the zip into the game'"'"'s Interface/AddOns folder (Forever: World of Warcraft/_classic_beta_/Interface/AddOns, Retail: World of Warcraft/_retail_/Interface/AddOns).\n' >> notes.md
+          gh release delete latest --yes --cleanup-tag || true   # the old fixed tag
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" "${{ steps.pkg.outputs.zip }}" --title "Lizzarick's Unit Frames $VERSION" \
+            --notes-file notes.md --target "$GITHUB_SHA" --latest

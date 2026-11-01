@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Retail patch 12.1.5 (and the 12.1.7 PTR): the addon is no longer listed as "Out of date".
+- GitHub releases are now tagged with their version (v0.17.4, ...) instead of one "latest" tag, so addon managers like WowUp see new versions, and older releases stay available. Thanks to **Lykias1** for the suggestion!
 
 ## 0.17.3
 - Fix: debuffs "With the buffs (own row)" could join the buff row when "Bigger debuffs" was on (your own debuffs opened the row, but debuffs on you come from enemies). All debuffs now start on a row of their own. Thanks to **user_slouyac50poxg707**!

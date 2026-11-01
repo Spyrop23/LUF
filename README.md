@@ -17,7 +17,7 @@ Hinweis: Bis 0.7.1 hieß das Addon „FUF – Forever Unit Frames“ (Ordner `FU
 `AddOns/FUF` löschen; die Einstellungen von damals werden nicht übernommen.
 
 
-**Am einfachsten:** über CurseForge, oder unter **Releases → Lizzarick's Unit Frames (latest)** die
+**Am einfachsten:** über CurseForge, oder unter **Releases** beim neuesten Release (Tag `v<Version>`) die
 Datei `LizzaricksUnitFrames-<Version>.zip` laden und direkt nach
 `World of Warcraft/_classic_beta_/Interface/AddOns/` (Forever) bzw.
 `World of Warcraft/_retail_/Interface/AddOns/` (Retail) entpacken.
