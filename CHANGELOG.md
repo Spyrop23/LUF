@@ -3,6 +3,7 @@
 ## Unreleased
 - Fix: 3D portraits showed an empty black box for units out of sight range or offline (and could stay empty on polled frames like Target of Target). They now show Blizzard's question mark model until the unit comes into view, then its model; the frames check this once a second. Thanks to **carnage0975**!
 - Range fading for warriors (and hunters): an enemy between melee and Charge's minimum range (about 5-8 yards) no longer fades. Out of combat the trade distance tells; in combat the frame remembers that the enemy was in melee last. Only when you close in from Charge range during combat can it fade for a moment until you reach melee. Thanks to **karrier_user_slouyac50poxg707**!
+- GitHub releases now carry a release.json next to the zip (flavours forever and mainline), so WowUp offers the addon for WoW: Forever too, not only for Retail. Thanks to **Lykias1**!
 
 ## 0.17.4
 - Retail patch 12.1.5 (and the 12.1.7 PTR): the addon is no longer listed as "Out of date".

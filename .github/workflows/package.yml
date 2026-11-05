@@ -38,7 +38,17 @@ jobs:
           # this version's part of the changelog, then where to unzip it
           awk -v head="## $VERSION" '$0 == head { on = 1; next } on && /^## / { exit } on' CHANGELOG.md > notes.md
           printf '\nFor WoW: Forever and Retail (Midnight). Unzip the zip into the game'"'"'s Interface/AddOns folder (Forever: World of Warcraft/_classic_beta_/Interface/AddOns, Retail: World of Warcraft/_retail_/Interface/AddOns).\n' >> notes.md
+          # release.json (as the BigWigs packager writes it): addon managers
+          # like WowUp take the zip for each game flavour listed there
+          # (Forever: interface 1xxxx, Retail: the newest 12xxxx)
+          ZIP=$(basename "${{ steps.pkg.outputs.zip }}")
+          IFACES=$(sed -n 's/^## Interface: *//p' LizzaricksUnitFrames/LizzaricksUnitFrames.toc | tr -d '\r' | tr ',' '\n' | tr -d ' ')
+          FOREVER=$(echo "$IFACES" | awk '$1 < 20000' | sort -n | tail -1)
+          MAINLINE=$(echo "$IFACES" | awk '$1 >= 100000' | sort -n | tail -1)
+          jq -n --arg v "$TAG" --arg f "$ZIP" --argjson fo "$FOREVER" --argjson ml "$MAINLINE" \
+            '{releases: [{name: "LizzaricksUnitFrames", version: $v, filename: $f, nolib: false,
+              metadata: [{flavor: "forever", interface: $fo}, {flavor: "mainline", interface: $ml}]}]}' > release.json
           gh release delete latest --yes --cleanup-tag || true   # the old fixed tag
           gh release delete "$TAG" --yes --cleanup-tag || true
-          gh release create "$TAG" "${{ steps.pkg.outputs.zip }}" --title "Lizzarick's Unit Frames $VERSION" \
+          gh release create "$TAG" "${{ steps.pkg.outputs.zip }}" release.json --title "Lizzarick's Unit Frames $VERSION" \
             --notes-file notes.md --target "$GITHUB_SHA" --latest
