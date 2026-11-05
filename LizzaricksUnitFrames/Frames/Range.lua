@@ -26,13 +26,18 @@ RG.BY_SPELL = BY_SPELL
 
 -- Rank 1 spell IDs with about 30-40 yards range, per class: one list for
 -- enemies (harm), one for friends (help). The first one you know is used
--- (by name, so the highest rank counts). No spells with a minimum range
--- (Throw, Shoot, Auto Shot, Charge): they report "out of range" up close.
+-- (by name, so the highest rank counts).
+-- A spell with a minimum range (Charge 8-25, Auto Shot 8-35) says "out of
+-- range" up close, so a melee spell (near) counts as well: in range is
+-- "the spell reaches or melee does". Only the few yards between melee and
+-- the minimum range fade (there neither one can be used).
 local SPELLS = {
     harm = {
         MAGE = { 133, 116 }, PRIEST = { 585, 589 }, WARLOCK = { 686, 348 }, DRUID = { 5176 },
-        SHAMAN = { 403 }, PALADIN = { 24275 },
+        SHAMAN = { 403 }, PALADIN = { 24275 }, WARRIOR = { 100 }, HUNTER = { 75 },
     },
+    -- Heroic Strike, Pummel, Slam / Raptor Strike (Forever, Retail)
+    near = { WARRIOR = { 78, 6552, 1464 }, HUNTER = { 2973, 186270 } },
     help = {
         MAGE = { 1459 }, PRIEST = { 2050, 1243 }, WARLOCK = { 5697 }, DRUID = { 5185, 1126 },
         SHAMAN = { 331 }, PALADIN = { 635, 19740 },
@@ -70,7 +75,14 @@ local function spellRange(unit)
         local spell = rangeSpell(kind)
         if spell then
             local okR, inRange = pcall(C_Spell.IsSpellInRange, spell, unit)
-            if okR and type(inRange) ~= "nil" then return inRange end
+            if okR and type(inRange) ~= "nil" then
+                local near = kind == "harm" and ns.CanRead(inRange) and not inRange and rangeSpell("near")
+                if near then
+                    local okN, inMelee = pcall(C_Spell.IsSpellInRange, near, unit)
+                    if okN and ns.CanRead(inMelee) and inMelee then return true end
+                end
+                return inRange
+            end
         end
     end
     return nil

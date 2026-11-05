@@ -1466,10 +1466,10 @@ do
     C_Spell.IsSpellInRange = function() return true end
     ns.Range.Update(tf)
     assert(tf.alpha == 1, "in range: opaque")
-    -- a warrior: no spell, so the follow distance (28 yards) counts; not
-    -- UnitInRange, which calls everyone outside the group out of range
+    -- a warrior on a friend: no spell, so the follow distance (28 yards)
+    -- counts; not UnitInRange, which calls everyone outside the group out of range
     UnitClass = function(u) if u == "player" then return "Warrior", "WARRIOR" end return cls(u) end
-    IsPlayerSpell = function(id) return id == 100 or id == 2764 end   -- Charge, Throw: min. range, not used
+    IsPlayerSpell = function(id) return id == 100 or id == 78 end   -- Charge, Heroic Strike
     fire("SPELLS_CHANGED")
     local cid, uir, combat = CheckInteractDistance, UnitInRange, InCombatLockdown
     local dist
@@ -1483,9 +1483,27 @@ do
     CheckInteractDistance = function() return false end
     ns.Range.Update(tf)
     assert(tf.alpha == ns.db.units.target.range.alpha, "warrior, friend beyond 28 yards: faded")
-    -- enemies in combat: the game does not answer, the frame stays visible
+    -- a warrior on an enemy, also in combat: Charge range (8-25) or melee
     UnitCanAttack = function() return true end
     InCombatLockdown = function() return true end
+    local calls, charge, melee = {}, false, true
+    C_Spell.IsSpellInRange = function(spell)
+        table.insert(calls, spell)
+        if #calls == 1 then return charge end
+        return melee
+    end
+    ns.Range.Update(tf)
+    assert(#calls == 2 and calls[1] ~= calls[2] and tf.alpha == 1, "warrior, enemy in melee (inside Charge's min. range): opaque")
+    calls, melee = {}, false
+    ns.Range.Update(tf)
+    assert(tf.alpha == ns.db.units.target.range.alpha, "warrior, enemy beyond Charge range: faded")
+    calls, charge = {}, true
+    ns.Range.Update(tf)
+    assert(#calls == 1 and tf.alpha == 1, "warrior, enemy in Charge range: opaque")
+    -- a rogue: no spell for enemies; in combat the game does not answer the
+    -- follow distance for them, so the frame stays visible
+    UnitClass = function(u) if u == "player" then return "Rogue", "ROGUE" end return cls(u) end
+    fire("SPELLS_CHANGED")
     dist = nil
     CheckInteractDistance = function(unit, index) dist = index; return false end
     ns.Range.Update(tf)
@@ -1493,7 +1511,7 @@ do
     InCombatLockdown = combat
     ns.Range.Update(tf)
     assert(dist == 4 and tf.alpha == ns.db.units.target.range.alpha, "enemy out of combat: follow distance")
-    -- "Your spell only": a warrior has none, so no fading
+    -- "Your spell only": a rogue has none, so no fading
     ns.db.units.target.range.measure = "spell"
     ns.Range.Update(tf)
     assert(tf.alpha == 1, "spell only, no spell: opaque")

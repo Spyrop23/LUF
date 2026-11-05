@@ -371,9 +371,9 @@ local function unitTabs(key)
             b:Slider("Alpha out of range", 0, 1, 0.05, p("range.alpha"))
             if ns.Range.BY_SPELL[key] then
                 b:Dropdown("Measure with", RANGE_MEASURES, p("range.measure"))
-                b:Text("Your spell: a heal or buff on friends, an attack spell on enemies (about 30-40 yards). " ..
-                    "28 yards: the follow distance; in combat the game only answers it for friends, so " ..
-                    "enemies stay visible then.", 44)
+                b:Text("Your spell: a heal or buff on friends, an attack spell on enemies (about 30-40 yards; " ..
+                    "warriors: Charge, 8-25 yards, or melee). 28 yards: the follow distance; in combat the game " ..
+                    "only answers it for friends, so enemies stay visible then.", 44)
             end
         end)
     end

@@ -3,6 +3,7 @@
 ## Unreleased
 - Retail patch 12.1.5 (and the 12.1.7 PTR): the addon is no longer listed as "Out of date".
 - GitHub releases are now tagged with their version (v0.17.4, ...) instead of one "latest" tag, so addon managers like WowUp see new versions, and older releases stay available. Thanks to **Lykias1** for the suggestion!
+- Range fading of target frames for warriors: enemies now count as in range within Charge range (8-25 yards) or melee, also in combat (before: 28 yards, and only out of combat). Hunters likewise use Auto Shot or melee. Only the few yards between melee and the minimum range fade, where neither can be used. Thanks to **user_slouyac50poxg707**!
 
 ## 0.17.3
 - Fix: debuffs "With the buffs (own row)" could join the buff row when "Bigger debuffs" was on (your own debuffs opened the row, but debuffs on you come from enemies). All debuffs now start on a row of their own. Thanks to **user_slouyac50poxg707**!
