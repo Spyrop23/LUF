@@ -65,49 +65,82 @@ end
 ns:RegisterEvent("SPELLS_CHANGED", function() spellCache = {} end)
 ns:RegisterEvent("LEARNED_SPELL_IN_TAB", function() spellCache = {} end)
 
+-- CheckInteractDistance (index: 2 trade, about 8-11 yards; 4 follow, about
+-- 28 yards), or nil when unknown. In combat the client allows it on friends
+-- only, so enemies are not asked then.
+local TRADE, FOLLOW = 2, 4
+local function interactRange(unit, hostile, index)
+    if not CheckInteractDistance then return nil end
+    if InCombatLockdown() and hostile ~= false then return nil end
+    local ok, inRange = pcall(CheckInteractDistance, unit, index)
+    if ok and ns.CanRead(inRange) then return inRange end
+    return nil
+end
+
+local function isIn(spell, unit)
+    local ok, inRange = pcall(C_Spell.IsSpellInRange, spell, unit)
+    if ok then return inRange end
+end
+
+-- A spell with a minimum range (Charge) plus melee: in range when either
+-- reaches. Between the two (about 5-8 yards) neither does, yet the unit is
+-- close: out of combat the trade distance tells; in combat the frame
+-- remembers that the unit was in melee last (walking out of melee passes
+-- that gap before Charge range starts). f.rangeZone: "melee" / "far".
+local function nearOrFar(f, unit, hostile, spell, near)
+    local inMelee = isIn(near, unit)
+    if ns.CanRead(inMelee) and inMelee then f.rangeZone = "melee" return true end
+    local inSpell = isIn(spell, unit)
+    if ns.CanRead(inSpell) and inSpell then f.rangeZone = "far" return true end
+    local close = interactRange(unit, hostile, TRADE)
+    if close ~= nil then
+        f.rangeZone = close and "melee" or nil
+        return close
+    end
+    if f.rangeZone == "melee" then return true end
+    if type(inSpell) == "nil" and type(inMelee) == "nil" then return nil end
+    return false
+end
+
 -- In range of one of your spells (true/false/secret), or nil when no spell fits.
-local function spellRange(unit)
+local function spellRange(f, unit, hostile)
     if not (C_Spell and C_Spell.IsSpellInRange) then return nil end
-    local ok, hostile = pcall(UnitCanAttack, "player", unit)
     local kinds
-    if ok and ns.CanRead(hostile) then kinds = { hostile and "harm" or "help" } else kinds = { "harm", "help" } end
+    if hostile ~= nil then kinds = { hostile and "harm" or "help" } else kinds = { "harm", "help" } end
     for _, kind in ipairs(kinds) do
         local spell = rangeSpell(kind)
-        if spell then
-            local okR, inRange = pcall(C_Spell.IsSpellInRange, spell, unit)
-            if okR and type(inRange) ~= "nil" then
-                local near = kind == "harm" and ns.CanRead(inRange) and not inRange and rangeSpell("near")
-                if near then
-                    local okN, inMelee = pcall(C_Spell.IsSpellInRange, near, unit)
-                    if okN and ns.CanRead(inMelee) and inMelee then return true end
-                end
-                return inRange
-            end
+        local near = spell and kind == "harm" and rangeSpell("near")
+        if near then
+            local inRange = nearOrFar(f, unit, hostile, spell, near)
+            if type(inRange) ~= "nil" then return inRange end
+        elseif spell then
+            local inRange = isIn(spell, unit)
+            if type(inRange) ~= "nil" then return inRange end
         end
     end
     return nil
 end
 
--- Within follow distance (about 28 yards), or nil when unknown. In combat
--- the client allows it on friends only, so enemies are not asked then.
-local FOLLOW = 4
-local function followRange(unit, hostile)
-    if not CheckInteractDistance then return nil end
-    if InCombatLockdown() and hostile ~= false then return nil end
-    local ok, inRange = pcall(CheckInteractDistance, unit, FOLLOW)
-    if ok then return inRange end
-    return nil
-end
-
-local function targetRange(unit, measure)
+local function targetRange(f, unit, measure)
     local ok, canAttack = pcall(UnitCanAttack, "player", unit)
     local hostile   -- nil: unknown (secret)
     if ok and ns.CanRead(canAttack) then hostile = canAttack and true or false end
     if measure ~= "28" then
-        local inRange = spellRange(unit)
+        local inRange = spellRange(f, unit, hostile)
         if type(inRange) ~= "nil" or measure == "spell" then return inRange end
     end
-    return followRange(unit, hostile)
+    return interactRange(unit, hostile, FOLLOW)
+end
+
+-- A new unit behind a frame: forget where the last one stood.
+local function forgetZones()
+    if not ns.UF then return end
+    for key in pairs(BY_SPELL) do
+        for _, f in ipairs(ns.UF.byKey[key] or {}) do f.rangeZone = nil end
+    end
+end
+for _, event in ipairs({ "PLAYER_TARGET_CHANGED", "PLAYER_FOCUS_CHANGED", "UNIT_TARGET" }) do
+    ns:RegisterEvent(event, forgetZones)
 end
 
 local POLL_EVERY = 0.25
@@ -132,7 +165,7 @@ function RG.Update(f)
     local inRange, checked
     if BY_SPELL[f.key] then
         -- not UnitInRange: it says "out of range" for anyone outside the group
-        inRange = targetRange(unit, db.measure or "auto")
+        inRange = targetRange(f, unit, db.measure or "auto")
     else
         inRange, checked = UnitInRange(unit)
     end

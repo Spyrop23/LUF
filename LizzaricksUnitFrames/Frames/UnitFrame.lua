@@ -540,17 +540,52 @@ function UF.UpdateXP(f)
     end
 end
 
+-- A 3D model only exists for units the client can see: out of sight range
+-- or offline, SetUnit leaves an empty (black) box. Those get Blizzard's
+-- question mark model instead, until they come into view.
+local QUESTION_MARK = "Interface\\Buttons\\TalkToMeQuestionMark.m2"
+
+local function readableCall(fn, ...)
+    if not fn then return nil end
+    local ok, v = pcall(fn, ...)
+    if ok and ns.CanRead(v) then return v end
+end
+
+-- What the model shows right now: the unit (GUID where readable) and
+-- whether it can be seen. A change means a new model.
+local function portraitState(unit)
+    local seen = readableCall(UnitIsVisible, unit) ~= false and readableCall(UnitIsConnected, unit) ~= false
+    return (readableCall(UnitGUID, unit) or "?") .. (seen and "+" or "-"), seen
+end
+
 function UF.UpdatePortrait(f)
     local p = f.portrait
     if not p then return end
     if p == f.portrait3D then
+        local state, seen = portraitState(f.unit)
+        f.portraitState = state
         p:ClearModel()
-        p:SetUnit(f.unit)
-        p:SetPortraitZoom(1)
-        p:SetCamDistanceScale(1)
+        if seen then
+            p:SetCamDistanceScale(1)
+            p:SetPortraitZoom(1)
+            p:SetPosition(0, 0, 0)
+            p:SetUnit(f.unit)
+        else
+            p:SetCamDistanceScale(0.25)
+            p:SetPortraitZoom(0)
+            p:SetPosition(0, 0, 0.25)
+            p:SetModel(QUESTION_MARK)
+        end
     else
         SetPortraitTexture(p, f.unit)
     end
+end
+
+-- For polled frames and range changes: a new model only when the unit or
+-- its visibility changed (setting it again every poll would flicker).
+function UF.CheckPortrait(f)
+    if f.portrait ~= f.portrait3D or not f.portrait then return end
+    if portraitState(f.unit) ~= f.portraitState then UF.UpdatePortrait(f) end
 end
 
 function UF.UpdateTexts(f)
@@ -605,6 +640,7 @@ local function updateBarsAndTexts(f)
     UF.UpdateHealth(f)
     UF.UpdatePower(f)
     UF.UpdateTexts(f)
+    UF.CheckPortrait(f)   -- the target of target changed, or came into view
 end
 
 -- Points an aura container at the unit the frame shows right now: in
@@ -670,6 +706,31 @@ local function onPoll(ev, elapsed)
     ev.wait = 0
     if ev.frame:IsVisible() then ns.Try("poll " .. ev.frame.unit, updateBarsAndTexts, ev.frame) end
 end
+
+-- Units walk into and out of sight range (party, raid, targets) without an
+-- event for it: once a second the 3D portraits check whether their model
+-- needs to change (question mark <-> the unit).
+local portraitTicker = CreateFrame("Frame")
+local portraitWait = 0
+portraitTicker:SetScript("OnUpdate", function(_, elapsed)
+    portraitWait = portraitWait + elapsed
+    if portraitWait < 1 then return end
+    portraitWait = 0
+    for _, list in pairs(UF.byKey) do
+        for _, f in ipairs(list) do
+            if f.portrait and f.portrait == f.portrait3D and f:IsVisible() then
+                ns.Try("portrait check", UF.CheckPortrait, f)
+            end
+        end
+    end
+end)
+ns:RegisterEvent("PORTRAITS_UPDATED", function()
+    for _, list in pairs(UF.byKey) do
+        for _, f in ipairs(list) do
+            if f:IsVisible() then ns.Try("portraits updated", UF.UpdatePortrait, f) end
+        end
+    end
+end)
 
 -- Your own (and your pet's) power regenerates on the client between the
 -- server's ticks without any event; Blizzard's frames poll it every frame

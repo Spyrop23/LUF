@@ -1484,22 +1484,41 @@ do
     ns.Range.Update(tf)
     assert(tf.alpha == ns.db.units.target.range.alpha, "warrior, friend beyond 28 yards: faded")
     -- a warrior on an enemy, also in combat: Charge range (8-25) or melee
+    -- (the spells come by ID here: the mock has no spell names)
     UnitCanAttack = function() return true end
     InCombatLockdown = function() return true end
-    local calls, charge, melee = {}, false, true
-    C_Spell.IsSpellInRange = function(spell)
-        table.insert(calls, spell)
-        if #calls == 1 then return charge end
-        return melee
-    end
+    local answer = { [100] = false, [78] = true }   -- Charge, Heroic Strike
+    C_Spell.IsSpellInRange = function(spell) return answer[spell] end
+    local faded = ns.db.units.target.range.alpha
     ns.Range.Update(tf)
-    assert(#calls == 2 and calls[1] ~= calls[2] and tf.alpha == 1, "warrior, enemy in melee (inside Charge's min. range): opaque")
-    calls, melee = {}, false
+    assert(tf.alpha == 1, "warrior, enemy in melee (inside Charge's min. range): opaque")
+    -- walking out of melee: the few yards before Charge range stay opaque
+    answer[78] = false
     ns.Range.Update(tf)
-    assert(tf.alpha == ns.db.units.target.range.alpha, "warrior, enemy beyond Charge range: faded")
-    calls, charge = {}, true
+    assert(tf.alpha == 1, "warrior, enemy just out of melee, below Charge range: opaque")
+    answer[100] = true
     ns.Range.Update(tf)
-    assert(#calls == 1 and tf.alpha == 1, "warrior, enemy in Charge range: opaque")
+    assert(tf.alpha == 1, "warrior, enemy in Charge range: opaque")
+    answer[100] = false
+    ns.Range.Update(tf)
+    assert(tf.alpha == faded, "warrior, enemy beyond Charge range: faded")
+    -- out of combat the trade distance (8-11 yards) covers that gap
+    InCombatLockdown = combat
+    dist = nil
+    CheckInteractDistance = function(unit, index) dist = index; return index == 2 end
+    ns.Range.Update(tf)
+    assert(dist == 2 and tf.alpha == 1, "out of combat, between melee and Charge: opaque")
+    CheckInteractDistance = function() return false end
+    ns.Range.Update(tf)
+    assert(tf.alpha == faded, "out of combat, beyond Charge range: faded")
+    -- a new target forgets that the last one was in melee
+    InCombatLockdown = function() return true end
+    answer[78] = true
+    ns.Range.Update(tf)
+    answer[78] = false
+    fire("PLAYER_TARGET_CHANGED")
+    ns.Range.Update(tf)
+    assert(tf.alpha == faded, "new target: no melee memory")
     -- a rogue: no spell for enemies; in combat the game does not answer the
     -- follow distance for them, so the frame stays visible
     UnitClass = function(u) if u == "player" then return "Rogue", "ROGUE" end return cls(u) end
@@ -1528,6 +1547,40 @@ do
     UnitClass, IsPlayerSpell, C_Spell.IsSpellInRange, UnitCanAttack = cls, known, inr, canAttack
     fire("SPELLS_CHANGED")
     tf:SetAlpha(1)
+end
+
+-- 3D portraits: out of sight range (or offline) the question mark model, in
+-- view the unit; the change is picked up without an event (and for polled
+-- frames like the target of target, too)
+do
+    local tf = ns.UF.frames.target
+    local tp = ns.db.units.target.portrait
+    local was = { tp.enabled, tp.type }
+    tp.enabled, tp.type = true, "3D"
+    ns:ApplyKey("target")
+    local model = tf.portrait3D
+    assert(tf.portrait == model, "3D portrait in use")
+    local setModel, visible = Widget.SetModel, false
+    function Widget:SetModel(m) self.modelSet = m; self.unitSet = nil end
+    UnitIsVisible = function() return visible end
+    ns.UF.UpdatePortrait(tf)
+    assert(model.modelSet and model.modelSet:find("QuestionMark") and not model.unitSet, "unseen unit: question mark")
+    visible = true
+    ns.UF.CheckPortrait(tf)
+    assert(model.unitSet == tf.unit, "in view: the unit's model")
+    model.unitSet = "unchanged"
+    ns.UF.CheckPortrait(tf)
+    assert(model.unitSet == "unchanged", "no change: the model is not set again")
+    local ttf = ns.UF.frames.targettarget
+    if ttf and ttf.portrait == ttf.portrait3D then
+        ttf.portrait3D.unitSet = nil
+        visible = false
+        ns.UF.CheckPortrait(ttf)
+        assert(ttf.portrait3D.modelSet, "polled frame: question mark too")
+    end
+    UnitIsVisible, Widget.SetModel = nil, setModel
+    tp.enabled, tp.type = was[1], was[2]
+    ns:ApplyKey("target")
 end
 
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
