@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Your own font file: General → "Custom font file". Put the font into a folder of its own under Interface\AddOns (e.g. Interface\AddOns\LUF_Fonts\Myriad.ttf), restart the game and enter the path; it shows up as "Custom file" in the font list. For fonts that cannot ship with an addon (like Myriad). Thanks to **DrGrog**!
+- Font outline: None, Thin or Thick (was on/off; "on" stays Thin). Thanks to **DrGrog**!
+
 ## 0.17.6
 - Fix: 3D portraits that get no model at all, even in view (e.g. NPCs in dungeons), stayed a black box. The 2D portrait now stands in on the same spot until a model loads. Thanks to **carnage0975**!
 - Width limit per text, as in Luna: Tags tab of each frame → "Left/Center/Right width limit (% of bar)". A longer text (e.g. a long mob name) wraps onto a second line instead of running into the health on the right; 50 = half the bar, 0 = off. Thanks to **DrGrog**!

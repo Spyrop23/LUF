@@ -58,6 +58,7 @@ local BAR_LABELS = { healthBar = "Health bar", powerBar = "Power bar", druidBar 
 local RAID_DIRECTIONS = { { "DOWN", "Below each other (columns)" }, { "RIGHT", "Next to each other (rows)" } }
 local AURA_POS = { { "BOTTOM", "Below the frame" }, { "TOP", "Above the frame" },
     { "RIGHT", "Right of the frame" }, { "LEFT", "Left of the frame" } }
+local FONT_OUTLINES = { { "NONE", "None" }, { "OUTLINE", "Thin" }, { "THICKOUTLINE", "Thick" } }
 local TIME_POS = { { "BELOW", "Below the icon" }, { "INSIDE", "In the icon" }, { "ABOVE", "Above the icon" } }
 local GROW_SIDES = { { "RIGHT", "Left edge, grow right" }, { "LEFT", "Right edge, grow left" } }
 -- How target frames measure range (Frames/Range.lua).
@@ -99,7 +100,22 @@ addPage("general", "General", function(b)
         for _, f in ipairs(ns.FontList()) do table.insert(list, { f[1], f[1] }) end
         return list
     end, function() return ns.db.font or "Default" end, function(v) ns.db.font = v; ns:ApplyAll(); ns.RefreshFontsSoon() end)
-    b:Check("Font outline", function() return ns.db.fontOutline end,
+    b:Edit("Custom font file", function() return ns.db.customFont or "" end, function(v)
+        ns.db.customFont = v
+        if ns.CustomFontPath() then
+            ns.db.font = ns.CUSTOM_FONT
+        elseif ns.db.font == ns.CUSTOM_FONT then
+            ns.db.font = "Default"
+        end
+        ns.PreloadFonts()
+        ns:ApplyAll()
+        ns.RefreshFontsSoon()
+        O:Refresh()
+    end, 320)
+    b:Text("A font of your own, e.g. Interface\\AddOns\\LUF_Fonts\\Myriad.ttf: make that folder, put the " ..
+        "file in, restart the game (a /reload does not see new files) and enter the path here. It shows up " ..
+        "as \"" .. ns.CUSTOM_FONT .. "\" in the list.", 44)
+    b:Dropdown("Font outline", FONT_OUTLINES, ns.FontOutline,
         function(v) ns.db.fontOutline = v; ns:ApplyAll(); ns.RefreshFontsSoon() end)
     b:Slider("Frame background alpha", 0, 1, 0.05, function() return ns.db.backgroundAlpha end,
         function(v) ns.db.backgroundAlpha = v; ns:ApplyAll() end)

@@ -67,12 +67,30 @@ local function sharedMedia()
     return stub and stub("LibSharedMedia-3.0", true)
 end
 
+-- A font file of your own (General page), e.g. a font you may not share
+-- with an addon: put it into a folder of its own under Interface\AddOns and
+-- enter its path. The client sees new files only after a restart.
+ns.CUSTOM_FONT = "Custom file"
+
+function ns.CustomFontPath()
+    local path = ns.db and ns.db.customFont
+    if type(path) ~= "string" then return nil end
+    path = path:gsub("^%s+", ""):gsub("%s+$", ""):gsub("/", "\\")
+    if path == "" then return nil end
+    return path
+end
+
 -- Every font to choose from: { name, path }.
 function ns.FontList()
     local list, seen = {}, {}
     for _, f in ipairs(ns.fonts) do
         table.insert(list, f)
         seen[f[1]] = true
+    end
+    local custom = ns.CustomFontPath()
+    if custom then
+        table.insert(list, { ns.CUSTOM_FONT, custom })
+        seen[ns.CUSTOM_FONT] = true
     end
     local lsm = sharedMedia()
     if lsm then
@@ -95,6 +113,7 @@ local fontName, fontPath
 function ns.Font()
     local want = ns.db and ns.db.font
     if not want or want == "Default" then return DEFAULT_FONT end
+    if want == ns.CUSTOM_FONT then return ns.CustomFontPath() or DEFAULT_FONT end
     if want == fontName then return fontPath end
     for _, f in ipairs(ns.FontList()) do
         if f[1] == want then
@@ -105,9 +124,19 @@ function ns.Font()
     return DEFAULT_FONT
 end
 
--- Outline for the frame texts (tags, cast bar), as chosen on the General page.
+-- Outline for the frame texts (tags, cast bar), as chosen on the General
+-- page: "NONE", "OUTLINE" (thin) or "THICKOUTLINE". Older profiles kept
+-- true / false.
+function ns.FontOutline()
+    local v = ns.db and ns.db.fontOutline
+    if v == true then return "OUTLINE" end
+    if v == "OUTLINE" or v == "THICKOUTLINE" then return v end
+    return "NONE"
+end
+
 function ns.FontFlags()
-    return ns.db and ns.db.fontOutline and "OUTLINE" or ""
+    local v = ns.FontOutline()
+    return v ~= "NONE" and v or ""
 end
 
 -- Sets the chosen font; falls back to the client's font if the file does

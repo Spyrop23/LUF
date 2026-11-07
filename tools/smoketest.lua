@@ -1613,6 +1613,26 @@ do
     ns:ApplyKey("target")
 end
 
+-- font outline: none / thin / thick (older profiles: true / false);
+-- a font file of your own shows up in the list and is used
+do
+    local was = { ns.db.fontOutline, ns.db.font, ns.db.customFont }
+    ns.db.fontOutline = true
+    assert(ns.FontFlags() == "OUTLINE", "old profile: outline on = thin")
+    ns.db.fontOutline = "THICKOUTLINE"
+    assert(ns.FontFlags() == "THICKOUTLINE", "thick outline")
+    ns.db.fontOutline = "NONE"
+    assert(ns.FontFlags() == "", "no outline")
+    ns.db.customFont = "  Interface/AddOns/LUF_Fonts/Myriad.ttf "
+    ns.db.font = ns.CUSTOM_FONT
+    local listed
+    for _, f in ipairs(ns.FontList()) do if f[1] == ns.CUSTOM_FONT then listed = f[2] end end
+    assert(listed == "Interface\\AddOns\\LUF_Fonts\\Myriad.ttf" and ns.Font() == listed, "custom font: " .. tostring(ns.Font()))
+    ns.db.customFont = ""
+    assert(ns.Font() ~= listed, "no custom file: back to a real font")
+    ns.db.fontOutline, ns.db.font, ns.db.customFont = was[1], was[2], was[3]
+end
+
 -- [shortname:x] counts letters, not bytes (umlauts stay whole)
 assert(ns.Tags.firstLetters("Größenwahn", 3) == "Grö" and ns.Tags.firstLetters("Abc", 10) == "Abc", "UTF-8 short names")
 
