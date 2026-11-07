@@ -121,6 +121,8 @@ local function buildRegions(f)
     f.portrait3D = CreateFrame("PlayerModel", nil, f)
     f.portrait2D = f:CreateTexture(nil, "ARTWORK")
     f.portrait2D:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    -- a model that arrives late replaces the 2D stand-in (UF.UpdatePortrait)
+    f.portrait3D:SetScript("OnModelLoaded", function() UF.PortraitFallback(f, false) end)
 
     if f.key == "pet" then
         -- On its own frame so it draws above the bars and the 3D model.
@@ -379,8 +381,10 @@ function UF.Layout(f)
     -- portrait
     local p = db.portrait
     f.portrait3D:Hide()
+    f.portrait3D:SetAlpha(1)
     f.portrait2D:Hide()
     f.portrait = nil
+    f.portraitFallback = nil
     if p.enabled then
         local pw = math.floor(inner * p.width + 0.5)
         local region = p.type == "2D" and f.portrait2D or f.portrait3D
@@ -558,6 +562,31 @@ local function portraitState(unit)
     return (readableCall(UnitGUID, unit) or "?") .. (seen and "+" or "-"), seen
 end
 
+-- Some units give the 3D portrait no model at all, also in view (NPCs in
+-- dungeons): then the 2D portrait stands in, on the model's place, until a
+-- model loads (OnModelLoaded) or the unit changes.
+function UF.PortraitFallback(f, on)
+    local t, model = f.portrait2D, f.portrait3D
+    if on then
+        t:ClearAllPoints()
+        t:SetAllPoints(model)
+        SetPortraitTexture(t, f.unit)
+        t:Show()
+        model:SetAlpha(0)
+    elseif f.portraitFallback then
+        t:Hide()
+        model:SetAlpha(1)
+    end
+    f.portraitFallback = on or nil
+end
+
+-- No model file after SetUnit (readable nil): nothing to draw.
+local function modelMissing(model)
+    if not model.GetModelFileID then return false end
+    local ok, id = pcall(model.GetModelFileID, model)
+    return ok and ns.CanRead(id) and (id == nil or id == 0)
+end
+
 function UF.UpdatePortrait(f)
     local p = f.portrait
     if not p then return end
@@ -565,11 +594,18 @@ function UF.UpdatePortrait(f)
         local state, seen = portraitState(f.unit)
         f.portraitState = state
         p:ClearModel()
+        UF.PortraitFallback(f, false)
         if seen then
             p:SetCamDistanceScale(1)
             p:SetPortraitZoom(1)
             p:SetPosition(0, 0, 0)
             p:SetUnit(f.unit)
+            -- models load in the background: look again a moment later
+            C_Timer.After(1, function()
+                if f.portrait == p and f.portraitState == state and modelMissing(p) then
+                    UF.PortraitFallback(f, true)
+                end
+            end)
         else
             p:SetCamDistanceScale(0.25)
             p:SetPortraitZoom(0)

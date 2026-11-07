@@ -281,6 +281,18 @@ Tags.methods = {
     end,
 }
 
+-- The first n letters of a UTF-8 string (byte-wise sub() would cut an
+-- umlaut or accent in half).
+local function firstLetters(text, n)
+    local out = {}
+    for ch in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+        if #out >= n then break end
+        out[#out + 1] = ch
+    end
+    return table.concat(out)
+end
+Tags.firstLetters = firstLetters
+
 -- Tags with an argument after a colon: [shortname:5], [color:ff8000].
 Tags.argMethods = {
     shortname = function(arg)
@@ -289,7 +301,7 @@ Tags.argMethods = {
             local name = UnitName(u)
             if not readable(name) then return "%s", name end
             if not name then return EMPTY end
-            return "%s", name:sub(1, n)
+            return "%s", firstLetters(name, n)
         end
     end,
     color = function(arg)

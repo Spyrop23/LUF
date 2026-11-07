@@ -1560,8 +1560,11 @@ do
     ns:ApplyKey("target")
     local model = tf.portrait3D
     assert(tf.portrait == model, "3D portrait in use")
-    local setModel, visible = Widget.SetModel, false
+    local setModel, setUnit, fileID, visible = Widget.SetModel, Widget.SetUnit, Widget.GetModelFileID, false
     function Widget:SetModel(m) self.modelSet = m; self.unitSet = nil end
+    local loads = true   -- whether SetUnit finds a model
+    function Widget:SetUnit(u) self.unitSet = u; self.modelFile = loads and 1234 or nil end
+    function Widget:GetModelFileID() return self.modelFile end
     UnitIsVisible = function() return visible end
     ns.UF.UpdatePortrait(tf)
     assert(model.modelSet and model.modelSet:find("QuestionMark") and not model.unitSet, "unseen unit: question mark")
@@ -1578,10 +1581,20 @@ do
         ns.UF.CheckPortrait(ttf)
         assert(ttf.portrait3D.modelSet, "polled frame: question mark too")
     end
-    UnitIsVisible, Widget.SetModel = nil, setModel
+    -- in view, but no model comes (NPCs in dungeons): the 2D portrait stands in
+    visible, loads = true, false
+    ns.UF.UpdatePortrait(tf)
+    assert(tf.portraitFallback and tf.portrait2D.shown and model.alpha == 0, "no model: 2D stand-in")
+    model.scripts.OnModelLoaded(model)
+    assert(not tf.portraitFallback and not tf.portrait2D.shown and model.alpha == 1, "model loaded late: 3D again")
+    loads = true
+    UnitIsVisible, Widget.SetModel, Widget.SetUnit, Widget.GetModelFileID = nil, setModel, setUnit, fileID
     tp.enabled, tp.type = was[1], was[2]
     ns:ApplyKey("target")
 end
+
+-- [shortname:x] counts letters, not bytes (umlauts stay whole)
+assert(ns.Tags.firstLetters("Größenwahn", 3) == "Grö" and ns.Tags.firstLetters("Abc", 10) == "Abc", "UTF-8 short names")
 
 -- smarthealth on a dead unit shows "Dead" (lit() was defined after its first use)
 do
