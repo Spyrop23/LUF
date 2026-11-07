@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.6
 - Fix: 3D portraits that get no model at all, even in view (e.g. NPCs in dungeons), stayed a black box. The 2D portrait now stands in on the same spot until a model loads. Thanks to **carnage0975**!
 - Width limit per text, as in Luna: Tags tab of each frame → "Left/Center/Right width limit (% of bar)". A longer text (e.g. a long mob name) wraps onto a second line instead of running into the health on the right; 50 = half the bar, 0 = off. Thanks to **DrGrog**!
 - New tags [perhpnum] and [perppnum]: health and power in percent without the % sign. Thanks to **DrGrog**!
