@@ -493,10 +493,14 @@ local function unitTabs(key)
                     local gy, sy = p(base .. "Y")
                     b:Slider(side[2] .. " X offset", -50, 50, 1, function() return gx() or 0 end, sx)
                     b:Slider(side[2] .. " Y offset", -20, 20, 1, function() return gy() or 0 end, sy)
+                    local gl, sl = p(base .. "Limit")
+                    b:Slider(side[2] .. " width limit (% of bar, 0 = off)", 0, 100, 5,
+                        function() return gl() or 0 end, sl)
                 end
             end
         end
-        b:Text("Texts use tags like [name] or [smarthealth]; see the Tags page.", 16)
+        b:Text("Texts use tags like [name] or [smarthealth]; see the Tags page. A width limit wraps a " ..
+            "longer text onto a second line (e.g. 50 = half the bar), so it stays clear of the other texts.", 30)
     end)
 
     return tabs

@@ -1266,6 +1266,26 @@ do
     assert(fs.wordWrap == false and fs.maxLines == 1, "single line again")
 end
 
+-- width limit (Luna): 50% of the bar, a long text wraps onto a second line;
+-- the limited left text no longer leans on the right one
+do
+    local pf = ns.UF.frames.player
+    local tdb = ns.db.units.player.tags.healthBar
+    local left = pf.healthBar.text.left
+    tdb.leftLimit = 50
+    ns.UF.Layout(pf)
+    local barWidth = ns.db.units.player.width - pf.barLeft - pf.barRight
+    assert(left.w == math.floor(barWidth / 2) and left.wordWrap == true and left.maxLines == 2, "left text: half the bar, two lines")
+    assert(left.point[1] == "LEFT", "limited left text keeps its own width")
+    tdb.leftLimit = 0
+    ns.UF.Layout(pf)
+    assert(left.w == 0 and left.wordWrap == false and left.point[1] == "RIGHT", "no limit: one line, up to the right text")
+    -- [perhpnum]: the percent without the sign
+    local fs = pf.healthBar.text.center
+    ns.Tags.Render(fs, "[perhp]|[perhpnum]", "player")
+    assert(fs.text and fs.text:match("^%d+%%|%d+$"), "percent with and without sign: " .. tostring(fs.text))
+end
+
 -- raid pets: off by default; on, the pets that exist fill the first places
 do
     local rdb = ns.db.units.raidpet

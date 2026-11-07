@@ -55,9 +55,9 @@ local function surnameSeparator()
     return type(sep) == "string" and sep or " "
 end
 
-local function percent(fn, u)
+local function percent(fn, u, noSign)
     if not ns.ScaleTo100 then return EMPTY end
-    return "%.0f%%", fn(u, true, ns.ScaleTo100)
+    return noSign and "%.0f" or "%.0f%%", fn(u, true, ns.ScaleTo100)
 end
 
 local function full(v)
@@ -169,6 +169,7 @@ Tags.methods = {
     smaxhp = function(u) return "%s", short(UnitHealthMax(u)) end,
     missinghp = function(u) return "%s", full(UnitHealthMissing(u, true)) end,
     perhp = function(u) return percent(UnitHealthPercent, u) end,
+    perhpnum = function(u) return percent(UnitHealthPercent, u, true) end,
     status = function(u) return lit(statusText(u) or EMPTY) end,
     smarthealth = function(u) return smartHealth(u, full, false) end,
     smarthealthp = function(u) return smartHealth(u, full, true) end,
@@ -187,6 +188,10 @@ Tags.methods = {
     perpp = function(u)
         if not ns.ScaleTo100 then return EMPTY end
         return "%.0f%%", UnitPowerPercent(u, nil, false, ns.ScaleTo100)
+    end,
+    perppnum = function(u)
+        if not ns.ScaleTo100 then return EMPTY end
+        return "%.0f", UnitPowerPercent(u, nil, false, ns.ScaleTo100)
     end,
 
     -- state
@@ -335,6 +340,7 @@ Tags.help = {
     { "smaxhp", "Maximum health, short" },
     { "missinghp", "Missing health" },
     { "perhp", "Health in percent" },
+    { "perhpnum", "Health in percent, without the % sign" },
     { "smarthealth", "Health/max, or Dead/Offline" },
     { "smarthealthp", "Health/max and percent" },
     { "ssmarthealth", "Like smarthealth, short numbers" },
@@ -347,6 +353,7 @@ Tags.help = {
     { "mana", "Current mana, also in a druid form" },
     { "maxmana", "Maximum mana, also in a druid form" },
     { "perpp", "Power in percent" },
+    { "perppnum", "Power in percent, without the % sign" },
     { "happiness", "Pet happiness (Happy / Content / Unhappy, coloured)" },
     { "loyalty", "Pet loyalty level" },
     { "xp", "Experience/needed (player)" },
@@ -398,7 +405,7 @@ end
 -- Tags whose value follows the power (the fast power ticker redraws only
 -- texts that use one of them).
 local POWER_TAGS = { pp = true, maxpp = true, spp = true, smaxpp = true, missingpp = true,
-    mana = true, maxmana = true, perpp = true }
+    mana = true, maxmana = true, perpp = true, perppnum = true }
 local usesPower = {}
 
 function Tags.UsesPower(line)

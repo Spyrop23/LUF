@@ -352,10 +352,20 @@ function UF.StackBars(f)
         t.right:SetPoint("RIGHT", bar, "RIGHT", -2 + rx, ry)
         t.center:ClearAllPoints()
         t.center:SetPoint("CENTER", bar, "CENTER", cx, cy)
+        local barWidth = db.width - left - right
         for _, side in ipairs({ "left", "center", "right" }) do
             ns.SetFont(t[side], tdb.size, ns.FontFlags())
             -- [br] makes more lines: room for all of them, centred on the bar
             local lines = 1 + select(2, (tdb[side] or ""):gsub("%[br%]", ""))
+            -- Luna's width limit (% of the bar): a longer text wraps onto a
+            -- second line instead of running into the next text
+            local limit = tdb[side .. "Limit"] or 0
+            if limit > 0 then
+                t[side]:SetWidth(math.max(10, math.floor(barWidth * limit / 100)))
+                lines = math.max(lines, 2)
+            else
+                t[side]:SetWidth(0)
+            end
             t[side]:SetHeight(lines > 1 and math.ceil(lines * tdb.size * 1.15) or h)
             -- one line stays unwrapped (long names are cut, not wrapped); with
             -- [br] the font string must allow lines, or it shows only the first
@@ -363,7 +373,10 @@ function UF.StackBars(f)
             if t[side].SetMaxLines then t[side]:SetMaxLines(lines > 1 and lines or 1) end
         end
         -- left and right share the bar; the left text gives way first
-        t.left:SetPoint("RIGHT", t.right, "LEFT", -4, ly - ry)
+        -- (unless it has a width limit of its own)
+        if (tdb.leftLimit or 0) <= 0 then
+            t.left:SetPoint("RIGHT", t.right, "LEFT", -4, ly - ry)
+        end
     end
     f.druidShown = UF.DruidBarWanted(f)
 end
