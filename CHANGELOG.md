@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.7
 - Your own font file: General → "Custom font file". Put the font into a folder of its own under Interface\AddOns (e.g. Interface\AddOns\LUF_Fonts\Myriad.ttf), restart the game and enter the path; it shows up as "Custom file" in the font list. For fonts that cannot ship with an addon (like Myriad). Thanks to **DrGrog**!
 - Font outline: None, Thin or Thick (was on/off; "on" stays Thin). Thanks to **DrGrog**!
 
