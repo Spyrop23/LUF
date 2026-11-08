@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.8
 - Fix: in combat, friendly targets (and Target of Target) faded even in melee range: the game answers the 28 yards check with "too far" for everyone in combat. In combat it is no longer asked; friends in your group fade by the group range (about 40 yards), other friends stay visible. Thanks to **karrier_user_slouyac50poxg707**!
 - Fix: warriors' enemy targets did not fade in combat when Charge could not be checked (outside Battle Stance). Intercept (8-25 yards) now counts as well: every known range spell is asked until one answers. Thanks to **karrier_user_slouyac50poxg707**!
 - Option to show numbers without the thousands separator (1234 instead of 1,234): General → "Thousands separator in numbers". Thanks to **karrier_user_slouyac50poxg707**!
