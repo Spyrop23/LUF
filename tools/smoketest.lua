@@ -1675,6 +1675,20 @@ do
     ns.db.thousandsSeparator = true
 end
 
+-- [levelcolor]: the game's difficulty for the unit (as Blizzard's target
+-- frame), the level-only colour only as the fallback
+do
+    local fs = ns.UF.frames.player.healthBar.text.center
+    local info, diffColor = C_PlayerInfo, GetDifficultyColor
+    C_PlayerInfo = { GetContentDifficultyCreatureForPlayer = function() return 1 end }
+    GetDifficultyColor = function(d) return d == 1 and { r = 0.25, g = 0.75, b = 0.25 } or { r = 0.5, g = 0.5, b = 0.5 } end
+    ns.Tags.Render(fs, "[levelcolor]x", "player")
+    assert(fs.text and fs.text:lower():find("^|cff3fbf3fx"), "level colour from the difficulty: " .. tostring(fs.text))
+    C_PlayerInfo, GetDifficultyColor = info, diffColor
+    ns.Tags.Render(fs, "[levelcolor]x", "player")
+    assert(fs.text and fs.text:lower():find("^|cffffcc00x"), "fallback: level only: " .. tostring(fs.text))
+end
+
 -- the PvP flag is on by default on player, target, focus and party (not raid)
 do
     local u = ns.db.units

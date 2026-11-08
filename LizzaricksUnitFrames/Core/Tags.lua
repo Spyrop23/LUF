@@ -150,10 +150,22 @@ Tags.methods = {
         local c = ns.ReactionColor(u)
         return c and ns.Hex(c) or "|cffffffff"
     end,
+    -- As Blizzard's target frame: the game's own difficulty for this unit
+    -- (it knows the grey/green ranges of your level); the level alone is
+    -- only the fallback (GetCreatureDifficultyColor greyed mobs that still
+    -- give experience).
     levelcolor = function(u)
         local l = UnitLevel(u)
         if not readable(l) then return EMPTY end
         if l <= 0 then return "|cffff0000" end
+        local info = C_PlayerInfo
+        if info and info.GetContentDifficultyCreatureForPlayer and GetDifficultyColor then
+            local ok, difficulty = pcall(info.GetContentDifficultyCreatureForPlayer, u)
+            if ok and readable(difficulty) and difficulty ~= nil then
+                local okC, c = pcall(GetDifficultyColor, difficulty)
+                if okC and c and readable(c.r) then return ns.Hex({ c.r, c.g, c.b }) end
+            end
+        end
         if GetCreatureDifficultyColor then
             local c = GetCreatureDifficultyColor(l)
             return ns.Hex({ c.r, c.g, c.b })
