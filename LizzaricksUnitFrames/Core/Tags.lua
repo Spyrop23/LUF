@@ -60,7 +60,10 @@ local function percent(fn, u, noSign)
     return noSign and "%.0f" or "%.0f%%", fn(u, true, ns.ScaleTo100)
 end
 
+-- Full numbers: 1,234 or, with the separator off (General page), 1234 (a
+-- secret goes to "%s" as it is).
 local function full(v)
+    if ns.db and ns.db.thousandsSeparator == false then return v end
     if BreakUpLargeNumbers then return BreakUpLargeNumbers(v) end
     return AbbreviateNumbers(v)
 end

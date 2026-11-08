@@ -1503,11 +1503,42 @@ do
     CheckInteractDistance = function() return false end
     ns.Range.Update(tf)
     assert(tf.alpha == ns.db.units.target.range.alpha, "warrior, friend beyond 28 yards: faded")
+    -- in combat the follow distance is not asked (the client says "too far"
+    -- for everyone then): a friend stays visible, a group member answers
+    -- UnitInRange
+    local inParty, inRaid = UnitInParty, UnitInRaid
+    InCombatLockdown = function() return true end
+    dist = nil
+    CheckInteractDistance = function(unit, index) dist = index; return false end
+    UnitInParty, UnitInRaid = function() return false end, function() return nil end
+    ns.Range.Update(tf)
+    assert(dist == nil and tf.alpha == 1, "friend in combat: not asked, visible")
+    UnitInParty = function() return true end
+    UnitInRange = function() return secret(false), secret(true) end
+    ns.Range.Update(tf)
+    assert(tf.alpha == ns.db.units.target.range.alpha, "group member in combat, out of range: faded")
+    UnitInRange = function() return secret(true), secret(true) end
+    ns.Range.Update(tf)
+    assert(tf.alpha == 1, "group member in combat, in range: visible")
+    UnitInParty, UnitInRaid, InCombatLockdown = inParty, inRaid, combat
+    UnitInRange = function() return secret(false), secret(false) end
     -- a warrior on an enemy, also in combat: Charge range (8-25) or melee
     -- (the spells come by ID here: the mock has no spell names)
     UnitCanAttack = function() return true end
     InCombatLockdown = function() return true end
-    local answer = { [100] = false, [78] = true }   -- Charge, Heroic Strike
+    -- Charge can say nothing (outside Battle Stance): Intercept speaks then
+    IsPlayerSpell = function(id) return id == 100 or id == 20252 or id == 78 end
+    fire("SPELLS_CHANGED")
+    local answer = { [20252] = false, [78] = false }   -- Charge: nil
+    C_Spell.IsSpellInRange = function(spell) return answer[spell] end
+    ns.Range.Update(tf)
+    assert(tf.alpha == ns.db.units.target.range.alpha, "warrior in combat, far enemy: faded by Intercept")
+    answer[20252] = true
+    ns.Range.Update(tf)
+    assert(tf.alpha == 1, "Intercept range: visible")
+    IsPlayerSpell = function(id) return id == 100 or id == 78 end
+    fire("SPELLS_CHANGED")
+    answer = { [100] = false, [78] = true }   -- Charge, Heroic Strike
     C_Spell.IsSpellInRange = function(spell) return answer[spell] end
     local faded = ns.db.units.target.range.alpha
     ns.Range.Update(tf)
@@ -1631,6 +1662,17 @@ do
     ns.db.customFont = ""
     assert(ns.Font() ~= listed, "no custom file: back to a real font")
     ns.db.fontOutline, ns.db.font, ns.db.customFont = was[1], was[2], was[3]
+end
+
+-- numbers without the thousands separator (General page)
+do
+    local fs = ns.UF.frames.player.healthBar.text.center
+    ns.Tags.Render(fs, "[hp]", "player")
+    local with = fs.text
+    ns.db.thousandsSeparator = false
+    ns.Tags.Render(fs, "[hp]", "player")
+    assert(with:find(",") and not fs.text:find(",") and fs.text == with:gsub(",", ""), "no separator: " .. tostring(fs.text))
+    ns.db.thousandsSeparator = true
 end
 
 -- [shortname:x] counts letters, not bytes (umlauts stay whole)

@@ -120,6 +120,7 @@ ns.defaults = {
     texture = "Smooth",
     font = "Default",
     fontOutline = false,
+    thousandsSeparator = true,   -- 1,234 (off: 1234) in the full-number tags
     hideBlizzardBuffs = false,   -- Blizzard's buff/debuff icons at the top right
     backgroundAlpha = 0.8,
     units = {

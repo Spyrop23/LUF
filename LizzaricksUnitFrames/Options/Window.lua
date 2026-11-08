@@ -117,6 +117,8 @@ addPage("general", "General", function(b)
         "as \"" .. ns.CUSTOM_FONT .. "\" in the list.", 44)
     b:Dropdown("Font outline", FONT_OUTLINES, ns.FontOutline,
         function(v) ns.db.fontOutline = v; ns:ApplyAll(); ns.RefreshFontsSoon() end)
+    b:Check("Thousands separator in numbers (1,234; off: 1234)", function() return ns.db.thousandsSeparator ~= false end,
+        function(v) ns.db.thousandsSeparator = v; ns:ApplyAll() end)
     b:Slider("Frame background alpha", 0, 1, 0.05, function() return ns.db.backgroundAlpha end,
         function(v) ns.db.backgroundAlpha = v; ns:ApplyAll() end)
     b:Header("Help")
@@ -388,8 +390,8 @@ local function unitTabs(key)
             if ns.Range.BY_SPELL[key] then
                 b:Dropdown("Measure with", RANGE_MEASURES, p("range.measure"))
                 b:Text("Your spell: a heal or buff on friends, an attack spell on enemies (about 30-40 yards; " ..
-                    "warriors: Charge, 8-25 yards, or melee). 28 yards: the follow distance; in combat the game " ..
-                    "only answers it for friends, so enemies stay visible then.", 44)
+                    "warriors: Charge or Intercept, 8-25 yards, or melee). 28 yards: the follow distance; the game " ..
+                    "does not answer it in combat, so then only group members (about 40 yards) fade.", 44)
             end
         end)
     end
