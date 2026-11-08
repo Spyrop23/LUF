@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.9
 - Fix: [levelcolor] showed some mobs grey that still give experience (e.g. 6 levels below you). It now takes the game's own difficulty for the unit, as Blizzard's target frame does. Thanks to **carnage0975**!
 - The PvP flag (faction crest, FFA icon) is now shown by default on the player, target, focus and party frames, also in existing profiles (once). Turn it off per frame under Indicators → Player vs. Player.
 
