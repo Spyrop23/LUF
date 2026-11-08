@@ -125,6 +125,7 @@ ns.defaults = {
     backgroundAlpha = 0.8,
     units = {
         player = unitDefaults({
+            indicators = { pvp = { enabled = true } },
             castBar = { enabled = true },
             druidBar = { enabled = true },
             status = { enabled = true, size = 16, point = "BOTTOMLEFT" },   -- Luna's default
@@ -148,7 +149,7 @@ ns.defaults = {
         target = unitDefaults({
             x = 260,
             -- the elite dragon is off: the level text already shows + / R / B
-            indicators = { elite = { enabled = false } },
+            indicators = { elite = { enabled = false }, pvp = { enabled = true } },
             combatText = { enabled = true },
             castBar = { enabled = true },
             -- Forever: your combo points on the target, as in Luna
@@ -161,11 +162,13 @@ ns.defaults = {
         -- focus below target of target, its target (off by default) next to it
         focus = unitDefaults(merge({
             x = 510, y = -65, width = 200, height = 34,
+            indicators = { pvp = { enabled = true } },
             castBar = { enabled = true },
             auras = { debuffs = true, position = "BOTTOM" },
         }, noPortrait)),
         focustarget = unitDefaults(small({ x = 720, y = -65, width = 120, enabled = false })),
         party = unitDefaults({ y = -140, spacing = 20, hideInRaid = true, showPlayer = false,
+            indicators = { pvp = { enabled = true } },
             auras = { debuffs = true, position = "RIGHT", perRow = 4 } }),
         partypet = unitDefaults(small({
             x = 5, y = -20, height = 20,
@@ -280,6 +283,14 @@ function ns:SetProfile(name)
         self.db.migrated030 = true
         if self.db.units.pet.healthBar.colorType == "class" then
             self.db.units.pet.healthBar.colorType = "happiness"
+        end
+    end
+    -- 0.17.9: the PvP flag is on by default on player, target, focus and party
+    if not self.db.migrated0179 then
+        self.db.migrated0179 = true
+        for _, key in ipairs({ "player", "target", "focus", "party" }) do
+            local u = self.db.units[key]
+            if u and u.indicators and u.indicators.pvp then u.indicators.pvp.enabled = true end
         end
     end
     -- 0.17.1: the elite dragon on the target is off by default now

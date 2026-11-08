@@ -1675,6 +1675,14 @@ do
     ns.db.thousandsSeparator = true
 end
 
+-- the PvP flag is on by default on player, target, focus and party (not raid)
+do
+    local u = ns.db.units
+    assert(u.player.indicators.pvp.enabled and u.target.indicators.pvp.enabled and u.focus.indicators.pvp.enabled
+        and u.party.indicators.pvp.enabled and not u.raid.indicators.pvp.enabled, "PvP flag defaults")
+    assert(ns.db.migrated0179, "PvP flag migration ran")
+end
+
 -- [shortname:x] counts letters, not bytes (umlauts stay whole)
 assert(ns.Tags.firstLetters("Größenwahn", 3) == "Grö" and ns.Tags.firstLetters("Abc", 10) == "Abc", "UTF-8 short names")
 
