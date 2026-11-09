@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.10
 - Fix: warriors' enemy targets could fade in melee range again. A range spell only counted when its rank 1 was known, but once a higher rank replaces it (Heroic Strike around level 30) rank 1 can count as unknown, so no melee spell was left. Spells are now asked by name (with the rank you have), and more melee spells count (Rend, Hamstring, Sunder Armor ...; hunters: Wing Clip, Mongoose Bite). Thanks to **karrier_user_slouyac50poxg707**!
 
 ## 0.17.9
