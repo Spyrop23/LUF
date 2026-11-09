@@ -38,26 +38,40 @@ local SPELLS = {
         MAGE = { 133, 116 }, PRIEST = { 585, 589 }, WARLOCK = { 686, 348 }, DRUID = { 5176 },
         SHAMAN = { 403 }, PALADIN = { 24275 }, WARRIOR = { 100, 20252 }, HUNTER = { 75 },
     },
-    -- Heroic Strike, Pummel, Slam / Raptor Strike (Forever, Retail)
-    near = { WARRIOR = { 78, 6552, 1464 }, HUNTER = { 2973, 186270 } },
+    -- melee: Heroic Strike, Rend, Hamstring, Sunder Armor, Pummel, Slam,
+    -- Shield Bash, Overpower / Raptor Strike, Wing Clip, Mongoose Bite
+    -- (Forever, Retail)
+    near = {
+        WARRIOR = { 78, 772, 1715, 7386, 6552, 1464, 72, 7384 },
+        HUNTER = { 2973, 2974, 1495, 186270 },
+    },
     help = {
         MAGE = { 1459 }, PRIEST = { 2050, 1243 }, WARLOCK = { 5697 }, DRUID = { 5185, 1126 },
         SHAMAN = { 331 }, PALADIN = { 635, 19740 },
     },
 }
 
--- The spells of a list you know, by name; nil when none.
+-- The spells of a list, by name; nil when none. A spell asked by name
+-- counts with the rank you have, and a spell you do not know answers
+-- nothing, so every name is kept: the rank 1 ID alone can count as
+-- unknown once a higher rank replaced it (Heroic Strike at level 30). A
+-- spell without a name (no spell data) only counts when known by ID.
 local spellCache = {}
 local function rangeSpells(kind)
     local cached = spellCache[kind]
     if cached ~= nil then return cached or nil end
     local _, class = UnitClass("player")
-    local found = {}
+    local found, seen = {}, {}
     for _, id in ipairs(ns.CanRead(class) and SPELLS[kind][class] or {}) do
-        local known = IsPlayerSpell and IsPlayerSpell(id)
-        if known or (IsSpellKnown and IsSpellKnown(id)) then
-            local info = C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(id)
-            table.insert(found, (info and info.name) or (GetSpellInfo and GetSpellInfo(id)) or id)
+        local info = C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(id)
+        local name = (info and info.name) or (GetSpellInfo and GetSpellInfo(id))
+        if type(name) ~= "string" then
+            local known = IsPlayerSpell and IsPlayerSpell(id)
+            name = (known or (IsSpellKnown and IsSpellKnown(id))) and id or nil
+        end
+        if name and not seen[name] then
+            seen[name] = true
+            table.insert(found, name)
         end
     end
     spellCache[kind] = #found > 0 and found or false

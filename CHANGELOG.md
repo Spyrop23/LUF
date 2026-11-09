@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Fix: warriors' enemy targets could fade in melee range again. A range spell only counted when its rank 1 was known, but once a higher rank replaces it (Heroic Strike around level 30) rank 1 can count as unknown, so no melee spell was left. Spells are now asked by name (with the rank you have), and more melee spells count (Rend, Hamstring, Sunder Armor ...; hunters: Wing Clip, Mongoose Bite). Thanks to **karrier_user_slouyac50poxg707**!
+
 ## 0.17.9
 - Fix: [levelcolor] showed some mobs grey that still give experience (e.g. 6 levels below you). It now takes the game's own difficulty for the unit, as Blizzard's target frame does. Thanks to **carnage0975**!
 - The PvP flag (faction crest, FFA icon) is now shown by default on the player, target, focus and party frames, also in existing profiles (once). Turn it off per frame under Indicators → Player vs. Player.

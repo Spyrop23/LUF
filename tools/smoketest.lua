@@ -1570,6 +1570,23 @@ do
     fire("PLAYER_TARGET_CHANGED")
     ns.Range.Update(tf)
     assert(tf.alpha == faded, "new target: no melee memory")
+    -- a higher rank replaced rank 1 (the ID counts as unknown): the spell is
+    -- asked by name and still answers
+    local getInfo = C_Spell.GetSpellInfo
+    local names = { [100] = "Charge", [20252] = "Intercept", [78] = "Heroic Strike" }
+    C_Spell.GetSpellInfo = function(id) return names[id] and { name = names[id] } or nil end
+    IsPlayerSpell = function() return false end
+    fire("SPELLS_CHANGED")
+    local asked = {}
+    C_Spell.IsSpellInRange = function(spell)
+        asked[spell] = true
+        if spell == "Heroic Strike" then return true end
+        if spell == "Charge" or spell == "Intercept" then return false end
+    end
+    ns.Range.Update(tf)
+    assert(asked["Heroic Strike"] and tf.alpha == 1, "melee by name (rank 1 ID unknown): visible")
+    C_Spell.GetSpellInfo = getInfo
+    fire("SPELLS_CHANGED")
     -- a rogue: no spell for enemies; in combat the game does not answer the
     -- follow distance for them, so the frame stays visible
     UnitClass = function(u) if u == "player" then return "Rogue", "ROGUE" end return cls(u) end
