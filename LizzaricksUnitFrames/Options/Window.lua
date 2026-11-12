@@ -90,6 +90,8 @@ addPage("general", "General", function(b)
         function(v) ns:SetLocked(v) end)
     b:Check("Show minimap button", function() return not LizzaricksUFDB.minimap.hide end,
         function(v) LizzaricksUFDB.minimap.hide = not v; ns.Minimap:Update() end)
+    b:Check("Frame names in config mode (Player, Grp 1, Party Targets 1 ...)",
+        function() return ns.db.moverLabels ~= false end, function(v) ns.db.moverLabels = v; ns:ApplyAll() end)
     b:Dropdown("Bar texture", function()
         local list = {}
         for _, t in ipairs(ns.textures) do table.insert(list, { t[1], t[1] }) end
@@ -400,6 +402,7 @@ local function unitTabs(key)
         b:Header("Borders")
         b:Check("On mouseover", p("borders.mouseover"))
         b:Check("On aggro", p("borders.aggro"))
+        b:Check("On elite / rare (yellow; rare: silver)", p("borders.elite"))
         if ns.Borders.debuffSupported[key] then
             b:Dropdown("On debuff", ns.Borders.DEBUFF_MODES, p("borders.debuff"))
             b:Text("The debuff border is coloured by type (magic blue, curse purple, poison green, " ..

@@ -133,6 +133,7 @@ function ns.UnlockFrame(f)
     elseif f.index then
         label = label .. " " .. f.index
     end
+    if ns.db.moverLabels == false then label = nil end   -- General page
     f.moverLabel:SetText(label or "")
     f.moverLabel:SetShown(label ~= nil)
     f:Show()

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Border on elite and rare units: Borders tab of each frame → "On elite / rare" (off by default). Elite, rare elite and bosses get a yellow edge, rares a silver one; aggro and mouseover show over it. Thanks to **maTzeprei**!
+- Option to hide the frame names in config mode (Player, Grp 1, Party Targets 1 ...): General → "Frame names in config mode". Thanks to **maTzeprei**!
+
 ## 0.17.10
 - Fix: warriors' enemy targets could fade in melee range again. A range spell only counted when its rank 1 was known, but once a higher rank replaces it (Heroic Strike around level 30) rank 1 can count as unknown, so no melee spell was left. Spells are now asked by name (with the rank you have), and more melee spells count (Rend, Hamstring, Sunder Armor ...; hunters: Wing Clip, Mongoose Bite). Thanks to **karrier_user_slouyac50poxg707**!
 

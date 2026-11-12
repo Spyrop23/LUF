@@ -4,7 +4,9 @@
 --   * on mouseover  (white while the mouse is over the frame)
 --   * on aggro      (Blizzard's threat colour; UnitThreatSituation is readable)
 --   * on debuff     (coloured by dispel type: only ones you can dispel, or all)
--- The debuff border wins over aggro, aggro over mouseover.
+--   * on elite / rare (yellow; rare: silver), as long as the unit is one
+-- The debuff border wins over aggro, aggro over mouseover, mouseover over
+-- elite.
 --
 -- The debuff border never reads an aura: it is one aura SLOT of the client's
 -- aura container, sized to the frame, whose four edges the client tints by
@@ -22,6 +24,13 @@ BO.debuffSupported = { player = true, pet = true, target = true, focus = true, p
 BO.DEBUFF_MODES = { { "off", "Off" }, { "own", "Your own (ones you can dispel, friendly units)" }, { "all", "All" } }
 
 local HOVER = { 1, 1, 1 }
+local ELITE = { elite = { 1, 0.82, 0 }, rareelite = { 1, 0.82, 0 }, worldboss = { 1, 0.82, 0 },
+    rare = { 0.78, 0.78, 0.85 } }
+
+local function eliteColor(unit)
+    local ok, class = pcall(UnitClassification, unit)
+    if ok and ns.CanRead(class) then return ELITE[class] end
+end
 local DISPEL_COLORS = {
     Magic = { 0.20, 0.60, 1.00 }, Curse = { 0.60, 0.00, 1.00 },
     Disease = { 0.60, 0.40, 0.00 }, Poison = { 0.00, 0.60, 0.00 },
@@ -171,6 +180,9 @@ function BO.Update(f)
         r, g, bl = GetThreatStatusColor(status)
     elseif db.mouseover and f.hovered then
         r, g, bl = HOVER[1], HOVER[2], HOVER[3]
+    else
+        local c = db.elite and eliteColor(f.unit)
+        if c then r, g, bl = c[1], c[2], c[3] end
     end
     if r then
         for _, e in ipairs(b.edges) do e:SetVertexColor(r, g, bl, 1) end
@@ -196,6 +208,7 @@ ticker:SetScript("OnUpdate", function(_, elapsed)
     if wait < 0.25 then return end
     wait = 0
     for f in pairs(frames) do
-        if f.db.borders.aggro and f:IsVisible() then BO.Update(f) end
+        local db = f.db.borders
+        if (db.aggro or db.elite) and f:IsVisible() then BO.Update(f) end
     end
 end)

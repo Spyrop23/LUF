@@ -58,7 +58,7 @@ local function unitDefaults(o)
         emptyBar  = { enabled = false, weight = 3, background = true, backgroundAlpha = 0.5, color = { 0, 0, 0 } },
         range     = { enabled = true, alpha = 0.4, measure = "auto" },
         squares   = squareDefaults(),
-        borders   = { mouseover = true, aggro = false, debuff = "own", size = 2, onTop = false },   -- Luna's defaults
+        borders   = { mouseover = true, aggro = false, debuff = "own", size = 2, onTop = false, elite = false },   -- Luna's defaults
         highlight = { mouseover = false, target = false, debuff = "off", alpha = 0.25 },
         combatText = { enabled = false, size = 20 },
         indicators = {
@@ -120,6 +120,7 @@ ns.defaults = {
     texture = "Smooth",
     font = "Default",
     fontOutline = false,
+    moverLabels = true,   -- frame names above the frames in config mode
     thousandsSeparator = true,   -- 1,234 (off: 1234) in the full-number tags
     hideBlizzardBuffs = false,   -- Blizzard's buff/debuff icons at the top right
     backgroundAlpha = 0.8,

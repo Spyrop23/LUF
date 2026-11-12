@@ -1706,6 +1706,45 @@ do
     assert(fs.text and fs.text:lower():find("^|cffffcc00x"), "fallback: level only: " .. tostring(fs.text))
 end
 
+-- elite border (yellow; rare: silver), below aggro and mouseover
+do
+    local tf = ns.UF.frames.target
+    local bdb = ns.db.units.target.borders
+    local cls = UnitClassification
+    local hovered, mouseover, aggro = tf.hovered, bdb.mouseover, bdb.aggro
+    tf.hovered, bdb.aggro = false, false
+    UnitClassification = function() return "elite" end
+    bdb.elite = true
+    ns.Borders.Update(tf)
+    local e = tf.border.edges[1]
+    assert(tf.border.shown and e.vertexColor and e.vertexColor[1] == 1 and e.vertexColor[2] == 0.82, "elite: yellow border")
+    UnitClassification = function() return "rare" end
+    ns.Borders.Update(tf)
+    assert(tf.border.shown and e.vertexColor[1] == 0.78, "rare: silver border")
+    UnitClassification = function() return "normal" end
+    ns.Borders.Update(tf)
+    assert(not tf.border.shown, "normal mob: no border")
+    UnitClassification = function() return "elite" end
+    bdb.elite = false
+    ns.Borders.Update(tf)
+    assert(not tf.border.shown, "option off: no border")
+    UnitClassification, tf.hovered, bdb.mouseover, bdb.aggro = cls, hovered, mouseover, aggro
+    ns.Borders.Update(tf)
+end
+
+-- config mode without the frame names (General page)
+do
+    ns.db.moverLabels = false
+    ns:SetLocked(false)
+    local pf = ns.UF.frames.player
+    assert(pf.moverOverlay and not pf.moverLabel.shown, "config mode: no frame names")
+    ns:SetLocked(true)
+    ns.db.moverLabels = true
+    ns:SetLocked(false)
+    assert(pf.moverLabel.shown, "config mode: frame names again")
+    ns:SetLocked(true)
+end
+
 -- the PvP flag is on by default on player, target, focus and party (not raid)
 do
     local u = ns.db.units
