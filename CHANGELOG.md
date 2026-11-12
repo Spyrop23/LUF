@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.17.11
 - Border on elite and rare units: Borders tab of each frame → "On elite / rare" (off by default). Elite, rare elite and bosses get a yellow edge, rares a silver one; aggro and mouseover show over it. Thanks to **maTzeprei**!
 - Option to hide the frame names in config mode (Player, Grp 1, Party Targets 1 ...): General → "Frame names in config mode". Thanks to **maTzeprei**!
 
